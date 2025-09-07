@@ -14,7 +14,7 @@ registerEnumType(MediaType, {
 @ObjectType()
 export class MediaDto {
   @Field(() => ID)
-  _id: string;
+  id: string;
 
   @Field()
   appId: string;

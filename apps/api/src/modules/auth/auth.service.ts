@@ -45,7 +45,7 @@ export class AuthService {
       username: user.username,
       sub: (user as any)._id.toString(),
       role: user.role,
-      organization: user.organization,
+      organizationId: user.organizationId?.toString(),
     };
 
     // Update last login
@@ -59,7 +59,7 @@ export class AuthService {
         username: user.username,
         name: user.name,
         role: user.role,
-        organization: user.organization,
+        organizationId: user.organizationId?.toString(),
         isActive: user.isActive,
         avatar: user.avatar,
         lastLoginAt: user.lastLoginAt,
@@ -89,7 +89,7 @@ export class AuthService {
         username: user.username,
         sub: (user as any)._id.toString(),
         role: user.role,
-        organization: user.organization,
+        organizationId: user.organizationId?.toString(),
       };
 
       return {
@@ -100,7 +100,7 @@ export class AuthService {
           username: user.username,
           name: user.name,
           role: user.role,
-          organization: user.organization,
+          organizationId: user.organizationId?.toString(),
           isActive: user.isActive,
           avatar: user.avatar,
           lastLoginAt: user.lastLoginAt,

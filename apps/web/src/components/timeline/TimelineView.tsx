@@ -56,7 +56,7 @@ export function TimelineView() {
     <div className="max-w-4xl mx-auto">
       <div className="space-y-8">
         {apps.map((app, index) => (
-          <TimelineItem key={app._id} app={app} index={index} />
+          <TimelineItem key={app.id} app={app} index={index} />
         ))}
       </div>
 

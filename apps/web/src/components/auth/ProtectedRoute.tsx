@@ -25,7 +25,7 @@ export function ProtectedRoute({
         return;
       }
 
-      if (requiredRole && user?.role !== requiredRole) {
+      if (requiredRole && user?.role?.toLowerCase() !== requiredRole.toLowerCase()) {
         // Check role hierarchy: admin > developer > viewer
         const roleHierarchy = { admin: 3, developer: 2, viewer: 1 };
         const userRoleLevel = roleHierarchy[user?.role as keyof typeof roleHierarchy] || 0;
@@ -51,7 +51,7 @@ export function ProtectedRoute({
     return null;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
+  if (requiredRole && user?.role?.toLowerCase() !== requiredRole.toLowerCase()) {
     const roleHierarchy = { admin: 3, developer: 2, viewer: 1 };
     const userRoleLevel = roleHierarchy[user?.role as keyof typeof roleHierarchy] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole];

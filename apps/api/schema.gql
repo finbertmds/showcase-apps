@@ -118,11 +118,11 @@ input LoginInput {
 }
 
 type MediaDto {
-  _id: ID!
   appId: String!
   createdAt: DateTime!
   filename: String!
   height: Float
+  id: ID!
   isActive: Boolean!
   meta: JSON
   mimeType: String!
@@ -213,12 +213,12 @@ input RegisterInput {
 }
 
 type TimelineEventDto {
-  _id: ID!
   appId: String!
   createdAt: DateTime!
   createdBy: String!
   date: DateTime!
   description: String
+  id: ID!
   isPublic: Boolean!
   metadata: JSON
   title: String!
@@ -266,7 +266,7 @@ type UserDto {
   isActive: Boolean!
   lastLoginAt: DateTime
   name: String!
-  organization: OrganizationDto
+  organizationId: String
   role: UserRole!
   updatedAt: DateTime!
   username: String!

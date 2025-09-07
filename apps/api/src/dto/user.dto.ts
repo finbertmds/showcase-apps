@@ -1,6 +1,5 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { UserRole } from '../schemas/user.schema';
-import { OrganizationDto } from './organization.dto';
 
 registerEnumType(UserRole, {
   name: 'UserRole',
@@ -24,8 +23,8 @@ export class UserDto {
   @Field(() => UserRole)
   role: UserRole;
 
-  @Field(() => OrganizationDto, { nullable: true })
-  organization?: OrganizationDto;
+  @Field({ nullable: true })
+  organizationId?: string;
 
   @Field()
   isActive: boolean;

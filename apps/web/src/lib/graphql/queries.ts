@@ -21,7 +21,7 @@ export const GET_APPS = gql`
       limit: $limit
       offset: $offset
     ) {
-      _id
+      id
       title
       slug
       shortDesc
@@ -43,7 +43,17 @@ export const GET_APPS = gql`
       createdAt
       updatedAt
       createdBy
+      createdByUser {
+        id
+        name
+        email
+      }
       organizationId
+      organization {
+        id
+        name
+        slug
+      }
     }
   }
 `;
@@ -51,7 +61,7 @@ export const GET_APPS = gql`
 export const GET_TIMELINE_APPS = gql`
   query GetTimelineApps($limit: Int, $offset: Int) {
     timelineApps(limit: $limit, offset: $offset) {
-      _id
+      id
       title
       slug
       shortDesc
@@ -73,7 +83,17 @@ export const GET_TIMELINE_APPS = gql`
       createdAt
       updatedAt
       createdBy
+      createdByUser {
+        id
+        name
+        email
+      }
       organizationId
+      organization {
+        id
+        name
+        slug
+      }
     }
   }
 `;
@@ -81,7 +101,7 @@ export const GET_TIMELINE_APPS = gql`
 export const GET_APP_BY_SLUG = gql`
   query GetAppBySlug($slug: String!) {
     appBySlug(slug: $slug) {
-      _id
+      id
       title
       slug
       shortDesc
@@ -103,15 +123,25 @@ export const GET_APP_BY_SLUG = gql`
       createdAt
       updatedAt
       createdBy
+      createdByUser {
+        id
+        name
+        email
+      }
       organizationId
+      organization {
+        id
+        name
+        slug
+      }
     }
   }
 `;
 
-export const GET_APP_BY_ID = gql`
+export const GET_APP_BYID = gql`
   query GetAppById($id: String!) {
     app(id: $id) {
-      _id
+      id
       title
       slug
       shortDesc
@@ -133,7 +163,17 @@ export const GET_APP_BY_ID = gql`
       createdAt
       updatedAt
       createdBy
+      createdByUser {
+        id
+        name
+        email
+      }
       organizationId
+      organization {
+        id
+        name
+        slug
+      }
     }
   }
 `;
@@ -141,7 +181,7 @@ export const GET_APP_BY_ID = gql`
 export const GET_TIMELINE_EVENTS = gql`
   query GetTimelineEvents($limit: Int, $offset: Int) {
     timelineEvents(limit: $limit, offset: $offset) {
-      _id
+      id
       appId
       title
       description
@@ -165,7 +205,7 @@ export const GET_TIMELINE_EVENTS = gql`
 export const GET_TIMELINE_EVENTS_BY_APP = gql`
   query GetTimelineEventsByApp($appId: String!, $isPublic: Boolean) {
     timelineEventsByApp(appId: $appId, isPublic: $isPublic) {
-      _id
+      id
       title
       description
       type
@@ -184,7 +224,7 @@ export const GET_TIMELINE_EVENTS_BY_APP = gql`
 export const GET_MEDIA_BY_APP = gql`
   query GetMediaByApp($appId: String!) {
     mediaByApp(appId: $appId) {
-      _id
+      id
       type
       url
       filename
@@ -221,7 +261,7 @@ export const LOGIN = gql`
     login(input: $input) {
       access_token
       user {
-        _id
+        id
         email
         username
         name
@@ -242,7 +282,7 @@ export const REGISTER = gql`
     register(input: $input) {
       access_token
       user {
-        _id
+        id
         email
         username
         name
@@ -261,7 +301,7 @@ export const REGISTER = gql`
 export const ME = gql`
   query Me {
     me {
-      _id
+      id
       email
       username
       name

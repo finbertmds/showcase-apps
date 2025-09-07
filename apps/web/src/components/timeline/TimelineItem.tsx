@@ -4,12 +4,12 @@ import { INCREMENT_APP_LIKE, INCREMENT_APP_VIEW } from '@/lib/graphql/queries';
 import { App } from '@/types';
 import { useMutation } from '@apollo/client';
 import {
-    CodeBracketIcon,
-    ComputerDesktopIcon,
-    DevicePhoneMobileIcon,
-    EyeIcon,
-    GlobeAltIcon,
-    HeartIcon,
+  CodeBracketIcon,
+  ComputerDesktopIcon,
+  DevicePhoneMobileIcon,
+  EyeIcon,
+  GlobeAltIcon,
+  HeartIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
@@ -27,12 +27,12 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
   const [incrementLike] = useMutation(INCREMENT_APP_LIKE);
 
   const handleView = () => {
-    incrementView({ variables: { id: app._id } });
+    incrementView({ variables: { id: app.id } });
   };
 
   const handleLike = () => {
     if (!isLiked) {
-      incrementLike({ variables: { id: app._id } });
+      incrementLike({ variables: { id: app.id } });
       setIsLiked(true);
     }
   };

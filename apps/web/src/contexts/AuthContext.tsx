@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           query: `
             query Me {
               me {
-                _id
+                id
                 email
                 username
                 name
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               login(input: $input) {
                 access_token
                 user {
-                  _id
+                  id
                   email
                   username
                   name
@@ -195,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               register(input: $input) {
                 access_token
                 user {
-                  _id
+                  id
                   email
                   username
                   name

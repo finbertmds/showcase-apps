@@ -11,7 +11,7 @@ registerEnumType(EventType, {
 @ObjectType()
 export class TimelineEventDto {
   @Field(() => ID)
-  _id: string;
+  id: string;
 
   @Field()
   appId: string;

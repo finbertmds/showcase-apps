@@ -1,5 +1,5 @@
 export interface App {
-  _id: string;
+  id: string;
   title: string;
   slug: string;
   shortDesc: string;
@@ -25,7 +25,7 @@ export interface App {
 }
 
 export interface TimelineEvent {
-  _id: string;
+  id: string;
   appId: string;
   title: string;
   description?: string;
@@ -41,7 +41,7 @@ export interface TimelineEvent {
 }
 
 export interface Media {
-  _id: string;
+  id: string;
   type: 'screenshot' | 'logo' | 'cover' | 'icon' | 'video' | 'document';
   url: string;
   filename: string;
@@ -59,7 +59,7 @@ export interface Media {
 }
 
 export interface User {
-  _id: string;
+  id: string;
   email: string;
   name: string;
   role: 'admin' | 'developer' | 'viewer';
@@ -72,7 +72,7 @@ export interface User {
 }
 
 export interface Organization {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   description?: string;

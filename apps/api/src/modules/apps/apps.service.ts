@@ -34,7 +34,7 @@ export class AppsService {
     } = {},
     limit = 20,
     offset = 0,
-  ): Promise<{ apps: App[]; total: number }> {
+  ): Promise<{ apps: AppDto[]; total: number }> {
     const query: any = {};
 
     // Apply filters
@@ -60,8 +60,6 @@ export class AppsService {
     const [apps, total] = await Promise.all([
       this.appModel
         .find(query)
-        .populate('createdBy', 'name email')
-        .populate('organizationId', 'name slug')
         .sort({ createdAt: -1 })
         .limit(limit)
         .skip(offset)
@@ -69,7 +67,31 @@ export class AppsService {
       this.appModel.countDocuments(query).exec(),
     ]);
 
-    return { apps, total };
+    // Populate createdByUser and organization for each app
+    const appsWithDetails = await Promise.all(
+      apps.map(async (app) => {
+        let user = null;
+        if (app.createdBy) {
+          user = await this.userModel.findById(app.createdBy).exec();
+        }
+
+        let organization = null;
+        if (app.organizationId) {
+          organization = await this.organizationModel.findById(app.organizationId).exec();
+        }
+
+        return {
+          ...app.toObject(),
+          id: app._id.toString(),
+          createdBy: app.createdBy.toString(),
+          createdByUser: user,
+          organizationId: app.organizationId?.toString(),
+          organization: organization,
+        };
+      })
+    );
+
+    return { apps: appsWithDetails, total };
   }
 
   async findOne(id: string): Promise<AppDto> {
@@ -81,7 +103,11 @@ export class AppsService {
       throw new NotFoundException('App not found');
     }
 
-    const user = await this.userModel.findById(app.createdBy).exec();
+    let user = null;
+    if (app.createdBy) {
+      user = await this.userModel.findById(app.createdBy).exec();
+    }
+
     let organization = null;
     if (app.organizationId) {
       organization = await this.organizationModel.findById(app.organizationId).exec();
@@ -106,8 +132,11 @@ export class AppsService {
       throw new NotFoundException('App not found');
     }
 
+    let user = null;
+    if (app.createdBy) {
+      user = await this.userModel.findById(app.createdBy).exec();
+    }
 
-    const user = await this.userModel.findById(app.createdBy).exec();
     let organization = null;
     if (app.organizationId) {
       organization = await this.organizationModel.findById(app.organizationId).exec();
@@ -163,7 +192,7 @@ export class AppsService {
     await this.appModel.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }).exec();
   }
 
-  async getTimelineApps(limit = 20, offset = 0): Promise<{ apps: any[]; total: number }> {
+  async getTimelineApps(limit = 20, offset = 0): Promise<{ apps: AppDto[]; total: number }> {
     const query = {
       status: 'published',
       visibility: 'public',
@@ -182,7 +211,11 @@ export class AppsService {
     // Populate createdByUser and organization for each app
     const appsWithDetails = await Promise.all(
       apps.map(async (app) => {
-        const user = await this.userModel.findById(app.createdBy).exec();
+        let user = null;
+        if (app.createdBy) {
+          user = await this.userModel.findById(app.createdBy).exec();
+        }
+
         let organization = null;
         if (app.organizationId) {
           organization = await this.organizationModel.findById(app.organizationId).exec();
