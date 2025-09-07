@@ -26,6 +26,9 @@ export class Organization {
   @Prop({ type: Types.ObjectId, ref: 'User' })
   ownerId: Types.ObjectId;
 
+  ownerIdString?: string; // Virtual field for GraphQL
+
+  id: string; // Virtual field for GraphQL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,3 +39,11 @@ export const OrganizationSchema = SchemaFactory.createForClass(Organization);
 OrganizationSchema.index({ slug: 1 });
 OrganizationSchema.index({ name: 1 });
 OrganizationSchema.index({ ownerId: 1 });
+OrganizationSchema.set('toJSON', { virtuals: true });
+OrganizationSchema.set('toObject', { virtuals: true });
+OrganizationSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+OrganizationSchema.virtual('ownerIdString').get(function () {
+  return this.ownerId?.toString();
+});

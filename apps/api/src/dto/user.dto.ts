@@ -9,7 +9,7 @@ registerEnumType(UserRole, {
 @ObjectType()
 export class UserDto {
   @Field(() => ID)
-  id: string;
+  _id: string;
 
   @Field()
   email: string;

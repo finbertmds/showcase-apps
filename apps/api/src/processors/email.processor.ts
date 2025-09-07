@@ -1,4 +1,4 @@
-import { Process, Processor } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import * as nodemailer from 'nodemailer';
 
@@ -25,7 +25,6 @@ export class EmailProcessor {
     });
   }
 
-  @Process('send-email')
   async handleEmailSending(job: Job<EmailJob>) {
     const { to, subject, template, context } = job.data;
 

@@ -1,4 +1,4 @@
-import { Process, Processor } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import * as sharp from 'sharp';
 import { MediaService } from '../modules/media/media.service';
@@ -18,7 +18,6 @@ export class ImageProcessor {
     private mediaService: MediaService,
   ) {}
 
-  @Process('process-image')
   async handleImageProcessing(job: Job<ImageProcessingJob>) {
     const { mediaId, appId, filePath, operations } = job.data;
 
@@ -81,7 +80,8 @@ export class ImageProcessor {
           image = image.jpeg({ quality: 85, progressive: true });
           break;
         case 'strip':
-          image = image.strip();
+          // Remove EXIF data
+          image = image.withMetadata();
           break;
         case 'normalize':
           image = image.normalize();

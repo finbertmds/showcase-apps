@@ -1,5 +1,9 @@
 import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { MediaType } from '../schemas/media.schema';
+
+// Re-export MediaType for GraphQL
+export { MediaType };
 
 registerEnumType(MediaType, {
   name: 'MediaType',
@@ -9,7 +13,7 @@ registerEnumType(MediaType, {
 @ObjectType()
 export class MediaDto {
   @Field(() => ID)
-  id: string;
+  _id: string;
 
   @Field()
   appId: string;
@@ -44,7 +48,7 @@ export class MediaDto {
   @Field()
   isActive: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   meta?: Record<string, any>;
 
   @Field()
@@ -68,6 +72,6 @@ export class CreateMediaInput {
   @Field({ nullable: true })
   order?: number;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   meta?: Record<string, any>;
 }

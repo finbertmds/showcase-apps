@@ -1,0 +1,250 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AppDto {
+  _id: ID!
+  appStoreUrl: String
+  createdAt: DateTime!
+  createdBy: String!
+  demoUrl: String
+  downloadUrl: String
+  languages: [String!]!
+  likeCount: Float!
+  longDesc: String!
+  organizationId: String!
+  platforms: [Platform!]!
+  playStoreUrl: String
+  releaseDate: DateTime
+  repository: String
+  shortDesc: String!
+  slug: String!
+  status: AppStatus!
+  tags: [String!]!
+  title: String!
+  updatedAt: DateTime!
+  viewCount: Float!
+  visibility: AppVisibility!
+  website: String
+}
+
+"""App status enum"""
+enum AppStatus {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
+"""App visibility enum"""
+enum AppVisibility {
+  PRIVATE
+  PUBLIC
+  UNLISTED
+}
+
+input CreateAppInput {
+  appStoreUrl: String
+  demoUrl: String
+  downloadUrl: String
+  languages: [String!]! = []
+  longDesc: String!
+  platforms: [Platform!]! = []
+  playStoreUrl: String
+  releaseDate: DateTime
+  repository: String
+  shortDesc: String!
+  slug: String!
+  tags: [String!]! = []
+  title: String!
+  visibility: AppVisibility! = PUBLIC
+  website: String
+}
+
+input CreateMediaInput {
+  appId: String!
+  meta: JSON
+  order: Float
+  type: MediaType!
+}
+
+input CreateTimelineEventInput {
+  appId: String!
+  date: DateTime!
+  description: String
+  isPublic: Boolean! = true
+  metadata: JSON
+  title: String!
+  type: EventType! = ANNOUNCEMENT
+  url: String
+  version: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""Timeline event type enum"""
+enum EventType {
+  ANNOUNCEMENT
+  BUGFIX
+  FEATURE
+  MILESTONE
+  RELEASE
+  UPDATE
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type MediaDto {
+  _id: ID!
+  appId: String!
+  createdAt: DateTime!
+  filename: String!
+  height: Float
+  isActive: Boolean!
+  meta: JSON
+  mimeType: String!
+  order: Float!
+  originalName: String!
+  size: Float!
+  type: MediaType!
+  updatedAt: DateTime!
+  uploadedBy: String!
+  url: String!
+  width: Float
+}
+
+"""Media type enum"""
+enum MediaType {
+  COVER
+  DOCUMENT
+  ICON
+  LOGO
+  SCREENSHOT
+  VIDEO
+}
+
+type Mutation {
+  createApp(input: CreateAppInput!): AppDto!
+  createTimelineEvent(input: CreateTimelineEventInput!): TimelineEventDto!
+  incrementAppLike(id: String!): Boolean!
+  incrementAppView(id: String!): Boolean!
+  loginWithClerk(clerkToken: String!): String!
+  removeApp(id: String!): Boolean!
+  removeMedia(id: String!): Boolean!
+  removeTimelineEvent(id: String!): Boolean!
+  removeUser(id: String!): Boolean!
+  updateApp(id: String!, input: UpdateAppInput!): AppDto!
+  updateTimelineEvent(id: String!, input: UpdateTimelineEventInput!): TimelineEventDto!
+  updateUser(id: String!, isActive: Boolean, role: String): UserDto!
+  uploadMedia(input: CreateMediaInput!): MediaDto!
+}
+
+type OrganizationDto {
+  _id: ID!
+  createdAt: DateTime!
+  description: String
+  isActive: Boolean!
+  logo: String
+  name: String!
+  ownerId: String!
+  slug: String!
+  updatedAt: DateTime!
+  website: String
+}
+
+"""Platform enum"""
+enum Platform {
+  ANDROID
+  API
+  DESKTOP
+  IOS
+  WEB
+}
+
+type Query {
+  app(id: String!): AppDto!
+  appBySlug(slug: String!): AppDto!
+  apps(limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
+  me: UserDto!
+  mediaByApp(appId: String!): [MediaDto!]!
+  mediaByAppAndType(appId: String!, type: MediaType!): [MediaDto!]!
+  organization(id: String!): OrganizationDto!
+  organizationBySlug(slug: String!): OrganizationDto!
+  organizations: [OrganizationDto!]!
+  timelineApps(limit: Int! = 20, offset: Int! = 0): [AppDto!]!
+  timelineEvents(limit: Int! = 20, offset: Int! = 0): [TimelineEventDto!]!
+  timelineEventsByApp(appId: String!, isPublic: Boolean! = true): [TimelineEventDto!]!
+  user(id: String!): UserDto!
+  users: [UserDto!]!
+}
+
+type TimelineEventDto {
+  _id: ID!
+  appId: String!
+  createdAt: DateTime!
+  createdBy: String!
+  date: DateTime!
+  description: String
+  isPublic: Boolean!
+  metadata: JSON
+  title: String!
+  type: EventType!
+  updatedAt: DateTime!
+  url: String
+  version: String
+}
+
+input UpdateAppInput {
+  appStoreUrl: String
+  demoUrl: String
+  downloadUrl: String
+  languages: [String!]
+  longDesc: String
+  platforms: [Platform!]
+  playStoreUrl: String
+  releaseDate: DateTime
+  repository: String
+  shortDesc: String
+  slug: String
+  status: AppStatus
+  tags: [String!]
+  title: String
+  visibility: AppVisibility
+  website: String
+}
+
+input UpdateTimelineEventInput {
+  date: DateTime
+  description: String
+  isPublic: Boolean
+  metadata: JSON
+  title: String
+  type: EventType
+  url: String
+  version: String
+}
+
+type UserDto {
+  _id: ID!
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  isActive: Boolean!
+  lastLoginAt: DateTime
+  name: String!
+  organizationId: String
+  role: UserRole!
+  updatedAt: DateTime!
+}
+
+"""User role enum"""
+enum UserRole {
+  ADMIN
+  DEVELOPER
+  VIEWER
+}

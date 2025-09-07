@@ -36,6 +36,14 @@ export class MediaService {
       .exec();
   }
 
+  async updateMediaMetadata(id: string, metadata: Record<string, any>): Promise<Media> {
+    return this.mediaModel.findByIdAndUpdate(
+      id,
+      { meta: metadata },
+      { new: true }
+    ).exec();
+  }
+
   async remove(id: string): Promise<boolean> {
     const result = await this.mediaModel.findByIdAndDelete(id).exec();
     return !!result;

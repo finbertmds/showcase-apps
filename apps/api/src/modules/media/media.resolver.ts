@@ -13,7 +13,7 @@ export class MediaResolver {
 
   @Query(() => [MediaDto], { name: 'mediaByApp' })
   async findByAppId(@Args('appId') appId: string): Promise<MediaDto[]> {
-    return this.mediaService.findByAppId(appId);
+    return this.mediaService.findByAppId(appId) as any;
   }
 
   @Query(() => [MediaDto], { name: 'mediaByAppAndType' })
@@ -21,7 +21,7 @@ export class MediaResolver {
     @Args('appId') appId: string,
     @Args('type', { type: () => MediaType }) type: MediaType,
   ): Promise<MediaDto[]> {
-    return this.mediaService.findByAppIdAndType(appId, type);
+    return this.mediaService.findByAppIdAndType(appId, type) as any;
   }
 
   @Mutation(() => MediaDto)

@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import algoliasearch from 'algoliasearch';
+import { algoliasearch, SearchClient } from 'algoliasearch';
 
 export const algoliaConfig = registerAs('algolia', () => ({
   appId: process.env.ALGOLIA_APP_ID,
@@ -7,7 +7,7 @@ export const algoliaConfig = registerAs('algolia', () => ({
   indexName: process.env.ALGOLIA_INDEX_NAME || 'showcase-apps',
 }));
 
-export const createAlgoliaClient = () => {
+export const createAlgoliaClient = (): SearchClient => {
   const config = algoliaConfig();
   
   if (!config.appId || !config.apiKey) {
@@ -16,13 +16,4 @@ export const createAlgoliaClient = () => {
   }
 
   return algoliasearch(config.appId, config.apiKey);
-};
-
-export const getAlgoliaIndex = () => {
-  const client = createAlgoliaClient();
-  const config = algoliaConfig();
-  
-  if (!client) return null;
-  
-  return client.initIndex(config.indexName);
 };

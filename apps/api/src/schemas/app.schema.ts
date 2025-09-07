@@ -66,6 +66,8 @@ export class App {
   @Prop({ type: Types.ObjectId, ref: 'Organization', required: true })
   organizationId: Types.ObjectId;
 
+  organizationIdString?: string; // Virtual field for GraphQL
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 
@@ -93,6 +95,7 @@ export class App {
   @Prop({ default: 0 })
   likeCount: number;
 
+  id: string; // Virtual field for GraphQL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -111,6 +114,14 @@ AppSchema.index({ releaseDate: -1 });
 AppSchema.index({ createdAt: -1 });
 AppSchema.index({ viewCount: -1 });
 AppSchema.index({ likeCount: -1 });
+AppSchema.set('toJSON', { virtuals: true });
+AppSchema.set('toObject', { virtuals: true });
+AppSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+AppSchema.virtual('organizationIdString').get(function () {
+  return this.organizationId?.toString();
+});
 
 // Text search index
 AppSchema.index({

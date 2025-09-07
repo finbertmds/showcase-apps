@@ -1,18 +1,23 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { getAlgoliaIndex } from '../config/algolia.config';
+import { SearchClient } from 'algoliasearch';
+import { algoliaConfig, createAlgoliaClient } from '../config/algolia.config';
 import { App } from '../schemas/app.schema';
 
 @Injectable()
 export class AlgoliaService implements OnModuleInit {
-  private index: any;
+  private index: string;
+  private client: SearchClient;
 
   async onModuleInit() {
-    this.index = getAlgoliaIndex();
+    this.client = createAlgoliaClient();
+    this.index = algoliaConfig().indexName;
     
-    if (this.index) {
+    if (this.client) {
       // Configure index settings
-      await this.index.setSettings({
-        searchableAttributes: [
+      await this.client.setSettings({
+        indexName: this.index,
+        indexSettings: {
+          searchableAttributes: [
           'title',
           'shortDesc',
           'longDesc',
@@ -34,16 +39,16 @@ export class AlgoliaService implements OnModuleInit {
         ],
         hitsPerPage: 20,
         maxValuesPerFacet: 100,
-      });
+      }});
     }
   }
 
   async indexApp(app: App): Promise<void> {
-    if (!this.index) return;
+    if (!this.client) return;
 
     try {
       const algoliaObject = {
-        objectID: app._id.toString(),
+        objectID: (app as any)._id.toString(),
         title: app.title,
         slug: app.slug,
         shortDesc: app.shortDesc,
@@ -61,7 +66,10 @@ export class AlgoliaService implements OnModuleInit {
         createdBy: app.createdBy.toString(),
       };
 
-      await this.index.saveObject(algoliaObject);
+      await this.client.saveObject({
+        indexName: this.index,
+        body: algoliaObject,
+      });
     } catch (error) {
       console.error('Error indexing app to Algolia:', error);
     }
@@ -72,17 +80,20 @@ export class AlgoliaService implements OnModuleInit {
   }
 
   async deleteApp(appId: string): Promise<void> {
-    if (!this.index) return;
+    if (!this.client) return;
 
     try {
-      await this.index.deleteObject(appId);
+      await this.client.deleteObject({
+        indexName: this.index,
+        objectID: appId,
+      });
     } catch (error) {
       console.error('Error deleting app from Algolia:', error);
     }
   }
 
   async searchApps(query: string, filters: any = {}): Promise<any> {
-    if (!this.index) {
+    if (!this.client) {
       throw new Error('Algolia not configured');
     }
 
@@ -122,28 +133,10 @@ export class AlgoliaService implements OnModuleInit {
         ];
       }
 
-      const result = await this.index.search(searchParams);
+      const result = await this.client.search(searchParams);
       return result;
     } catch (error) {
       console.error('Error searching apps in Algolia:', error);
-      throw error;
-    }
-  }
-
-  async getFacets(): Promise<any> {
-    if (!this.index) {
-      throw new Error('Algolia not configured');
-    }
-
-    try {
-      const result = await this.index.search('', {
-        facets: ['platforms', 'tags', 'languages', 'status', 'visibility'],
-        hitsPerPage: 0,
-      });
-
-      return result.facets;
-    } catch (error) {
-      console.error('Error getting facets from Algolia:', error);
       throw error;
     }
   }

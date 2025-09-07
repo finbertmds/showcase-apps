@@ -1,4 +1,4 @@
-import { Process, Processor } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import axios from 'axios';
 import { Job } from 'bullmq';
 
@@ -10,7 +10,6 @@ interface WebhookJob {
 
 @Processor('webhook')
 export class WebhookProcessor {
-  @Process('send-webhook')
   async handleWebhookSending(job: Job<WebhookJob>) {
     const { url, payload, headers = {} } = job.data;
 

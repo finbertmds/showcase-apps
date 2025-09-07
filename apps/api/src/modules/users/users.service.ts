@@ -15,6 +15,7 @@ export class UsersService {
     clerkId: string;
     role?: UserRole;
     organizationId?: string;
+    avatar?: string;
   }): Promise<User> {
     const user = new this.userModel(userData);
     return user.save();

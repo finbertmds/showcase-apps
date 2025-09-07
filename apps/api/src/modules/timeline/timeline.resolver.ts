@@ -17,7 +17,7 @@ export class TimelineResolver {
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
   ): Promise<TimelineEventDto[]> {
     const { events } = await this.timelineService.findAll(limit, offset);
-    return events;
+    return events as any;
   }
 
   @Query(() => [TimelineEventDto], { name: 'timelineEventsByApp' })
@@ -25,7 +25,7 @@ export class TimelineResolver {
     @Args('appId') appId: string,
     @Args('isPublic', { defaultValue: true }) isPublic?: boolean,
   ): Promise<TimelineEventDto[]> {
-    return this.timelineService.findByAppId(appId, isPublic);
+    return this.timelineService.findByAppId(appId, isPublic) as any;
   }
 
   @Mutation(() => TimelineEventDto)
@@ -36,7 +36,7 @@ export class TimelineResolver {
     @Context() context: any,
   ): Promise<TimelineEventDto> {
     const user = context.req.user;
-    return this.timelineService.create(createTimelineEventInput, user.id);
+    return this.timelineService.create(createTimelineEventInput, user._id.toString()) as any;
   }
 
   @Mutation(() => TimelineEventDto)
@@ -46,7 +46,7 @@ export class TimelineResolver {
     @Args('id') id: string,
     @Args('input') updateTimelineEventInput: UpdateTimelineEventInput,
   ): Promise<TimelineEventDto> {
-    return this.timelineService.update(id, updateTimelineEventInput);
+    return this.timelineService.update(id, updateTimelineEventInput) as any;
   }
 
   @Mutation(() => Boolean)

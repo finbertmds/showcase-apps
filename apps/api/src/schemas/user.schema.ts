@@ -30,6 +30,8 @@ export class User {
   @Prop({ type: Types.ObjectId, ref: 'Organization' })
   organizationId?: Types.ObjectId;
 
+  organizationIdString?: string; // Virtual field for GraphQL
+
   @Prop({ default: true })
   isActive: boolean;
 
@@ -39,6 +41,7 @@ export class User {
   @Prop()
   lastLoginAt?: Date;
 
+  id: string; // Virtual field for GraphQL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,3 +53,13 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ clerkId: 1 });
 UserSchema.index({ organizationId: 1 });
 UserSchema.index({ role: 1 });
+
+// Transform _id to id
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true });
+UserSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+UserSchema.virtual('organizationIdString').get(function () {
+  return this.organizationId?.toString();
+});

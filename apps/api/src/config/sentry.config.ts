@@ -7,9 +7,9 @@ export const sentryConfig = registerAs('sentry', () => ({
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   debug: process.env.NODE_ENV === 'development',
   integrations: [
-    new Sentry.Integrations.Http({ tracing: true }),
-    new Sentry.Integrations.Express({ app: undefined }),
-    new Sentry.Integrations.Mongo({ useMongoose: true }),
+    Sentry.httpIntegration(),
+    Sentry.expressIntegration(),
+    Sentry.mongoIntegration(),
   ],
 }));
 

@@ -48,58 +48,58 @@ services:
       - showcase-network
 
   # API Backend (NestJS)
-  api:
-    build:
-      context: ./apps/api
-      dockerfile: Dockerfile.dev
-    container_name: showcase-api
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    environment:
-      NODE_ENV: development
-      MONGODB_URI: mongodb://admin:password@mongodb:27017/showcase?authSource=admin
-      REDIS_URL: redis://redis:6379
-      MINIO_ENDPOINT: minio
-      MINIO_PORT: 9000
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin123
-      MINIO_BUCKET: showcase-media
-      JWT_SECRET: d6bU645Net8i6Abg1LOOFmEl7V8FCV5w9j/fmW1MVKg=
-      CLERK_SECRET_KEY: sk_test_lWEJJRMIFBL0UKfRHeE0GUomgRpb1rqFOhQMxbI0pe
-    volumes:
-      - ./apps/api:/app
-      - /app/node_modules
-    depends_on:
-      - mongodb
-      - redis
-      - minio
-    networks:
-      - showcase-network
+  # api:
+  #   build:
+  #     context: ./apps/api
+  #     dockerfile: Dockerfile.dev
+  #   container_name: showcase-api
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     NODE_ENV: development
+  #     MONGODB_URI: mongodb://admin:password@mongodb:27017/showcase?authSource=admin
+  #     REDIS_URL: redis://redis:6379
+  #     MINIO_ENDPOINT: minio
+  #     MINIO_PORT: 9000
+  #     MINIO_ACCESS_KEY: minioadmin
+  #     MINIO_SECRET_KEY: minioadmin123
+  #     MINIO_BUCKET: showcase-media
+  #     JWT_SECRET: d6bU645Net8i6Abg1LOOFmEl7V8FCV5w9j/fmW1MVKg=
+  #     CLERK_SECRET_KEY: sk_test_lWEJJRMIFBL0UKfRHeE0GUomgRpb1rqFOhQMxbI0pe
+  #   volumes:
+  #     - ./apps/api:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #     - minio
+  #   networks:
+  #     - showcase-network
 
-  # Web Frontend (Next.js)
-  web:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile.dev
-    container_name: showcase-web
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cmVmaW5lZC1zbmlwZS00Ny5jbGVyay5hY2NvdW50cy5kZXYk
-      CLERK_SECRET_KEY: sk_test_lWEJJRMIFBL0UKfRHeE0GUomgRpb1rqFOhQMxbI0pe
+  # # Web Frontend (Next.js)
+  # web:
+  #   build:
+  #     context: ./apps/web
+  #     dockerfile: Dockerfile.dev
+  #   container_name: showcase-web
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NODE_ENV: development
+  #     NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+  #     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cmVmaW5lZC1zbmlwZS00Ny5jbGVyay5hY2NvdW50cy5kZXYk
+  #     CLERK_SECRET_KEY: sk_test_lWEJJRMIFBL0UKfRHeE0GUomgRpb1rqFOhQMxbI0pe
 
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-      - /app/.next
-    depends_on:
-      - api
-    networks:
-      - showcase-network
+  #   volumes:
+  #     - ./apps/web:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - showcase-network
 
 volumes:
   mongodb_data:

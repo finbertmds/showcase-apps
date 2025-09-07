@@ -19,15 +19,15 @@ export class AppsResolver {
     @Context() context: any,
   ): Promise<AppDto> {
     const user = context.req.user;
-    return this.appsService.create(createAppInput, user.id, user.organizationId);
+    return this.appsService.create(createAppInput, user._id.toString(), user.organizationId) as any;
   }
 
   @Query(() => [AppDto], { name: 'apps' })
   async findAll(
     @Args('status', { nullable: true }) status?: string,
     @Args('visibility', { nullable: true }) visibility?: string,
-    @Args('platforms', { type: () => [String], nullable: true }) platforms?: string[],
-    @Args('tags', { type: () => [String], nullable: true }) tags?: string[],
+    @Args('platforms', { type: () => [String!], nullable: true }) platforms?: string[],
+    @Args('tags', { type: () => [String!], nullable: true }) tags?: string[],
     @Args('search', { nullable: true }) search?: string,
     @Args('organizationId', { nullable: true }) organizationId?: string,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
@@ -38,7 +38,7 @@ export class AppsResolver {
       limit,
       offset,
     );
-    return apps;
+    return apps as any;
   }
 
   @Query(() => [AppDto], { name: 'timelineApps' })
@@ -47,17 +47,17 @@ export class AppsResolver {
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
   ): Promise<AppDto[]> {
     const { apps } = await this.appsService.getTimelineApps(limit, offset);
-    return apps;
+    return apps as any;
   }
 
   @Query(() => AppDto, { name: 'app' })
   async findOne(@Args('id') id: string): Promise<AppDto> {
-    return this.appsService.findOne(id);
+    return this.appsService.findOne(id) as any;
   }
 
   @Query(() => AppDto, { name: 'appBySlug' })
   async findBySlug(@Args('slug') slug: string): Promise<AppDto> {
-    return this.appsService.findBySlug(slug);
+    return this.appsService.findBySlug(slug) as any;
   }
 
   @Mutation(() => AppDto)
@@ -69,7 +69,7 @@ export class AppsResolver {
     @Context() context: any,
   ): Promise<AppDto> {
     const user = context.req.user;
-    return this.appsService.update(id, updateAppInput, user.id, user.role);
+    return this.appsService.update(id, updateAppInput, user._id.toString(), user.role) as any;
   }
 
   @Mutation(() => Boolean)

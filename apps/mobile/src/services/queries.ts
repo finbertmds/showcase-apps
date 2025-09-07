@@ -4,8 +4,8 @@ export const GET_APPS = gql`
   query GetApps(
     $status: String
     $visibility: String
-    $platforms: [String]
-    $tags: [String]
+    $platforms: [String!]
+    $tags: [String!]
     $search: String
     $organizationId: String
     $limit: Int
@@ -21,7 +21,7 @@ export const GET_APPS = gql`
       limit: $limit
       offset: $offset
     ) {
-      id
+      _id
       title
       slug
       shortDesc
@@ -42,16 +42,8 @@ export const GET_APPS = gql`
       likeCount
       createdAt
       updatedAt
-      createdBy {
-        id
-        name
-        email
-      }
-      organizationId {
-        id
-        name
-        slug
-      }
+      createdBy
+      organizationId
     }
   }
 `;
@@ -59,7 +51,7 @@ export const GET_APPS = gql`
 export const GET_TIMELINE_APPS = gql`
   query GetTimelineApps($limit: Int, $offset: Int) {
     timelineApps(limit: $limit, offset: $offset) {
-      id
+      _id
       title
       slug
       shortDesc
@@ -80,16 +72,8 @@ export const GET_TIMELINE_APPS = gql`
       likeCount
       createdAt
       updatedAt
-      createdBy {
-        id
-        name
-        email
-      }
-      organizationId {
-        id
-        name
-        slug
-      }
+      createdBy
+      organizationId
     }
   }
 `;
@@ -97,7 +81,7 @@ export const GET_TIMELINE_APPS = gql`
 export const GET_APP_BY_SLUG = gql`
   query GetAppBySlug($slug: String!) {
     appBySlug(slug: $slug) {
-      id
+      _id
       title
       slug
       shortDesc
@@ -118,16 +102,8 @@ export const GET_APP_BY_SLUG = gql`
       likeCount
       createdAt
       updatedAt
-      createdBy {
-        id
-        name
-        email
-      }
-      organizationId {
-        id
-        name
-        slug
-      }
+      createdBy
+      organizationId
     }
   }
 `;
@@ -135,7 +111,7 @@ export const GET_APP_BY_SLUG = gql`
 export const GET_APP_BY_ID = gql`
   query GetAppById($id: String!) {
     app(id: $id) {
-      id
+      _id
       title
       slug
       shortDesc
@@ -156,16 +132,8 @@ export const GET_APP_BY_ID = gql`
       likeCount
       createdAt
       updatedAt
-      createdBy {
-        id
-        name
-        email
-      }
-      organizationId {
-        id
-        name
-        slug
-      }
+      createdBy
+      organizationId
     }
   }
 `;
@@ -173,12 +141,8 @@ export const GET_APP_BY_ID = gql`
 export const GET_TIMELINE_EVENTS = gql`
   query GetTimelineEvents($limit: Int, $offset: Int) {
     timelineEvents(limit: $limit, offset: $offset) {
-      id
-      appId {
-        id
-        title
-        slug
-      }
+      _id
+      appId
       title
       description
       type
@@ -201,7 +165,7 @@ export const GET_TIMELINE_EVENTS = gql`
 export const GET_TIMELINE_EVENTS_BY_APP = gql`
   query GetTimelineEventsByApp($appId: String!, $isPublic: Boolean) {
     timelineEventsByApp(appId: $appId, isPublic: $isPublic) {
-      id
+      _id
       title
       description
       type
@@ -210,11 +174,7 @@ export const GET_TIMELINE_EVENTS_BY_APP = gql`
       version
       url
       metadata
-      createdBy {
-        id
-        name
-        email
-      }
+      createdBy
       createdAt
       updatedAt
     }
@@ -224,7 +184,7 @@ export const GET_TIMELINE_EVENTS_BY_APP = gql`
 export const GET_MEDIA_BY_APP = gql`
   query GetMediaByApp($appId: String!) {
     mediaByApp(appId: $appId) {
-      id
+      _id
       type
       url
       filename
@@ -236,11 +196,7 @@ export const GET_MEDIA_BY_APP = gql`
       order
       isActive
       meta
-      uploadedBy {
-        id
-        name
-        email
-      }
+      uploadedBy
       createdAt
       updatedAt
     }

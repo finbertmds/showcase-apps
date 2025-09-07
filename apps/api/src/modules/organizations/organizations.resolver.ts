@@ -8,16 +8,16 @@ export class OrganizationsResolver {
 
   @Query(() => [OrganizationDto], { name: 'organizations' })
   async findAll(): Promise<OrganizationDto[]> {
-    return this.organizationsService.findAll();
+    return this.organizationsService.findAll() as any;
   }
 
   @Query(() => OrganizationDto, { name: 'organization' })
   async findOne(@Args('id') id: string): Promise<OrganizationDto> {
-    return this.organizationsService.findOne(id);
+    return this.organizationsService.findOne(id) as any;
   }
 
   @Query(() => OrganizationDto, { name: 'organizationBySlug' })
   async findBySlug(@Args('slug') slug: string): Promise<OrganizationDto> {
-    return this.organizationsService.findBySlug(slug);
+    return this.organizationsService.findBySlug(slug) as any;
   }
 }

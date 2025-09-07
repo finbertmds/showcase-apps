@@ -21,13 +21,13 @@ export class AuthService {
   async login(user: any) {
     const payload = {
       email: user.email,
-      sub: user.id,
+      sub: (user as any)._id.toString(),
       role: user.role,
       organizationId: user.organizationId,
     };
 
     // Update last login
-    await this.usersService.updateLastLogin(user.id);
+    await this.usersService.updateLastLogin((user as any)._id.toString());
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -54,7 +54,7 @@ export class AuthService {
     
     if (user) {
       // Update existing user
-      user = await this.usersService.update(user.id, {
+      user = await this.usersService.update((user as any)._id.toString(), {
         name,
         email,
         avatar: clerkUser.imageUrl,

@@ -1,4 +1,5 @@
 import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { EventType } from '../schemas/timeline-event.schema';
 
 registerEnumType(EventType, {
@@ -9,7 +10,7 @@ registerEnumType(EventType, {
 @ObjectType()
 export class TimelineEventDto {
   @Field(() => ID)
-  id: string;
+  _id: string;
 
   @Field()
   appId: string;
@@ -35,7 +36,7 @@ export class TimelineEventDto {
   @Field({ nullable: true })
   url?: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   metadata?: Record<string, any>;
 
   @Field()
@@ -74,7 +75,7 @@ export class CreateTimelineEventInput {
   @Field({ nullable: true })
   url?: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   metadata?: Record<string, any>;
 }
 
@@ -101,6 +102,6 @@ export class UpdateTimelineEventInput {
   @Field({ nullable: true })
   url?: string;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   metadata?: Record<string, any>;
 }

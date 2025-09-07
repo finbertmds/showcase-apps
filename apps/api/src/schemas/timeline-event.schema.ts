@@ -17,6 +17,8 @@ export class TimelineEvent {
   @Prop({ type: Types.ObjectId, ref: 'App', required: true })
   appId: Types.ObjectId;
 
+  appIdString?: string; // Virtual field for GraphQL
+
   @Prop({ required: true })
   title: string;
 
@@ -52,6 +54,7 @@ export class TimelineEvent {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 
+  id: string; // Virtual field for GraphQL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,3 +67,11 @@ TimelineEventSchema.index({ appId: 1, type: 1 });
 TimelineEventSchema.index({ isPublic: 1 });
 TimelineEventSchema.index({ date: -1 });
 TimelineEventSchema.index({ createdBy: 1 });
+TimelineEventSchema.set('toJSON', { virtuals: true });
+TimelineEventSchema.set('toObject', { virtuals: true });
+TimelineEventSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+TimelineEventSchema.virtual('appIdString').get(function () {
+  return this.appId?.toString();
+});

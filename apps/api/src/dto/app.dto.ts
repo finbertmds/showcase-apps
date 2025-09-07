@@ -19,7 +19,7 @@ registerEnumType(Platform, {
 @ObjectType()
 export class AppDto {
   @Field(() => ID)
-  id: string;
+  _id: string;
 
   @Field()
   title: string;
@@ -42,13 +42,13 @@ export class AppDto {
   @Field({ nullable: true })
   releaseDate?: Date;
 
-  @Field(() => [Platform])
+  @Field(() => [Platform!])
   platforms: Platform[];
 
-  @Field(() => [String])
+  @Field(() => [String!])
   languages: string[];
 
-  @Field(() => [String])
+  @Field(() => [String!])
   tags: string[];
 
   @Field()
@@ -108,13 +108,13 @@ export class CreateAppInput {
   @Field({ nullable: true })
   releaseDate?: Date;
 
-  @Field(() => [Platform], { defaultValue: [] })
+  @Field(() => [Platform!], { defaultValue: [] })
   platforms: Platform[];
 
-  @Field(() => [String], { defaultValue: [] })
+  @Field(() => [String!], { defaultValue: [] })
   languages: string[];
 
-  @Field(() => [String], { defaultValue: [] })
+  @Field(() => [String!], { defaultValue: [] })
   tags: string[];
 
   @Field({ nullable: true })
@@ -159,13 +159,13 @@ export class UpdateAppInput {
   @Field({ nullable: true })
   releaseDate?: Date;
 
-  @Field(() => [Platform], { nullable: true })
+  @Field(() => [Platform!], { nullable: true })
   platforms?: Platform[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String!], { nullable: true })
   languages?: string[];
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String!], { nullable: true })
   tags?: string[];
 
   @Field({ nullable: true })

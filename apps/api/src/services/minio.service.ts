@@ -141,6 +141,7 @@ export class MinioService implements OnModuleInit {
         this.bucketName,
         destFilename,
         `/${this.bucketName}/${sourceFilename}`,
+        new (require('minio').CopyConditions)()
       );
     } catch (error) {
       console.error('Error copying file in MinIO:', error);

@@ -17,6 +17,8 @@ export class Media {
   @Prop({ type: Types.ObjectId, ref: 'App', required: true })
   appId: Types.ObjectId;
 
+  appIdString?: string; // Virtual field for GraphQL
+
   @Prop({ 
     type: String, 
     enum: MediaType, 
@@ -51,6 +53,8 @@ export class Media {
   @Prop({ default: true })
   isActive: boolean;
 
+  id: string; // Virtual field for GraphQL
+
   @Prop({ type: Object })
   meta?: {
     alt?: string;
@@ -74,3 +78,11 @@ MediaSchema.index({ appId: 1, type: 1 });
 MediaSchema.index({ appId: 1, order: 1 });
 MediaSchema.index({ uploadedBy: 1 });
 MediaSchema.index({ isActive: 1 });
+MediaSchema.set('toJSON', { virtuals: true });
+MediaSchema.set('toObject', { virtuals: true });
+MediaSchema.virtual('id').get(function () {
+  return this._id.toHexString();
+});
+MediaSchema.virtual('appIdString').get(function () {
+  return this.appId?.toString();
+});

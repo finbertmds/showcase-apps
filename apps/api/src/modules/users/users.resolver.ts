@@ -15,20 +15,20 @@ export class UsersResolver {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async findAll(): Promise<UserDto[]> {
-    return this.usersService.findAll();
+    return this.usersService.findAll() as any;
   }
 
   @Query(() => UserDto, { name: 'user' })
   @UseGuards(JwtAuthGuard)
   async findOne(@Args('id') id: string): Promise<UserDto> {
-    return this.usersService.findOne(id);
+    return this.usersService.findOne(id) as any;
   }
 
   @Query(() => UserDto, { name: 'me' })
   @UseGuards(JwtAuthGuard)
   async getCurrentUser(@Context() context: any): Promise<UserDto> {
     const user = context.req.user;
-    return this.usersService.findOne(user.id);
+    return this.usersService.findOne(user._id.toString()) as any;
   }
 
   @Mutation(() => UserDto)
@@ -43,7 +43,7 @@ export class UsersResolver {
     if (role !== undefined) updateData.role = role;
     if (isActive !== undefined) updateData.isActive = isActive;
     
-    return this.usersService.update(id, updateData);
+    return this.usersService.update(id, updateData) as any;
   }
 
   @Mutation(() => Boolean)

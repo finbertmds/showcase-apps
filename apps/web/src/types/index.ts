@@ -1,5 +1,5 @@
 export interface App {
-  id: string;
+  _id: string;
   title: string;
   slug: string;
   shortDesc: string;
@@ -20,25 +20,13 @@ export interface App {
   likeCount: number;
   createdAt: string;
   updatedAt: string;
-  createdBy: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  organizationId: {
-    id: string;
-    name: string;
-    slug: string;
-  };
+  createdBy: string;
+  organizationId: string;
 }
 
 export interface TimelineEvent {
-  id: string;
-  appId: {
-    id: string;
-    title: string;
-    slug: string;
-  };
+  _id: string;
+  appId: string;
   title: string;
   description?: string;
   type: 'release' | 'update' | 'milestone' | 'announcement' | 'feature' | 'bugfix';
@@ -47,17 +35,13 @@ export interface TimelineEvent {
   version?: string;
   url?: string;
   metadata?: Record<string, any>;
-  createdBy: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Media {
-  id: string;
+  _id: string;
   type: 'screenshot' | 'logo' | 'cover' | 'icon' | 'video' | 'document';
   url: string;
   filename: string;
@@ -69,17 +53,13 @@ export interface Media {
   order: number;
   isActive: boolean;
   meta?: Record<string, any>;
-  uploadedBy: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  uploadedBy: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface User {
-  id: string;
+  _id: string;
   email: string;
   name: string;
   role: 'admin' | 'developer' | 'viewer';
@@ -92,7 +72,7 @@ export interface User {
 }
 
 export interface Organization {
-  id: string;
+  _id: string;
   name: string;
   slug: string;
   description?: string;
