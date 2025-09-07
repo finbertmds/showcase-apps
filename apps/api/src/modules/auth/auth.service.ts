@@ -1,3 +1,4 @@
+import { createClerkClient, verifyToken } from '@clerk/backend';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '../../schemas/user.schema';
@@ -35,6 +36,40 @@ export class AuthService {
     };
   }
 
+  async createOrUpdateUserFromClerkToken(clerkToken: string): Promise<any> {
+    try {
+      // Verify Clerk token
+      const payload = await verifyToken(clerkToken, {
+        secretKey: process.env.CLERK_SECRET_KEY || 'your-clerk-secret-key',
+      });
+
+      if (!payload) {
+        throw new UnauthorizedException('Invalid Clerk token');
+      }
+
+      // Create Clerk client to get user information
+      const clerk = createClerkClient({
+        secretKey: process.env.CLERK_SECRET_KEY || 'your-clerk-secret-key',
+      });
+
+      // Get user information from Clerk API
+      const clerkUser = await clerk.users.getUser(payload.sub);
+      
+      // Transform Clerk user to our format
+      const userData = {
+        id: clerkUser.id,
+        emailAddresses: clerkUser.emailAddresses || [],
+        firstName: clerkUser.firstName || '',
+        lastName: clerkUser.lastName || '',
+        imageUrl: clerkUser.imageUrl || '',
+      };
+
+      return this.createOrUpdateUser(userData);
+    } catch (error) {
+      throw new UnauthorizedException(`Clerk token verification failed: ${error.message}`);
+    }
+  }
+
   async createOrUpdateUser(clerkUser: {
     id: string;
     emailAddresses: Array<{ emailAddress: string }>;
@@ -65,7 +100,7 @@ export class AuthService {
         email,
         name,
         clerkId: clerkUser.id,
-        role: UserRole.VIEWER, // Default role
+        role: UserRole.ADMIN, // Default role
         avatar: clerkUser.imageUrl,
       });
     }

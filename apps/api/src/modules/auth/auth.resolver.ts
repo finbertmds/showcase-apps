@@ -18,9 +18,15 @@ export class AuthResolver {
   async loginWithClerk(
     @Args('clerkToken') clerkToken: string,
   ): Promise<string> {
-    // In a real implementation, you would verify the Clerk token here
-    // and create/update the user accordingly
-    // For now, this is a placeholder
-    throw new Error('Clerk integration not implemented yet');
+    try {
+      // Create or update user from Clerk token
+      const user = await this.authService.createOrUpdateUserFromClerkToken(clerkToken);
+      
+      // Generate JWT token
+      const result = await this.authService.login(user);
+      return result.access_token;
+    } catch (error) {
+      throw new Error(`Clerk login failed: ${error.message}`);
+    }
   }
 }

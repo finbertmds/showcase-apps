@@ -17,6 +17,7 @@ export enum AppVisibility {
 
 export enum Platform {
   WEB = 'web',
+  MOBILE = 'mobile',
   IOS = 'ios',
   ANDROID = 'android',
   DESKTOP = 'desktop',

@@ -1,0 +1,185 @@
+{
+  "description": "Quick test requests for Showcase Apps API",
+  "baseUrl": "http://localhost:4000",
+  "webUrl": "http://localhost:3000",
+  "requests": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "url": "http://localhost:4000/health",
+      "description": "Check if API server is running"
+    },
+    {
+      "name": "Get All Apps (Basic)",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ apps { _id title slug } }"
+      },
+      "description": "Get basic app information"
+    },
+    {
+      "name": "Get Apps with All Fields",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ apps { _id title slug shortDesc longDesc status visibility releaseDate platforms languages tags website repository demoUrl downloadUrl appStoreUrl playStoreUrl viewCount likeCount createdAt updatedAt } }"
+      },
+      "description": "Get complete app information"
+    },
+    {
+      "name": "Get Apps with Filters",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "query GetApps($platforms: [String!], $tags: [String!]) { apps(platforms: $platforms, tags: $tags) { _id title slug platforms tags } }",
+        "variables": {
+          "platforms": ["web"],
+          "tags": ["react"]
+        }
+      },
+      "description": "Get apps filtered by platforms and tags"
+    },
+    {
+      "name": "Get Timeline Apps",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ timelineApps { _id title slug shortDesc } }"
+      },
+      "description": "Get apps for timeline view"
+    },
+    {
+      "name": "Get Timeline Events",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ timelineEvents { _id title description type date isPublic } }"
+      },
+      "description": "Get timeline events"
+    },
+    {
+      "name": "Get Organizations",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ organizations { _id name slug description } }"
+      },
+      "description": "Get all organizations"
+    },
+    {
+      "name": "Test Web Proxy",
+      "method": "POST",
+      "url": "http://localhost:3000/api/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ apps { _id title slug } }"
+      },
+      "description": "Test GraphQL through web app proxy"
+    },
+    {
+      "name": "Get Schema Info",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ __schema { types { name } } }"
+      },
+      "description": "Get GraphQL schema information"
+    },
+    {
+      "name": "Get Query Types",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "{ __type(name: \"Query\") { fields { name args { name type { name } } } } }"
+      },
+      "description": "Get available query types and arguments"
+    }
+  ],
+  "sampleMutations": [
+    {
+      "name": "Create App (Requires JWT)",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_JWT_TOKEN_HERE"
+      },
+      "body": {
+        "query": "mutation CreateApp($input: CreateAppInput!) { createApp(input: $input) { _id title slug } }",
+        "variables": {
+          "input": {
+            "title": "Test App",
+            "slug": "test-app",
+            "shortDesc": "A test application",
+            "longDesc": "This is a test application for API testing",
+            "visibility": "PUBLIC",
+            "platforms": ["WEB"],
+            "languages": ["JavaScript"],
+            "tags": ["test", "api"]
+          }
+        }
+      },
+      "description": "Create a new app (requires authentication)"
+    },
+    {
+      "name": "Increment App View",
+      "method": "POST",
+      "url": "http://localhost:4000/graphql",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "query": "mutation IncrementAppView($id: String!) { incrementAppView(id: $id) }",
+        "variables": {
+          "id": "YOUR_APP_ID_HERE"
+        }
+      },
+      "description": "Increment app view count (public mutation)"
+    }
+  ],
+  "curlExamples": [
+    {
+      "name": "Basic Apps Query",
+      "command": "curl -X POST http://localhost:4000/graphql -H \"Content-Type: application/json\" -d '{\"query\": \"{ apps { _id title slug } }\"}'"
+    },
+    {
+      "name": "Apps with Variables",
+      "command": "curl -X POST http://localhost:4000/graphql -H \"Content-Type: application/json\" -d '{\"query\": \"query GetApps($platforms: [String!]) { apps(platforms: $platforms) { _id title } }\", \"variables\": {\"platforms\": [\"web\"]}}'"
+    },
+    {
+      "name": "Health Check",
+      "command": "curl -I http://localhost:4000/health"
+    },
+    {
+      "name": "Web Proxy Test",
+      "command": "curl -X POST http://localhost:3000/api/graphql -H \"Content-Type: application/json\" -d '{\"query\": \"{ apps { _id title slug } }\"}'"
+    }
+  ]
+}
