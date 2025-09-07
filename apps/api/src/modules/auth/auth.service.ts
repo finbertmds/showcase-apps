@@ -1,6 +1,6 @@
-import { createClerkClient, verifyToken } from '@clerk/backend';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AuthResponse, LoginInput, RegisterInput } from '../../dto/auth.dto';
 import { UserRole } from '../../schemas/user.schema';
 import { UsersService } from '../users/users.service';
 
@@ -11,20 +11,41 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(clerkId: string): Promise<any> {
-    const user = await this.usersService.findByClerkId(clerkId);
+  async validateUser(userId: string): Promise<any> {
+    const user = await this.usersService.findOne(userId);
     if (user && user.isActive) {
       return user;
     }
     return null;
   }
 
-  async login(user: any) {
+  async login(loginInput: LoginInput): Promise<AuthResponse> {
+    const { usernameOrEmail, password } = loginInput;
+
+    // Find user by username or email
+    const user = await this.usersService.findByUsernameOrEmail(usernameOrEmail);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Validate password
+    const isPasswordValid = await this.usersService.validatePassword(user, password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
+    // Generate JWT token
     const payload = {
       email: user.email,
+      username: user.username,
       sub: (user as any)._id.toString(),
       role: user.role,
-      organizationId: user.organizationId,
+      organization: user.organization,
     };
 
     // Update last login
@@ -32,80 +53,100 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
-      user,
+      user: {
+        id: (user as any)._id.toString(),
+        email: user.email,
+        username: user.username,
+        name: user.name,
+        role: user.role,
+        organization: user.organization,
+        isActive: user.isActive,
+        avatar: user.avatar,
+        lastLoginAt: user.lastLoginAt,
+        createdAt: (user as any).createdAt,
+        updatedAt: (user as any).updatedAt,
+      },
     };
   }
 
-  async createOrUpdateUserFromClerkToken(clerkToken: string): Promise<any> {
+  async register(registerInput: RegisterInput): Promise<AuthResponse> {
+    const { username, email, name, password, role } = registerInput;
+
     try {
-      // Verify Clerk token
-      const payload = await verifyToken(clerkToken, {
-        secretKey: process.env.CLERK_SECRET_KEY || 'your-clerk-secret-key',
+      console.log('Registering user:', registerInput);
+      // Create user
+      const user = await this.usersService.create({
+        username,
+        email,
+        name,
+        password,
+        role: role || UserRole.VIEWER,
       });
 
-      if (!payload) {
-        throw new UnauthorizedException('Invalid Clerk token');
-      }
-
-      // Create Clerk client to get user information
-      const clerk = createClerkClient({
-        secretKey: process.env.CLERK_SECRET_KEY || 'your-clerk-secret-key',
-      });
-
-      // Get user information from Clerk API
-      const clerkUser = await clerk.users.getUser(payload.sub);
-      
-      // Transform Clerk user to our format
-      const userData = {
-        id: clerkUser.id,
-        emailAddresses: clerkUser.emailAddresses || [],
-        firstName: clerkUser.firstName || '',
-        lastName: clerkUser.lastName || '',
-        imageUrl: clerkUser.imageUrl || '',
+      // Generate JWT token
+      const payload = {
+        email: user.email,
+        username: user.username,
+        sub: (user as any)._id.toString(),
+        role: user.role,
+        organization: user.organization,
       };
 
-      return this.createOrUpdateUser(userData);
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: (user as any)._id.toString(),
+          email: user.email,
+          username: user.username,
+          name: user.name,
+          role: user.role,
+          organization: user.organization,
+          isActive: user.isActive,
+          avatar: user.avatar,
+          lastLoginAt: user.lastLoginAt,
+          createdAt: (user as any).createdAt,
+            updatedAt: (user as any).updatedAt,
+          },
+      };
     } catch (error) {
-      throw new UnauthorizedException(`Clerk token verification failed: ${error.message}`);
+      console.error('Error registering user:', error);
+      if (error.name === 'ValidationError') {
+        for (const field in error.errors) {
+          console.error(`Validation error on field "${field}": ${error.errors[field].message}`);
+        }
+      } else if (error?.name === 'MongoServerError') {
+        console.log(
+          'Mongo validation error details:',
+          JSON.stringify(error.errInfo.details, null, 2)
+        );
+    
+        // Nếu muốn lấy ra list các field lỗi rõ ràng
+        const details = error.errInfo.details.schemaRulesNotSatisfied;
+    
+        details.forEach((rule) => {
+          if (rule.propertiesNotSatisfied) {
+            rule.propertiesNotSatisfied.forEach((prop) => {
+              console.error(
+                `Invalid field: ${prop.propertyName}, reason: ${JSON.stringify(prop.details)}`
+              );
+            });
+          }
+    
+          if (rule.missingProperties) {
+            console.error(
+              `Missing required fields: ${rule.missingProperties.join(', ')}`
+            );
+          }
+        });
+      } else {
+        console.error(error);
+      }
+      throw error;
     }
   }
 
-  async createOrUpdateUser(clerkUser: {
-    id: string;
-    emailAddresses: Array<{ emailAddress: string }>;
-    firstName?: string;
-    lastName?: string;
-    imageUrl?: string;
-  }): Promise<any> {
-    const email = clerkUser.emailAddresses[0]?.emailAddress;
-    if (!email) {
-      throw new UnauthorizedException('No email found in Clerk user');
-    }
-
-    const name = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || email.split('@')[0];
-
-    // Check if user exists
-    let user = await this.usersService.findByClerkId(clerkUser.id);
-    
-    if (user) {
-      // Update existing user
-      user = await this.usersService.update((user as any)._id.toString(), {
-        name,
-        email,
-        avatar: clerkUser.imageUrl,
-      });
-    } else {
-      // Create new user
-      user = await this.usersService.create({
-        email,
-        name,
-        clerkId: clerkUser.id,
-        role: UserRole.ADMIN, // Default role
-        avatar: clerkUser.imageUrl,
-      });
-    }
-
-    return user;
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    return this.usersService.changePassword(userId, currentPassword, newPassword);
   }
 
   async verifyToken(token: string): Promise<any> {

@@ -27,12 +27,12 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
   const [incrementLike] = useMutation(INCREMENT_APP_LIKE);
 
   const handleView = () => {
-    incrementView({ variables: { id: app.id } });
+    incrementView({ variables: { id: app._id } });
   };
 
   const handleLike = () => {
     if (!isLiked) {
-      incrementLike({ variables: { id: app.id } });
+      incrementLike({ variables: { id: app._id } });
       setIsLiked(true);
     }
   };
@@ -87,7 +87,7 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
                 </Link>
                 
                 <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                  <span>by {app.createdBy.name}</span>
+                  <span>by {app.createdBy}</span>
                   {app.releaseDate && (
                     <span>• {formatDate(app.releaseDate)}</span>
                   )}

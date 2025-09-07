@@ -9,7 +9,7 @@ db.createCollection('users', {
   validator: {
     $jsonSchema: {
       bsonType: 'object',
-      required: ['email', 'name', 'clerkId'],
+      required: ['email', 'name', 'username', 'password'],
       properties: {
         email: {
           bsonType: 'string',
@@ -21,10 +21,15 @@ db.createCollection('users', {
           minLength: 1,
           description: 'Name is required'
         },
-        clerkId: {
+        username: {
           bsonType: 'string',
-          minLength: 1,
-          description: 'Clerk ID is required'
+          minLength: 3,
+          description: 'Username is required and must be at least 3 characters'
+        },
+        password: {
+          bsonType: 'string',
+          minLength: 6,
+          description: 'Password is required and must be at least 6 characters'
         },
         role: {
           enum: ['admin', 'developer', 'viewer'],
@@ -91,7 +96,7 @@ db.createCollection('timelineevents');
 
 // Create indexes for better performance
 db.users.createIndex({ email: 1 }, { unique: true });
-db.users.createIndex({ clerkId: 1 }, { unique: true });
+db.users.createIndex({ username: 1 }, { unique: true });
 db.users.createIndex({ organizationId: 1 });
 db.users.createIndex({ role: 1 });
 
@@ -152,7 +157,8 @@ if (process.env.NODE_ENV === 'development') {
   const sampleUser = db.users.insertOne({
     email: 'admin@showcase-apps.com',
     name: 'Admin User',
-    clerkId: 'sample-clerk-id',
+    username: 'admin',
+    password: '$2a$10$oX/ZEnfs1DGPifStycWEYOxtcNeZsjsxWqZHnEZG9KmaGQou3TZI.', // password123
     role: 'admin',
     organizationId: sampleOrg.insertedId,
     isActive: true,

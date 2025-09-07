@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
 
@@ -12,13 +13,45 @@ export class UsersService {
   async create(userData: {
     email: string;
     name: string;
-    clerkId: string;
+    username: string;
+    password: string;
     role?: UserRole;
     organizationId?: string;
     avatar?: string;
   }): Promise<User> {
-    const user = new this.userModel(userData);
-    return user.save();
+    try {
+      // Check if user already exists
+      const existingUser = await this.userModel.findOne({
+        $or: [{ email: userData.email }, { username: userData.username }]
+      });
+
+      if (existingUser) {
+        throw new ConflictException('User with this email or username already exists');
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+      const user = new this.userModel({
+        ...userData,
+        password: hashedPassword,
+      });
+      console.log('Creating user with data:', user);
+      return user.save();
+    } catch (error) {
+      console.error('Error creating user:', error);
+      if (error.name === 'ValidationError') {
+        // Trường hợp fail validate trong Mongoose schema
+        for (const field in error.errors) {
+          console.error(`Validation error on field "${field}": ${error.errors[field].message}`);
+        }
+      } else if (error?.name === 'MongoServerError') {
+        console.error('Mongo validation error:', error.errInfo?.details ?? error);
+      } else {
+        console.error(error);
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<User[]> {
@@ -45,8 +78,34 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async findByClerkId(clerkId: string): Promise<User | null> {
-    return this.userModel.findOne({ clerkId }).exec();
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userModel.findOne({ username }).exec();
+  }
+
+  async findByUsernameOrEmail(usernameOrEmail: string): Promise<User | null> {
+    return this.userModel.findOne({
+      $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }]
+    }).exec();
+  }
+
+  async validatePassword(user: User, password: string): Promise<boolean> {
+    return bcrypt.compare(password, user.password);
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isCurrentPasswordValid = await this.validatePassword(user, currentPassword);
+    if (!isCurrentPasswordValid) {
+      throw new ConflictException('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await this.userModel.findByIdAndUpdate(userId, { password: hashedNewPassword }).exec();
+    return true;
   }
 
   async update(id: string, updateData: Partial<User>): Promise<User> {

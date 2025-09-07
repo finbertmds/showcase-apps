@@ -8,7 +8,7 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
-  // Get the authentication token from Clerk
+  // Get the authentication token from localStorage
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
   
   return {

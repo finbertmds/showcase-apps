@@ -1,7 +1,9 @@
+import { AppStatus, AppVisibility } from '@/schemas/app.schema';
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AppDto, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
-import { UserRole } from '../../schemas/user.schema';
+import { User, UserRole } from '../../schemas/user.schema';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -16,16 +18,15 @@ export class AppsResolver {
   @Roles(UserRole.ADMIN, UserRole.DEVELOPER)
   async createApp(
     @Args('input') createAppInput: CreateAppInput,
-    @Context() context: any,
+    @CurrentUser() user: User, 
   ): Promise<AppDto> {
-    const user = context.req.user;
-    return this.appsService.create(createAppInput, user._id.toString(), user.organizationId) as any;
+    return this.appsService.create(createAppInput, user.id, user.organizationId?.toString() || null) as any;
   }
 
   @Query(() => [AppDto], { name: 'apps' })
   async findAll(
-    @Args('status', { nullable: true }) status?: string,
-    @Args('visibility', { nullable: true }) visibility?: string,
+    @Args('status', { nullable: true }) status?: AppStatus,
+    @Args('visibility', { nullable: true }) visibility?: AppVisibility,
     @Args('platforms', { type: () => [String!], nullable: true }) platforms?: string[],
     @Args('tags', { type: () => [String!], nullable: true }) tags?: string[],
     @Args('search', { nullable: true }) search?: string,
@@ -34,7 +35,14 @@ export class AppsResolver {
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
   ): Promise<AppDto[]> {
     const { apps } = await this.appsService.findAll(
-      { status, visibility, platforms, tags, search, organizationId },
+      {
+        status: status?.toLowerCase(), 
+        visibility: visibility?.toLowerCase(),
+        platforms: platforms?.map(platform => platform.toLowerCase()),
+        tags,
+        search,
+        organizationId
+      },
       limit,
       offset,
     );

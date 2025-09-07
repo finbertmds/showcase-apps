@@ -93,13 +93,13 @@ export function AppInfo({ app }: AppInfoProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <UserIcon className="h-4 w-4" />
-          <span>Created by {app.createdBy.name}</span>
+          <span>Created by {app.createdBy}</span>
         </div>
         
         {app.organizationId && (
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <BuildingOfficeIcon className="h-4 w-4" />
-            <span>{app.organizationId.name}</span>
+            <span>{app.organizationId}</span>
           </div>
         )}
         

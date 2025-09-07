@@ -94,7 +94,7 @@ export function AppScreenshots({ media, loading, appTitle }: AppScreenshotsProps
         <div className="mt-4 flex space-x-2 overflow-x-auto">
           {screenshots.map((screenshot, index) => (
             <button
-              key={screenshot.id}
+              key={screenshot._id}
               onClick={() => setCurrentIndex(index)}
               className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
                 index === currentIndex

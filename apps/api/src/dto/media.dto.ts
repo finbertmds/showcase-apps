@@ -1,4 +1,5 @@
 import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { GraphQLJSON } from 'graphql-type-json';
 import { MediaType } from '../schemas/media.schema';
 
@@ -64,14 +65,20 @@ export class MediaDto {
 @InputType()
 export class CreateMediaInput {
   @Field()
+  @IsNotEmpty()
+  @IsString()
   appId: string;
 
   @Field(() => MediaType)
+  @IsEnum(MediaType)
   type: MediaType;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
   order?: number;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
   meta?: Record<string, any>;
 }

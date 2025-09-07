@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { UserRole } from '../schemas/user.schema';
+import { OrganizationDto } from './organization.dto';
 
 registerEnumType(UserRole, {
   name: 'UserRole',
@@ -9,7 +10,7 @@ registerEnumType(UserRole, {
 @ObjectType()
 export class UserDto {
   @Field(() => ID)
-  _id: string;
+  id: string;
 
   @Field()
   email: string;
@@ -17,11 +18,14 @@ export class UserDto {
   @Field()
   name: string;
 
+  @Field()
+  username: string;
+
   @Field(() => UserRole)
   role: UserRole;
 
-  @Field({ nullable: true })
-  organizationId?: string;
+  @Field(() => OrganizationDto, { nullable: true })
+  organization?: OrganizationDto;
 
   @Field()
   isActive: boolean;

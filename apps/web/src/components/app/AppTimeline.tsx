@@ -86,7 +86,7 @@ export function AppTimeline({ events, loading }: AppTimelineProps) {
   return (
     <div className="space-y-6">
       {events.map((event, index) => (
-        <div key={event.id} className="relative">
+        <div key={event._id} className="relative">
           {/* Timeline line */}
           {index !== events.length - 1 && (
             <div className="absolute left-5 top-10 w-0.5 h-16 bg-gray-200" />

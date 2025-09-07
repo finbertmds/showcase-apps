@@ -1,13 +1,14 @@
 'use client';
 
-import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
+import { Bars3Icon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState } from 'react';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isSignedIn, user } = useUser();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
 
   const navigation = [
     { name: 'Timeline', href: '/' },
@@ -41,9 +42,9 @@ export function Header() {
 
             {/* Auth section */}
             <div className="flex items-center space-x-4">
-              {isSignedIn ? (
+              {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  {user?.publicMetadata?.role === 'admin' && (
+                  {user?.role === 'admin' && (
                     <Link
                       href="/admin"
                       className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
@@ -51,14 +52,53 @@ export function Header() {
                       Admin
                     </Link>
                   )}
-                  <UserButton afterSignOutUrl="/" />
+                  
+                  {/* User menu */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      className="flex items-center space-x-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    >
+                      <UserCircleIcon className="h-6 w-6" />
+                      <span>{user?.name}</span>
+                    </button>
+                    
+                    {userMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                        <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200">
+                          <div className="font-medium">{user?.name}</div>
+                          <div className="text-gray-500">{user?.email}</div>
+                          <div className="text-xs text-gray-400 capitalize">{user?.role}</div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setUserMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Sign out
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
-                <SignInButton mode="modal">
-                  <button className="btn-primary px-4 py-2">
+                <div className="flex items-center space-x-2">
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                  >
                     Sign In
-                  </button>
-                </SignInButton>
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="btn-primary px-4 py-2"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               )}
             </div>
 
@@ -94,6 +134,53 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
+              
+              {/* Mobile auth section */}
+              <div className="border-t border-gray-200 pt-4">
+                {isAuthenticated ? (
+                  <div className="space-y-2">
+                    <div className="px-3 py-2 text-sm text-gray-700">
+                      <div className="font-medium">{user?.name}</div>
+                      <div className="text-gray-500">{user?.email}</div>
+                    </div>
+                    {user?.role === 'admin' && (
+                      <Link
+                        href="/admin"
+                        className="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Link
+                      href="/login"
+                      className="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

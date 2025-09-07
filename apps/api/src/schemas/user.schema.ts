@@ -1,3 +1,5 @@
+import { OrganizationDto } from '@/dto/organization.dto';
+import { Field } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
@@ -11,14 +13,20 @@ export enum UserRole {
 
 @Schema({ timestamps: true })
 export class User {
+  @Field(() => String)
+  id: string; 
+  
   @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: true, unique: true })
+  username: string;
+
   @Prop({ required: true })
-  clerkId: string;
+  password: string;
 
   @Prop({ 
     type: String, 
@@ -27,10 +35,11 @@ export class User {
   })
   role: UserRole;
 
-  @Prop({ type: Types.ObjectId, ref: 'Organization' })
+  @Prop({ type: Types.ObjectId, ref: 'Organization', required: false })
   organizationId?: Types.ObjectId;
 
-  organizationIdString?: string; // Virtual field for GraphQL
+  @Field(() => OrganizationDto, { nullable: true })
+  organization?: OrganizationDto;
 
   @Prop({ default: true })
   isActive: boolean;
@@ -41,7 +50,6 @@ export class User {
   @Prop()
   lastLoginAt?: Date;
 
-  id: string; // Virtual field for GraphQL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,16 +58,10 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 // Indexes
 UserSchema.index({ email: 1 });
-UserSchema.index({ clerkId: 1 });
+UserSchema.index({ username: 1 });
 UserSchema.index({ organizationId: 1 });
 UserSchema.index({ role: 1 });
 
-// Transform _id to id
-UserSchema.set('toJSON', { virtuals: true });
-UserSchema.set('toObject', { virtuals: true });
 UserSchema.virtual('id').get(function () {
-  return this._id.toHexString();
-});
-UserSchema.virtual('organizationIdString').get(function () {
-  return this.organizationId?.toString();
+  return this._id.toString();
 });

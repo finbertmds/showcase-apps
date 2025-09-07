@@ -1,21 +1,24 @@
+import { Organization, OrganizationDocument } from '@/schemas/organization.schema';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
+import { Model, Types } from 'mongoose';
+import { AppDto, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
 import { App, AppDocument } from '../../schemas/app.schema';
-import { UserRole } from '../../schemas/user.schema';
+import { User, UserDocument, UserRole } from '../../schemas/user.schema';
 
 @Injectable()
 export class AppsService {
   constructor(
     @InjectModel(App.name) private appModel: Model<AppDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Organization.name) private organizationModel: Model<OrganizationDocument>,
   ) {}
 
-  async create(createAppInput: CreateAppInput, userId: string, organizationId: string): Promise<App> {
+  async create(createAppInput: CreateAppInput, userId: string, organizationId: string | null): Promise<App> {
     const app = new this.appModel({
       ...createAppInput,
       createdBy: userId,
-      organizationId,
+      organizationId: organizationId ? new Types.ObjectId(organizationId) : null,
     });
     return app.save();
   }
@@ -48,7 +51,7 @@ export class AppsService {
       query.tags = { $in: filters.tags };
     }
     if (filters.organizationId) {
-      query.organizationId = filters.organizationId;
+      query.organizationId = filters.organizationId ? new Types.ObjectId(filters.organizationId) : null;
     }
     if (filters.search) {
       query.$text = { $search: filters.search };
@@ -69,32 +72,55 @@ export class AppsService {
     return { apps, total };
   }
 
-  async findOne(id: string): Promise<App> {
+  async findOne(id: string): Promise<AppDto> {
     const app = await this.appModel
       .findById(id)
-      .populate('createdBy', 'name email')
-      .populate('organizationId', 'name slug')
       .exec();
 
     if (!app) {
       throw new NotFoundException('App not found');
     }
 
-    return app;
+    const user = await this.userModel.findById(app.createdBy).exec();
+    let organization = null;
+    if (app.organizationId) {
+      organization = await this.organizationModel.findById(app.organizationId).exec();
+    }
+
+    return {
+      ...app.toObject(),
+      id: app._id.toString(),
+      createdBy: app.createdBy.toString(),
+      createdByUser: user,
+      organizationId: app.organizationId?.toString(),
+      organization: organization,
+    };
   }
 
-  async findBySlug(slug: string): Promise<App> {
+  async findBySlug(slug: string): Promise<AppDto> {
     const app = await this.appModel
       .findOne({ slug })
-      .populate('createdBy', 'name email')
-      .populate('organizationId', 'name slug')
       .exec();
 
     if (!app) {
       throw new NotFoundException('App not found');
     }
 
-    return app;
+
+    const user = await this.userModel.findById(app.createdBy).exec();
+    let organization = null;
+    if (app.organizationId) {
+      organization = await this.organizationModel.findById(app.organizationId).exec();
+    }
+
+    return {
+      ...app.toObject(),
+      id: app._id.toString(),
+      createdBy: app.createdBy.toString(),
+      createdByUser: user,
+      organizationId: app.organizationId?.toString(),
+      organization: organization,
+    };
   }
 
   async update(
@@ -112,8 +138,6 @@ export class AppsService {
 
     const updatedApp = await this.appModel
       .findByIdAndUpdate(id, updateAppInput, { new: true })
-      .populate('createdBy', 'name email')
-      .populate('organizationId', 'name slug')
       .exec();
 
     return updatedApp;
@@ -139,7 +163,7 @@ export class AppsService {
     await this.appModel.findByIdAndUpdate(id, { $inc: { likeCount: 1 } }).exec();
   }
 
-  async getTimelineApps(limit = 20, offset = 0): Promise<{ apps: App[]; total: number }> {
+  async getTimelineApps(limit = 20, offset = 0): Promise<{ apps: any[]; total: number }> {
     const query = {
       status: 'published',
       visibility: 'public',
@@ -148,8 +172,6 @@ export class AppsService {
     const [apps, total] = await Promise.all([
       this.appModel
         .find(query)
-        .populate('createdBy', 'name email')
-        .populate('organizationId', 'name slug')
         .sort({ releaseDate: -1, createdAt: -1 })
         .limit(limit)
         .skip(offset)
@@ -157,6 +179,26 @@ export class AppsService {
       this.appModel.countDocuments(query).exec(),
     ]);
 
-    return { apps, total };
+    // Populate createdByUser and organization for each app
+    const appsWithDetails = await Promise.all(
+      apps.map(async (app) => {
+        const user = await this.userModel.findById(app.createdBy).exec();
+        let organization = null;
+        if (app.organizationId) {
+          organization = await this.organizationModel.findById(app.organizationId).exec();
+        }
+
+        return {
+          ...app.toObject(),
+          id: app._id.toString(),
+          createdBy: app.createdBy.toString(),
+          createdByUser: user,
+          organizationId: app.organizationId?.toString(),
+          organization: organization,
+        };
+      })
+    );
+
+    return { apps: appsWithDetails, total };
   }
 }

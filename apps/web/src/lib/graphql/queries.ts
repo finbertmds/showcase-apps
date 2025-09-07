@@ -214,3 +214,70 @@ export const INCREMENT_APP_LIKE = gql`
     incrementAppLike(id: $id)
   }
 `;
+
+// Authentication queries
+export const LOGIN = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      access_token
+      user {
+        _id
+        email
+        username
+        name
+        role
+        organizationId
+        isActive
+        avatar
+        lastLoginAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const REGISTER = gql`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      access_token
+      user {
+        _id
+        email
+        username
+        name
+        role
+        organizationId
+        isActive
+        avatar
+        lastLoginAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const ME = gql`
+  query Me {
+    me {
+      _id
+      email
+      username
+      name
+      role
+      organizationId
+      isActive
+      avatar
+      lastLoginAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CHANGE_PASSWORD = gql`
+  mutation ChangePassword($input: ChangePasswordInput!) {
+    changePassword(input: $input)
+  }
+`;

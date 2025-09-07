@@ -3,16 +3,18 @@
 # ------------------------------------------------------
 
 type AppDto {
-  _id: ID!
   appStoreUrl: String
   createdAt: DateTime!
   createdBy: String!
+  createdByUser: UserDto
   demoUrl: String
   downloadUrl: String
+  id: ID!
   languages: [String!]!
   likeCount: Float!
   longDesc: String!
-  organizationId: String!
+  organization: OrganizationDto
+  organizationId: String
   platforms: [Platform!]!
   playStoreUrl: String
   releaseDate: DateTime
@@ -42,6 +44,16 @@ enum AppVisibility {
   UNLISTED
 }
 
+type AuthResponse {
+  access_token: String!
+  user: UserDto!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
 input CreateAppInput {
   appStoreUrl: String
   demoUrl: String
@@ -54,6 +66,7 @@ input CreateAppInput {
   repository: String
   shortDesc: String!
   slug: String!
+  status: AppStatus
   tags: [String!]! = []
   title: String!
   visibility: AppVisibility! = PUBLIC
@@ -99,6 +112,11 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+input LoginInput {
+  password: String!
+  usernameOrEmail: String!
+}
+
 type MediaDto {
   _id: ID!
   appId: String!
@@ -129,11 +147,13 @@ enum MediaType {
 }
 
 type Mutation {
+  changePassword(input: ChangePasswordInput!): Boolean!
   createApp(input: CreateAppInput!): AppDto!
   createTimelineEvent(input: CreateTimelineEventInput!): TimelineEventDto!
   incrementAppLike(id: String!): Boolean!
   incrementAppView(id: String!): Boolean!
-  loginWithClerk(clerkToken: String!): String!
+  login(input: LoginInput!): AuthResponse!
+  register(input: RegisterInput!): AuthResponse!
   removeApp(id: String!): Boolean!
   removeMedia(id: String!): Boolean!
   removeTimelineEvent(id: String!): Boolean!
@@ -145,9 +165,9 @@ type Mutation {
 }
 
 type OrganizationDto {
-  _id: ID!
   createdAt: DateTime!
   description: String
+  id: ID!
   isActive: Boolean!
   logo: String
   name: String!
@@ -182,6 +202,14 @@ type Query {
   timelineEventsByApp(appId: String!, isPublic: Boolean! = true): [TimelineEventDto!]!
   user(id: String!): UserDto!
   users: [UserDto!]!
+}
+
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+  role: UserRole
+  username: String!
 }
 
 type TimelineEventDto {
@@ -231,16 +259,17 @@ input UpdateTimelineEventInput {
 }
 
 type UserDto {
-  _id: ID!
   avatar: String
   createdAt: DateTime!
   email: String!
+  id: ID!
   isActive: Boolean!
   lastLoginAt: DateTime
   name: String!
-  organizationId: String
+  organization: OrganizationDto
   role: UserRole!
   updatedAt: DateTime!
+  username: String!
 }
 
 """User role enum"""
