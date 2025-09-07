@@ -1,0 +1,37 @@
+{
+  "name": "showcase-apps",
+  "version": "1.0.0",
+  "description": "Full-stack showcase platform for apps",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd apps/api && npm run start:dev",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:mobile": "cd apps/mobile && npm run start",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "cd apps/api && npm run build",
+    "build:web": "cd apps/web && npm run build",
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "cd apps/api && npm run test",
+    "test:web": "cd apps/web && npm run test",
+    "lint": "npm run lint:api && npm run lint:web",
+    "lint:api": "cd apps/api && npm run lint",
+    "lint:web": "cd apps/web && npm run lint",
+    "type-check": "npm run type-check:api && npm run type-check:web",
+    "type-check:api": "cd apps/api && npm run type-check",
+    "type-check:web": "cd apps/web && npm run type-check"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showcase-api
+  namespace: showcase-apps
+  labels:
+    app: showcase-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: showcase-api
+  template:
+    metadata:
+      labels:
+        app: showcase-api
+    spec:
+      containers:
+      - name: api
+        image: ghcr.io/your-org/showcase-apps/api:latest
+        ports:
+        - containerPort: 4000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "4000"
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: mongodb-uri
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: redis-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: jwt-secret
+        - name: CLERK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: clerk-secret-key
+        - name: MINIO_ENDPOINT
+          value: "minio-service"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: minio-access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: minio-secret-key
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: showcase-secrets
+              key: sentry-dsn
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showcase-api-service
+  namespace: showcase-apps
+spec:
+  selector:
+    app: showcase-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 4000
+  type: ClusterIP

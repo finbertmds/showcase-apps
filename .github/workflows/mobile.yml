@@ -1,0 +1,255 @@
+name: Mobile CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/mobile/**'
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Test and lint mobile app
+  test-mobile:
+    name: Test Mobile App
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd apps/mobile
+          npm ci
+
+      - name: Lint mobile app
+        run: |
+          cd apps/mobile
+          npm run lint
+
+      - name: Type check mobile app
+        run: |
+          cd apps/mobile
+          npm run type-check
+
+      - name: Test mobile app
+        run: |
+          cd apps/mobile
+          npm test
+
+  # Build iOS app
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    needs: test-mobile
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install dependencies
+        run: |
+          cd apps/mobile
+          npm ci
+
+      - name: Install iOS dependencies
+        run: |
+          cd apps/mobile/ios
+          pod install
+
+      - name: Build iOS app
+        run: |
+          cd apps/mobile
+          npx react-native run-ios --configuration Release
+
+      - name: Upload iOS build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: apps/mobile/ios/build/
+
+  # Build Android app
+  build-android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    needs: test-mobile
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: |
+          cd apps/mobile
+          npm ci
+
+      - name: Build Android APK
+        run: |
+          cd apps/mobile
+          npx react-native run-android --variant=release
+
+      - name: Upload Android build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: apps/mobile/android/app/build/outputs/
+
+  # Deploy to TestFlight (iOS)
+  deploy-ios:
+    name: Deploy to TestFlight
+    runs-on: macos-latest
+    needs: build-ios
+    if: github.ref == 'refs/heads/main'
+    environment: ios-testflight
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download iOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+
+      - name: Deploy to TestFlight
+        run: |
+          echo "Deploying to TestFlight..."
+          # Add your TestFlight deployment commands here
+          # Example: xcrun altool --upload-app -f app.ipa -u ${{ secrets.APPLE_ID }} -p ${{ secrets.APPLE_PASSWORD }}
+
+  # Deploy to Google Play (Android)
+  deploy-android:
+    name: Deploy to Google Play
+    runs-on: ubuntu-latest
+    needs: build-android
+    if: github.ref == 'refs/heads/main'
+    environment: android-playstore
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Android build
+        uses: actions/download-artifact@v4
+        with:
+          name: android-build
+
+      - name: Deploy to Google Play
+        run: |
+          echo "Deploying to Google Play..."
+          # Add your Google Play deployment commands here
+          # Example: fastlane supply --aab app-release.aab --track internal
+
+  # E2E Testing
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build-ios, build-android]
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd apps/mobile
+          npm ci
+
+      - name: Download iOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+
+      - name: Download Android build
+        uses: actions/download-artifact@v4
+        with:
+          name: android-build
+
+      - name: Run E2E tests
+        run: |
+          cd apps/mobile
+          npm run test:e2e
+        env:
+          DETOX_CONFIGURATION: ios.sim.release
+          DETOX_CONFIGURATION_ANDROID: android.emu.release
+
+  # Code coverage
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    needs: test-mobile
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd apps/mobile
+          npm ci
+
+      - name: Run tests with coverage
+        run: |
+          cd apps/mobile
+          npm run test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./apps/mobile/coverage/lcov.info
+          flags: mobile
+          name: mobile-coverage
