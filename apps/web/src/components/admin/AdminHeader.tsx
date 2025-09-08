@@ -1,11 +1,16 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { UserCircleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, UserCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState } from 'react';
 
-export function AdminHeader() {
+interface AdminHeaderProps {
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+}
+
+export function AdminHeader({ sidebarCollapsed, onToggleSidebar }: AdminHeaderProps) {
   const { user, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -14,6 +19,13 @@ export function AdminHeader() {
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
+            <button
+              onClick={onToggleSidebar}
+              className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <Bars3Icon className="h-5 w-5" />
+            </button>
             <Link href="/admin" className="text-xl font-bold text-primary-600">
               Admin Dashboard
             </Link>

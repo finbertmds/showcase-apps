@@ -4,10 +4,10 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { GET_APPS } from '@/lib/graphql/queries';
 import { useQuery } from '@apollo/client';
 import {
-    EyeIcon,
-    PencilIcon,
-    PlusIcon,
-    TrashIcon,
+  EyeIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -57,7 +57,7 @@ export function AdminAppsList() {
         
         <Link
           href="/admin/apps/new"
-          className="btn-primary inline-flex items-center space-x-2"
+          className="btn-primary inline-flex items-center space-x-2 p-2"
         >
           <PlusIcon className="h-4 w-4" />
           <span>New App</span>
