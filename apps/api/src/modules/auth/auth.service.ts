@@ -70,7 +70,7 @@ export class AuthService {
   }
 
   async register(registerInput: RegisterInput): Promise<AuthResponse> {
-    const { username, email, name, password, role } = registerInput;
+    const { username, email, name, password, role, organizationId } = registerInput;
 
     try {
       console.log('Registering user:', registerInput);
@@ -81,6 +81,7 @@ export class AuthService {
         name,
         password,
         role: role || UserRole.VIEWER,
+        organizationId,
       });
 
       // Generate JWT token

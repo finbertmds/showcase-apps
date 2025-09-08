@@ -1,8 +1,10 @@
+import { UserDto } from '@/dto/user.dto';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { ValidationException } from '../../exceptions/validation.exception';
+import { Organization, OrganizationDocument } from '../../schemas/organization.schema';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
 import { UserValidationService } from '../../services/user-validation.service';
 
@@ -10,6 +12,7 @@ import { UserValidationService } from '../../services/user-validation.service';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Organization.name) private organizationModel: Model<OrganizationDocument>,
     private validationService: UserValidationService,
   ) {}
 
@@ -66,17 +69,32 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel
-      .find()
-      .populate('organizationId', 'name slug')
-      .exec();
+  async findAll(): Promise<UserDto[]> {
+    const users = await this.userModel.find().exec();
+    
+    // Get organization information for each user
+    const usersWithOrganizations = await Promise.all(
+      users.map(async (user) => {
+        let organization = null;
+        if (user.organizationId) {
+          organization = await this.organizationModel.findById(user.organizationId).exec();
+        }
+
+        return {
+          ...user.toObject(),
+          id: user._id.toString(),
+          organizationId: user.organizationId?.toString(),
+          organization: organization,
+        };
+      })
+    );
+
+    return usersWithOrganizations as UserDto[];
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.userModel
       .findById(id)
-      .populate('organizationId', 'name slug')
       .exec();
 
     if (!user) {

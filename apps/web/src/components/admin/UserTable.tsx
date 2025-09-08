@@ -188,6 +188,7 @@ export function UserTable({
                   onChange={(e) => onSearchChange(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   aria-label="Search users by name or email"
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -239,6 +240,9 @@ export function UserTable({
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Organization
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -288,6 +292,28 @@ export function UserTable({
                       <option value="developer">Developer</option>
                       <option value="viewer">Viewer</option>
                     </select>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {user.organization ? (
+                      <div className="flex items-center">
+                        {user.organization.logo && (
+                          <img
+                            className="h-6 w-6 rounded-full object-cover mr-2"
+                            src={user.organization.logo}
+                            alt={user.organization.name}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{user.organization.name}</div>
+                          <div className="text-xs text-gray-500">/{user.organization.slug}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400">No organization</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button

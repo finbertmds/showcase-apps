@@ -74,6 +74,7 @@ export function AdminAppsList() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="input w-full"
+              autoComplete="off"
             />
           </div>
           

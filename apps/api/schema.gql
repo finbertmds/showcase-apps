@@ -219,6 +219,7 @@ type Query {
 input RegisterInput {
   email: String!
   name: String!
+  organizationId: String
   password: String!
   role: UserRole
   username: String!
@@ -297,6 +298,7 @@ type UserDto {
   isActive: Boolean!
   lastLoginAt: DateTime
   name: String!
+  organization: OrganizationDto
   organizationId: String
   role: UserRole!
   updatedAt: DateTime!

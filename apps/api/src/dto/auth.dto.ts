@@ -41,6 +41,11 @@ export class RegisterInput {
   @Field(() => UserRole, { nullable: true })
   @IsOptional()
   role?: UserRole;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  organizationId?: string;
 }
 
 @ObjectType()

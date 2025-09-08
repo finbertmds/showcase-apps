@@ -7,6 +7,7 @@ import { useMutation } from '@apollo/client';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { OrganizationSelect } from './OrganizationSelect';
 
 interface UserFormModalProps {
   user: User;
@@ -162,6 +163,7 @@ export function UserFormModal({ user, isOpen, onClose, onSuccess }: UserFormModa
               value={formData.name}
               onChange={handleInputChange}
               className={getInputClassName('name')}
+              autoComplete="name"
               required
             />
             {fieldErrors.name && (
@@ -181,6 +183,7 @@ export function UserFormModal({ user, isOpen, onClose, onSuccess }: UserFormModa
               value={formData.email}
               onChange={handleInputChange}
               className={getInputClassName('email')}
+              autoComplete="email"
               required
             />
             {fieldErrors.email && (
@@ -200,6 +203,7 @@ export function UserFormModal({ user, isOpen, onClose, onSuccess }: UserFormModa
               value={formData.username}
               onChange={handleInputChange}
               className={getInputClassName('username')}
+              autoComplete="username"
               required
             />
             {fieldErrors.username && (
@@ -242,23 +246,27 @@ export function UserFormModal({ user, isOpen, onClose, onSuccess }: UserFormModa
             </label>
           </div>
 
-          {/* Organization ID */}
+          {/* Organization */}
           <div>
             <label htmlFor="organizationId" className="block text-sm font-medium text-gray-700">
-              Organization ID
+              Organization
             </label>
-            <input
-              type="text"
-              id="organizationId"
-              name="organizationId"
+            <OrganizationSelect
               value={formData.organizationId}
-              onChange={handleInputChange}
-              className={getInputClassName('organizationId')}
-              placeholder="Enter organization ID (optional)"
+              onChange={(value) => {
+                // Clear field error when user selects
+                if (fieldErrors.organizationId) {
+                  setFieldErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.organizationId;
+                    return newErrors;
+                  });
+                }
+                setFormData(prev => ({ ...prev, organizationId: value }));
+              }}
+              error={fieldErrors.organizationId}
+              placeholder="Select active organization (optional)"
             />
-            {fieldErrors.organizationId && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.organizationId}</p>
-            )}
           </div>
 
           {/* Avatar URL */}
@@ -273,6 +281,7 @@ export function UserFormModal({ user, isOpen, onClose, onSuccess }: UserFormModa
               value={formData.avatar}
               onChange={handleInputChange}
               className={getInputClassName('avatar')}
+              autoComplete="url"
               placeholder="Enter avatar URL (optional)"
             />
             {fieldErrors.avatar && (

@@ -332,6 +332,12 @@ export const LIST_USERS = gql`
       name
       role
       organizationId
+      organization {
+        id
+        name
+        slug
+        isActive
+      }
       isActive
       avatar
       lastLoginAt

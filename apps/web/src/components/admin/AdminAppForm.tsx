@@ -126,6 +126,7 @@ export function AdminAppForm() {
                 {...register('title')}
                 className="input"
                 placeholder="Enter app title"
+                autoComplete="off"
               />
               {errors.title && (
                 <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
@@ -138,6 +139,7 @@ export function AdminAppForm() {
                 {...register('slug')}
                 className="input"
                 placeholder="app-slug"
+                autoComplete="off"
               />
               {errors.slug && (
                 <p className="mt-1 text-sm text-red-600">{errors.slug.message}</p>
@@ -201,6 +203,7 @@ export function AdminAppForm() {
               {...register('releaseDate')}
               type="date"
               className="input"
+              autoComplete="off"
             />
           </div>
         </div>
@@ -272,6 +275,7 @@ export function AdminAppForm() {
                 type="text"
                 placeholder="Add a tag and press Enter"
                 className="input"
+                autoComplete="off"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -295,6 +299,7 @@ export function AdminAppForm() {
                 type="url"
                 className="input"
                 placeholder="https://example.com"
+                autoComplete="url"
               />
             </div>
 
@@ -305,6 +310,7 @@ export function AdminAppForm() {
                 type="url"
                 className="input"
                 placeholder="https://github.com/user/repo"
+                autoComplete="url"
               />
             </div>
 
@@ -315,6 +321,7 @@ export function AdminAppForm() {
                 type="url"
                 className="input"
                 placeholder="https://demo.example.com"
+                autoComplete="url"
               />
             </div>
 
@@ -325,6 +332,7 @@ export function AdminAppForm() {
                 type="url"
                 className="input"
                 placeholder="https://download.example.com"
+                autoComplete="url"
               />
             </div>
 
@@ -335,6 +343,7 @@ export function AdminAppForm() {
                 type="url"
                 className="input"
                 placeholder="https://apps.apple.com/app/..."
+                autoComplete="url"
               />
             </div>
 
@@ -345,6 +354,7 @@ export function AdminAppForm() {
                 type="url"
                 className="input"
                 placeholder="https://play.google.com/store/apps/..."
+                autoComplete="url"
               />
             </div>
           </div>

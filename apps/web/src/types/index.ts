@@ -65,6 +65,7 @@ export interface User {
   name: string;
   role: 'admin' | 'developer' | 'viewer';
   organizationId?: string;
+  organization?: Organization;
   isActive: boolean;
   avatar?: string;
   lastLoginAt?: string;

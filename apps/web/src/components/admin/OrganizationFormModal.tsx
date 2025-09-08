@@ -156,6 +156,7 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
               value={formData.name}
               onChange={handleInputChange}
               className={getInputClassName('name')}
+              autoComplete="organization"
               required
             />
             {fieldErrors.name && (
@@ -175,6 +176,7 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
               value={formData.slug}
               onChange={handleInputChange}
               className={getInputClassName('slug')}
+              autoComplete="off"
               required
             />
             {fieldErrors.slug && (
@@ -213,6 +215,7 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
               value={formData.website}
               onChange={handleInputChange}
               className={getInputClassName('website')}
+              autoComplete="url"
               placeholder="https://example.com (optional)"
             />
             {fieldErrors.website && (
@@ -232,6 +235,7 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
               value={formData.logo}
               onChange={handleInputChange}
               className={getInputClassName('logo')}
+              autoComplete="url"
               placeholder="https://example.com/logo.png (optional)"
             />
             {fieldErrors.logo && (

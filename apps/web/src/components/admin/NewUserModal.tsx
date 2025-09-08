@@ -7,6 +7,7 @@ import { useMutation } from '@apollo/client';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { OrganizationSelect } from './OrganizationSelect';
 
 interface NewUserModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
     password: '',
     confirmPassword: '',
     role: 'viewer' as 'admin' | 'developer' | 'viewer',
+    organizationId: '',
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -53,6 +55,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
             name: formData.name,
             password: formData.password,
             role: formData.role.toUpperCase(),
+            organizationId: formData.organizationId || null,
           },
         },
         update: (cache, { data }) => {
@@ -134,6 +137,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
       password: '',
       confirmPassword: '',
       role: 'viewer',
+      organizationId: '',
     });
     setFieldErrors({});
     onClose();
@@ -155,25 +159,6 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username */}
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Username *
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              className={getInputClassName('username')}
-              required
-            />
-            {fieldErrors.username && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.username}</p>
-            )}
-          </div>
-
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -186,10 +171,31 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               value={formData.email}
               onChange={handleInputChange}
               className={getInputClassName('email')}
+              autoComplete="email"
               required
             />
             {fieldErrors.email && (
               <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+            )}
+          </div>
+          
+          {/* Username */}
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              Username *
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              className={getInputClassName('username')}
+              autoComplete="username"
+              required
+            />
+            {fieldErrors.username && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.username}</p>
             )}
           </div>
 
@@ -205,6 +211,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               value={formData.name}
               onChange={handleInputChange}
               className={getInputClassName('name')}
+              autoComplete="name"
               required
             />
             {fieldErrors.name && (
@@ -233,6 +240,29 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
             )}
           </div>
 
+          {/* Organization */}
+          <div>
+            <label htmlFor="organizationId" className="block text-sm font-medium text-gray-700">
+              Organization
+            </label>
+            <OrganizationSelect
+              value={formData.organizationId}
+              onChange={(value) => {
+                // Clear field error when user selects
+                if (fieldErrors.organizationId) {
+                  setFieldErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.organizationId;
+                    return newErrors;
+                  });
+                }
+                setFormData(prev => ({ ...prev, organizationId: value }));
+              }}
+              error={fieldErrors.organizationId}
+              placeholder="Select active organization (optional)"
+            />
+          </div>
+
           {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -245,6 +275,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               value={formData.password}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              autoComplete="new-password"
               required
               minLength={6}
             />
@@ -263,6 +294,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               value={formData.confirmPassword}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              autoComplete="new-password"
               required
               minLength={6}
             />

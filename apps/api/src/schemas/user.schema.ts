@@ -65,3 +65,15 @@ UserSchema.index({ role: 1 });
 UserSchema.virtual('id').get(function () {
   return this._id.toString();
 });
+
+// Transform organizationId to string when serializing
+UserSchema.set('toJSON', {
+  transform: function(doc, ret: any) {
+    if (ret.organizationId && ret.organizationId._id) {
+      ret.organizationId = ret.organizationId._id.toString();
+    } else if (ret.organizationId && typeof ret.organizationId === 'object') {
+      ret.organizationId = ret.organizationId.toString();
+    }
+    return ret;
+  }
+});
