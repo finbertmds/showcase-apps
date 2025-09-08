@@ -5,7 +5,7 @@ import { FieldError, ValidationException } from '../exceptions/validation.except
 import { User, UserDocument, UserRole } from '../schemas/user.schema';
 
 @Injectable()
-export class ValidationService {
+export class UserValidationService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}

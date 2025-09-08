@@ -4,13 +4,13 @@ import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { ValidationException } from '../../exceptions/validation.exception';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
-import { ValidationService } from '../../services/validation.service';
+import { UserValidationService } from '../../services/user-validation.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private validationService: ValidationService,
+    private validationService: UserValidationService,
   ) {}
 
   async create(userData: {

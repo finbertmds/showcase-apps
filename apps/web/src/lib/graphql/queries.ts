@@ -385,3 +385,61 @@ export const CREATE_USER = gql`
     }
   }
 `;
+
+// Admin Organization Management queries
+export const LIST_ORGANIZATIONS = gql`
+  query ListOrganizations {
+    organizations {
+      id
+      name
+      slug
+      description
+      logo
+      website
+      isActive
+      ownerId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_ORGANIZATION = gql`
+  mutation UpdateOrganization($id: String!, $input: UpdateOrganizationInput!) {
+    updateOrganization(id: $id, input: $input) {
+      id
+      name
+      slug
+      description
+      logo
+      website
+      isActive
+      ownerId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_ORGANIZATION = gql`
+  mutation DeleteOrganization($id: String!) {
+    removeOrganization(id: $id)
+  }
+`;
+
+export const CREATE_ORGANIZATION = gql`
+  mutation CreateOrganization($input: CreateOrganizationInput!) {
+    createOrganization(input: $input) {
+      id
+      name
+      slug
+      description
+      logo
+      website
+      isActive
+      ownerId
+      createdAt
+      updatedAt
+    }
+  }
+`;

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Organization, OrganizationSchema } from '../../schemas/organization.schema';
 import { User, UserSchema } from '../../schemas/user.schema';
-import { ValidationService } from '../../services/validation.service';
+import { UserValidationService } from '../../services/user-validation.service';
 import { UsersResolver } from './users.resolver';
 import { UsersService } from './users.service';
 
@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
       { name: Organization.name, schema: OrganizationSchema },
     ]),
   ],
-  providers: [UsersResolver, UsersService, ValidationService],
+  providers: [UsersResolver, UsersService, UserValidationService],
   exports: [UsersService],
 })
 export class UsersModule {}

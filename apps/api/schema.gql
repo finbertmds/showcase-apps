@@ -80,6 +80,15 @@ input CreateMediaInput {
   type: MediaType!
 }
 
+input CreateOrganizationInput {
+  description: String
+  isActive: Boolean
+  logo: String
+  name: String!
+  slug: String!
+  website: String
+}
+
 input CreateTimelineEventInput {
   appId: String!
   date: DateTime!
@@ -149,6 +158,7 @@ enum MediaType {
 type Mutation {
   changePassword(input: ChangePasswordInput!): Boolean!
   createApp(input: CreateAppInput!): AppDto!
+  createOrganization(input: CreateOrganizationInput!): OrganizationDto!
   createTimelineEvent(input: CreateTimelineEventInput!): TimelineEventDto!
   incrementAppLike(id: String!): Boolean!
   incrementAppView(id: String!): Boolean!
@@ -156,9 +166,11 @@ type Mutation {
   register(input: RegisterInput!): AuthResponse!
   removeApp(id: String!): Boolean!
   removeMedia(id: String!): Boolean!
+  removeOrganization(id: String!): Boolean!
   removeTimelineEvent(id: String!): Boolean!
   removeUser(id: String!): Boolean!
   updateApp(id: String!, input: UpdateAppInput!): AppDto!
+  updateOrganization(id: String!, input: UpdateOrganizationInput!): OrganizationDto!
   updateTimelineEvent(id: String!, input: UpdateTimelineEventInput!): TimelineEventDto!
   updateUser(id: String!, input: UpdateUserInput!): UserDto!
   uploadMedia(input: CreateMediaInput!): MediaDto!
@@ -244,6 +256,15 @@ input UpdateAppInput {
   tags: [String!]
   title: String
   visibility: AppVisibility
+  website: String
+}
+
+input UpdateOrganizationInput {
+  description: String
+  isActive: Boolean
+  logo: String
+  name: String
+  slug: String
   website: String
 }
 

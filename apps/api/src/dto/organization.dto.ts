@@ -1,4 +1,5 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { IsBoolean, IsOptional, IsString, IsUrl } from 'class-validator';
 
 @ObjectType()
 export class OrganizationDto {
@@ -31,4 +32,68 @@ export class OrganizationDto {
 
   @Field()
   updatedAt: Date;
+}
+
+@InputType()
+export class CreateOrganizationInput {
+  @Field()
+  @IsString()
+  name: string;
+
+  @Field()
+  @IsString()
+  slug: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl()
+  logo?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl()
+  website?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+@InputType()
+export class UpdateOrganizationInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl()
+  logo?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl()
+  website?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
