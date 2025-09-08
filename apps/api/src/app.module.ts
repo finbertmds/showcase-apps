@@ -51,8 +51,10 @@ import { redisConfig } from './config/redis.config';
         console.error('GraphQL Error:', error);
         return {
           message: error.message,
-          code: error.extensions?.code,
           path: error.path,
+          extensions: {
+            fieldErrors: error.extensions?.fieldErrors || undefined,
+          },
         };
       },
     }),

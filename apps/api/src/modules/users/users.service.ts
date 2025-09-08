@@ -2,12 +2,15 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
+import { ValidationException } from '../../exceptions/validation.exception';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
+import { ValidationService } from '../../services/validation.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private validationService: ValidationService,
   ) {}
 
   async create(userData: {
@@ -40,6 +43,15 @@ export class UsersService {
       return user.save();
     } catch (error) {
       console.error('Error creating user:', error);
+      
+      // Handle MongoDB duplicate key errors
+      if (error.code === 11000) {
+        const duplicateField = this.extractDuplicateField(error.message);
+        if (duplicateField) {
+          throw ValidationException.duplicateField(duplicateField, userData[duplicateField]);
+        }
+      }
+      
       if (error.name === 'ValidationError') {
         // Trường hợp fail validate trong Mongoose schema
         for (const field in error.errors) {
@@ -109,16 +121,41 @@ export class UsersService {
   }
 
   async update(id: string, updateData: Partial<User>): Promise<User> {
-    const user = await this.userModel
-      .findByIdAndUpdate(id, updateData, { new: true })
-      .populate('organizationId', 'name slug')
-      .exec();
+    // Validate all fields before attempting update
+    await this.validationService.validateUserUpdate(id, updateData);
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+    try {
+      const user = await this.userModel
+        .findByIdAndUpdate(id, updateData, { new: true })
+        .populate('organizationId', 'name slug')
+        .exec();
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      // If validation passed but MongoDB still throws duplicate key error,
+      // it means there's a race condition - handle it gracefully
+      if (error.code === 11000) {
+        const duplicateField = this.extractDuplicateField(error.message);
+        if (duplicateField) {
+          throw ValidationException.duplicateField(duplicateField, updateData[duplicateField] as string);
+        }
+      }
+      throw error;
     }
+  }
 
-    return user;
+  private extractDuplicateField(errorMessage: string): string | null {
+    // Extract field name from MongoDB duplicate key error
+    // Example: "E11000 duplicate key error collection: showcase.users index: username_1 dup key: { username: \"testuser\" }"
+    const match = errorMessage.match(/index: (\w+)_\d+/);
+    if (match) {
+      return match[1];
+    }
+    return null;
   }
 
   async remove(id: string): Promise<boolean> {

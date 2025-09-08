@@ -3,6 +3,7 @@
 import { UserFormModal } from '@/components/admin/UserFormModal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DELETE_USER, LIST_USERS, UPDATE_USER } from '@/lib/graphql/queries';
+import { getRoleBadgeColor, normalizeUsers } from '@/lib/utils/user';
 import { User } from '@/types';
 import { useMutation, useQuery } from '@apollo/client';
 import {
@@ -47,7 +48,7 @@ export function UserTable({
   const [deleteUser] = useMutation(DELETE_USER);
 
   // Client-side filtering and pagination
-  const allUsers = data?.users || [];
+  const allUsers = normalizeUsers(data?.users || []);
   
   const filteredUsers = useMemo(() => {
     return allUsers.filter((user: User) => {
@@ -55,7 +56,7 @@ export function UserTable({
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesRole = !roleFilter || user.role.toLowerCase() === roleFilter.toLowerCase();
+      const matchesRole = !roleFilter || user.role === roleFilter.toLowerCase();
       
       const matchesStatus = !statusFilter || 
         (statusFilter === 'active' && user.isActive) ||
@@ -106,7 +107,10 @@ export function UserTable({
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
     try {
       await updateUser({
-        variables: { id: userId, isActive: !currentStatus },
+        variables: { 
+          id: userId, 
+          input: { isActive: !currentStatus }
+        },
       });
       toast.success('User status updated successfully');
       refetch();
@@ -119,7 +123,10 @@ export function UserTable({
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
       await updateUser({
-        variables: { id: userId, role: newRole },
+        variables: { 
+          id: userId, 
+          input: { role: newRole.toUpperCase() }
+        },
       });
       toast.success('User role updated successfully');
       refetch();
@@ -139,18 +146,6 @@ export function UserTable({
     });
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'developer':
-        return 'bg-blue-100 text-blue-800';
-      case 'viewer':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   if (loading) {
     return (
@@ -276,6 +271,7 @@ export function UserTable({
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
                         <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-xs text-gray-400">@{user.username}</div>
                       </div>
                     </div>
                   </td>
@@ -283,7 +279,7 @@ export function UserTable({
                     <select
                       id={`role-${user.id}`}
                       name={`role-${user.id}`}
-                      value={user.role.toLowerCase()}
+                      value={user.role}
                       onChange={(e) => handleUpdateRole(user.id, e.target.value)}
                       className={`text-xs font-medium px-8 py-2 rounded-full border-0 focus:ring-2 focus:ring-primary-500 ${getRoleBadgeColor(user.role)}`}
                       aria-label={`Change role for ${user.name}`}

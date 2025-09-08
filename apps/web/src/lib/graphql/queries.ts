@@ -342,8 +342,8 @@ export const LIST_USERS = gql`
 `;
 
 export const UPDATE_USER = gql`
-  mutation UpdateUser($id: String!, $role: String, $isActive: Boolean) {
-    updateUser(id: $id, role: $role, isActive: $isActive) {
+  mutation UpdateUser($id: String!, $input: UpdateUserInput!) {
+    updateUser(id: $id, input: $input) {
       id
       email
       username

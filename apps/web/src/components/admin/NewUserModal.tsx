@@ -1,6 +1,8 @@
 'use client';
 
 import { CREATE_USER, LIST_USERS } from '@/lib/graphql/queries';
+import { normalizeUsers } from '@/lib/utils/user';
+import { FieldError } from '@/types';
 import { useMutation } from '@apollo/client';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
@@ -22,10 +24,14 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
     role: 'viewer' as 'admin' | 'developer' | 'viewer',
   });
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [createUser, { loading }] = useMutation(CREATE_USER);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear previous field errors
+    setFieldErrors({});
     
     // Validation
     if (formData.password !== formData.confirmPassword) {
@@ -54,10 +60,11 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
           if (data?.register?.user) {
             const existingUsers = cache.readQuery({ query: LIST_USERS }) as any;
             if (existingUsers?.users) {
+              const normalizedNewUser = normalizeUsers([data.register.user])[0];
               cache.writeQuery({
                 query: LIST_USERS,
                 data: {
-                  users: [...existingUsers.users, data.register.user],
+                  users: [...existingUsers.users, normalizedNewUser],
                 },
               });
             }
@@ -70,6 +77,24 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
       handleClose();
     } catch (error: any) {
       console.error('Create user error:', error);
+      console.error('GraphQL Errors:', error.graphQLErrors);
+      
+      // Handle field-specific errors
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        const graphQLError = error.graphQLErrors[0];
+        console.error('GraphQL Error extensions:', graphQLError.extensions);
+        
+        if (graphQLError.extensions?.fieldErrors) {
+          console.error('Field errors found:', graphQLError.extensions.fieldErrors);
+          const errors: Record<string, string> = {};
+          graphQLError.extensions.fieldErrors.forEach((fieldError: FieldError) => {
+            errors[fieldError.field] = fieldError.message;
+          });
+          setFieldErrors(errors);
+          return; // Don't show generic toast
+        }
+      }
+      
       const errorMessage = error.message || 'Failed to create user';
       toast.error(errorMessage);
     }
@@ -77,10 +102,28 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const getInputClassName = (fieldName: string) => {
+    const baseClass = "mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500";
+    const errorClass = "border-red-300 focus:ring-red-500 focus:border-red-500";
+    const normalClass = "border-gray-300";
+    
+    return `${baseClass} ${fieldErrors[fieldName] ? errorClass : normalClass}`;
   };
 
   const handleClose = () => {
@@ -92,6 +135,7 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
       confirmPassword: '',
       role: 'viewer',
     });
+    setFieldErrors({});
     onClose();
   };
 
@@ -122,9 +166,12 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               name="username"
               value={formData.username}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className={getInputClassName('username')}
               required
             />
+            {fieldErrors.username && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.username}</p>
+            )}
           </div>
 
           {/* Email */}
@@ -138,9 +185,12 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className={getInputClassName('email')}
               required
             />
+            {fieldErrors.email && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+            )}
           </div>
 
           {/* Name */}
@@ -154,9 +204,12 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className={getInputClassName('name')}
               required
             />
+            {fieldErrors.name && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+            )}
           </div>
 
           {/* Role */}
@@ -169,12 +222,15 @@ export function NewUserModal({ isOpen, onClose, onSuccess }: NewUserModalProps) 
               name="role"
               value={formData.role}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className={getInputClassName('role')}
             >
               <option value="viewer">Viewer</option>
               <option value="developer">Developer</option>
               <option value="admin">Admin</option>
             </select>
+            {fieldErrors.role && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.role}</p>
+            )}
           </div>
 
           {/* Password */}

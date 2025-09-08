@@ -160,7 +160,7 @@ type Mutation {
   removeUser(id: String!): Boolean!
   updateApp(id: String!, input: UpdateAppInput!): AppDto!
   updateTimelineEvent(id: String!, input: UpdateTimelineEventInput!): TimelineEventDto!
-  updateUser(id: String!, isActive: Boolean, role: String): UserDto!
+  updateUser(id: String!, input: UpdateUserInput!): UserDto!
   uploadMedia(input: CreateMediaInput!): MediaDto!
 }
 
@@ -256,6 +256,16 @@ input UpdateTimelineEventInput {
   type: EventType
   url: String
   version: String
+}
+
+input UpdateUserInput {
+  avatar: String
+  email: String
+  isActive: Boolean
+  name: String
+  organizationId: String
+  role: UserRole
+  username: String
 }
 
 type UserDto {

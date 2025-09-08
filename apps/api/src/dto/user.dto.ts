@@ -1,4 +1,5 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '../schemas/user.schema';
 
 registerEnumType(UserRole, {
@@ -40,4 +41,42 @@ export class UserDto {
 
   @Field()
   updatedAt: Date;
+}
+
+@InputType()
+export class UpdateUserInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @Field(() => UserRole, { nullable: true })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  organizationId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }

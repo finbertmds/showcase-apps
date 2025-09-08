@@ -61,6 +61,7 @@ export interface Media {
 export interface User {
   id: string;
   email: string;
+  username: string;
   name: string;
   role: 'admin' | 'developer' | 'viewer';
   organizationId?: string;
@@ -82,4 +83,15 @@ export interface Organization {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FieldError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ValidationError {
+  message: string;
+  fieldErrors: FieldError[];
 }

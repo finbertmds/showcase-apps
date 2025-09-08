@@ -1,6 +1,7 @@
-import { UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { UserDto } from '../../dto/user.dto';
+import { UpdateUserInput, UserDto } from '../../dto/user.dto';
+import { ValidationExceptionFilter } from '../../filters/validation-exception.filter';
 import { UserRole } from '../../schemas/user.schema';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -33,15 +34,22 @@ export class UsersResolver {
 
   @Mutation(() => UserDto)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(ValidationExceptionFilter)
   @Roles(UserRole.ADMIN)
   async updateUser(
     @Args('id') id: string,
-    @Args('role', { nullable: true }) role?: UserRole,
-    @Args('isActive', { nullable: true }) isActive?: boolean,
+    @Args('input') input: UpdateUserInput,
   ): Promise<UserDto> {
     const updateData: any = {};
-    if (role !== undefined) updateData.role = role;
-    if (isActive !== undefined) updateData.isActive = isActive;
+    
+    // Only include fields that are provided (not undefined)
+    if (input.email !== undefined) updateData.email = input.email;
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.username !== undefined) updateData.username = input.username;
+    if (input.role !== undefined) updateData.role = input.role;
+    if (input.organizationId !== undefined) updateData.organizationId = input.organizationId;
+    if (input.isActive !== undefined) updateData.isActive = input.isActive;
+    if (input.avatar !== undefined) updateData.avatar = input.avatar;
     
     return this.usersService.update(id, updateData) as any;
   }
