@@ -321,3 +321,67 @@ export const CHANGE_PASSWORD = gql`
     changePassword(input: $input)
   }
 `;
+
+// Admin User Management queries
+export const LIST_USERS = gql`
+  query ListUsers {
+    users {
+      id
+      email
+      username
+      name
+      role
+      organizationId
+      isActive
+      avatar
+      lastLoginAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_USER = gql`
+  mutation UpdateUser($id: String!, $role: String, $isActive: Boolean) {
+    updateUser(id: $id, role: $role, isActive: $isActive) {
+      id
+      email
+      username
+      name
+      role
+      organizationId
+      isActive
+      avatar
+      lastLoginAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_USER = gql`
+  mutation DeleteUser($id: String!) {
+    removeUser(id: $id)
+  }
+`;
+
+export const CREATE_USER = gql`
+  mutation CreateUser($input: RegisterInput!) {
+    register(input: $input) {
+      access_token
+      user {
+        id
+        email
+        username
+        name
+        role
+        organizationId
+        isActive
+        avatar
+        lastLoginAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
