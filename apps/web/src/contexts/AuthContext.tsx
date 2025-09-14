@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export interface User {
@@ -35,26 +35,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const hasFetchedUserData = useRef(false);
 
   const isAuthenticated = !!user && !!token;
 
-  useEffect(() => {
-    // Check for existing token on mount (only on client side)
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('auth-token');
-      if (storedToken) {
-        setToken(storedToken);
-        // Fetch user data
-        fetchUserData(storedToken);
-      } else {
-        setLoading(false);
-      }
-    } else {
-      setLoading(false);
+  const fetchUserData = useCallback(async (authToken: string) => {
+    // Prevent multiple simultaneous calls
+    if (hasFetchedUserData.current) {
+      return;
     }
-  }, []);
 
-  const fetchUserData = async (authToken: string) => {
+    hasFetchedUserData.current = true;
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
         method: 'POST',
@@ -103,13 +95,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Check for existing token on mount (only on client side)
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('auth-token');
+      if (storedToken) {
+        setToken(storedToken);
+        // Fetch user data
+        fetchUserData(storedToken);
+      } else {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [fetchUserData]);
 
   const login = async (usernameOrEmail: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,14 +160,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data?.login) {
         const { access_token, user: userData } = data.login;
-        
+
         // Store token (only on client side)
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth-token', access_token);
         }
         setToken(access_token);
         setUser(userData);
-        
+        hasFetchedUserData.current = true; // Mark as fetched
+
         toast.success('Login successful!');
         return true;
       } else {
@@ -183,8 +192,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ): Promise<boolean> => {
     try {
       setLoading(true);
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -230,14 +239,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data?.register) {
         const { access_token, user: userData } = data.register;
-        
+
         // Store token (only on client side)
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth-token', access_token);
         }
         setToken(access_token);
         setUser(userData);
-        
+        hasFetchedUserData.current = true; // Mark as fetched
+
         toast.success('Registration successful!');
         return true;
       } else {
@@ -258,6 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setToken(null);
     setUser(null);
+    hasFetchedUserData.current = false; // Reset flag to allow future fetches
     toast.success('Logged out successfully');
     router.push('/');
   };

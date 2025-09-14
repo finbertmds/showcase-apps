@@ -484,6 +484,13 @@ export const LIST_ORGANIZATIONS = gql`
       website
       isActive
       ownerId
+      owner {
+        name
+        email
+        username
+        role
+        isActive
+      }
       createdAt
       updatedAt
     }

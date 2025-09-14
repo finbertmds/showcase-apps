@@ -140,7 +140,7 @@ export function AdminOrganizationEditModal({ organization, isOpen, onClose, onSu
             <div className="text-sm text-gray-600">
               <p><strong>Created:</strong> {new Date(organization.createdAt).toLocaleDateString()}</p>
               <p><strong>Last Updated:</strong> {new Date(organization.updatedAt).toLocaleDateString()}</p>
-              <p><strong>Owner ID:</strong> {organization.ownerId}</p>
+              <p><strong>Owner:</strong> {organization.owner?.name || 'Unknown'}</p>
             </div>
           </div>
 

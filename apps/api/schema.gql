@@ -183,10 +183,25 @@ type OrganizationDto {
   isActive: Boolean!
   logo: String
   name: String!
+  owner: OwnerDto
   ownerId: String!
   slug: String!
   updatedAt: DateTime!
   website: String
+}
+
+type OwnerDto {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  isActive: Boolean!
+  lastLoginAt: DateTime
+  name: String!
+  organizationId: String
+  role: String!
+  updatedAt: DateTime!
+  username: String!
 }
 
 """Platform enum"""

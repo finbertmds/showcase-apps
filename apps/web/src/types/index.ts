@@ -82,6 +82,13 @@ export interface Organization {
   website?: string;
   isActive: boolean;
   ownerId: string;
+  owner?: {
+    email: string;
+    name: string;
+    username: string;
+    role: string;
+    isActive: boolean;
+  };
   createdAt: string;
   updatedAt: string;
 }
