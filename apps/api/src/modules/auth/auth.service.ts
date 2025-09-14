@@ -73,7 +73,6 @@ export class AuthService {
     const { username, email, name, password, role, organizationId } = registerInput;
 
     try {
-      console.log('Registering user:', registerInput);
       // Create user
       const user = await this.usersService.create({
         username,

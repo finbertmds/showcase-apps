@@ -1,5 +1,5 @@
-import { AdminAppForm } from '@/components/admin/AdminAppForm';
+import { AdminAppNewForm } from '@/components/admin/AdminAppNewForm';
 
 export default function NewAppPage() {
-  return <AdminAppForm />;
+  return <AdminAppNewForm />;
 }

@@ -25,13 +25,13 @@ export function OrganizationSelect({ value, onChange, error, placeholder = "Sele
   // Filter organizations based on search term and active status
   const filteredOrganizations = useMemo(() => {
     if (!data?.organizations) return [];
-    
+
     // First filter by active status
     const activeOrganizations = data.organizations.filter((org: Organization) => org.isActive);
-    
+
     // Then filter by search term
     if (!searchTerm.trim()) return activeOrganizations;
-    
+
     return activeOrganizations.filter((org: Organization) =>
       org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       org.slug.toLowerCase().includes(searchTerm.toLowerCase())
@@ -91,7 +91,7 @@ export function OrganizationSelect({ value, onChange, error, placeholder = "Sele
     const baseClass = "relative w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 cursor-pointer";
     const errorClass = "border-red-300 focus:ring-red-500 focus:border-red-500";
     const normalClass = "border-gray-300";
-    
+
     return `${baseClass} ${error ? errorClass : normalClass}`;
   };
 
@@ -195,9 +195,8 @@ export function OrganizationSelect({ value, onChange, error, placeholder = "Sele
                 <div
                   key={organization.id}
                   onClick={() => handleSelectOrganization(organization)}
-                  className={`px-3 py-2 cursor-pointer hover:bg-gray-50 flex items-center space-x-3 ${
-                    selectedOrganization?.id === organization.id ? 'bg-primary-50' : ''
-                  }`}
+                  className={`px-3 py-2 cursor-pointer hover:bg-gray-50 flex items-center space-x-3 ${selectedOrganization?.id === organization.id ? 'bg-primary-50' : ''
+                    }`}
                 >
                   {organization.logo && (
                     <img
@@ -218,11 +217,10 @@ export function OrganizationSelect({ value, onChange, error, placeholder = "Sele
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      organization.isActive
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${organization.isActive
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                    }`}>
+                      }`}>
                       {organization.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>

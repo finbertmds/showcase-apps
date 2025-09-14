@@ -5,9 +5,8 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
   HomeIcon,
-  PlusIcon,
   Squares2X2Icon,
-  UsersIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -16,7 +15,6 @@ import { usePathname } from 'next/navigation';
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Apps', href: '/admin/apps', icon: Squares2X2Icon },
-  { name: 'New App', href: '/admin/apps/new', icon: PlusIcon },
   { name: 'Users', href: '/admin/users', icon: UsersIcon },
   { name: 'Organizations', href: '/admin/organizations', icon: BuildingOfficeIcon },
   { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
@@ -31,13 +29,12 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className={`fixed inset-y-0 left-0 bg-white shadow-sm border-r border-gray-200 transition-all duration-300 ${
-      collapsed ? 'w-16' : 'w-64'
-    }`}>
+    <div className={`fixed inset-y-0 left-0 bg-white shadow-sm border-r border-gray-200 transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'
+      }`}>
       <div className="flex flex-col h-full">
         <nav className={`flex-1 py-6 space-y-2 ${collapsed ? 'px-2' : 'px-4'}`}>
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = item.href === '/admin' ? pathname === item.href : pathname.includes(item.href);
             return (
               <Link
                 key={item.name}

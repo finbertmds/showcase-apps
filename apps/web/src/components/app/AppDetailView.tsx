@@ -67,15 +67,15 @@ export function AppDetailView({ slug }: AppDetailViewProps) {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{app.title}</h1>
             <p className="text-lg text-gray-600 mb-6">{app.shortDesc}</p>
-            
+
             <AppInfo app={app} />
             <AppActions app={app} />
           </div>
 
           {/* Screenshots */}
           <div>
-            <AppScreenshots 
-              media={media} 
+            <AppScreenshots
+              media={media}
               loading={mediaLoading}
               appTitle={app.title}
             />
@@ -95,8 +95,8 @@ export function AppDetailView({ slug }: AppDetailViewProps) {
       {timelineEvents.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">Timeline</h2>
-          <AppTimeline 
-            events={timelineEvents} 
+          <AppTimeline
+            events={timelineEvents}
             loading={timelineLoading}
           />
         </div>

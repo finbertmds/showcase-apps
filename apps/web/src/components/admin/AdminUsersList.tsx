@@ -1,42 +1,42 @@
 'use client';
 
-import { UserFormModal } from '@/components/admin/UserFormModal';
+import { AdminUserEditModal } from '@/components/admin/AdminUserEditModal';
+import { AdminUserNewModal } from '@/components/admin/AdminUserNewModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DELETE_USER, LIST_USERS, UPDATE_USER } from '@/lib/graphql/queries';
-import { getRoleBadgeColor, normalizeUsers } from '@/lib/utils/user';
+import { EnumOption, getUserRoleBadgeColor, getUserRoleDisplay, getUserStatusBadgeColor, getUserStatusDisplay, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from '@/lib/utils/enum-display';
+import { normalizeUsers } from '@/lib/utils/user';
 import { User } from '@/types';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   MagnifyingGlassIcon,
   PencilIcon,
+  PlusIcon,
   TrashIcon,
   UserCircleIcon
 } from '@heroicons/react/24/outline';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
-interface UserTableProps {
-  searchTerm: string;
-  roleFilter: string;
-  statusFilter: string;
-  onSearchChange: (value: string) => void;
-  onRoleFilterChange: (value: string) => void;
-  onStatusFilterChange: (value: string) => void;
-}
-
-export function UserTable({ 
-  searchTerm, 
-  roleFilter, 
-  statusFilter,
-  onSearchChange,
-  onRoleFilterChange,
-  onStatusFilterChange
-}: UserTableProps) {
+export function AdminUsersList() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  
+  const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    userId: string;
+    userName: string;
+  }>({
+    isOpen: false,
+    userId: '',
+    userName: '',
+  });
+
   const itemsPerPage = 10;
 
   // GraphQL queries and mutations
@@ -45,23 +45,23 @@ export function UserTable({
   });
 
   const [updateUser] = useMutation(UPDATE_USER);
-  const [deleteUser] = useMutation(DELETE_USER);
+  const [deleteUser, { loading: isDeleting }] = useMutation(DELETE_USER);
 
   // Client-side filtering and pagination
   const allUsers = normalizeUsers(data?.users || []);
-  
+
   const filteredUsers = useMemo(() => {
     return allUsers.filter((user: User) => {
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesRole = !roleFilter || user.role === roleFilter.toLowerCase();
-      
-      const matchesStatus = !statusFilter || 
+
+      const matchesStatus = !statusFilter ||
         (statusFilter === 'active' && user.isActive) ||
         (statusFilter === 'inactive' && !user.isActive);
-      
+
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [allUsers, searchTerm, roleFilter, statusFilter]);
@@ -81,60 +81,42 @@ export function UserTable({
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = (userId: string, userName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      userId,
+      userName,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
     try {
       await deleteUser({
-        variables: { id: userId },
+        variables: { id: deleteModal.userId },
         update: (cache) => {
           // Remove the user from the cache
           cache.modify({
             fields: {
               users(existingUsers = []) {
-                return existingUsers.filter((user: any) => user.__ref !== `UserDto:${userId}`);
+                return existingUsers.filter((user: any) => user.__ref !== `UserDto:${deleteModal.userId}`);
               },
             },
           });
         },
       });
       toast.success('User deleted successfully');
-      setDeleteConfirmId(null);
+      setDeleteModal({ isOpen: false, userId: '', userName: '' });
     } catch (error) {
       console.error('Delete user error:', error);
       toast.error('Failed to delete user');
     }
   };
 
-  const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
-    try {
-      await updateUser({
-        variables: { 
-          id: userId, 
-          input: { isActive: !currentStatus }
-        },
-      });
-      toast.success('User status updated successfully');
-      refetch();
-    } catch (error) {
-      console.error('Toggle status error:', error);
-      toast.error('Failed to update user status');
-    }
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({ isOpen: false, userId: '', userName: '' });
   };
 
-  const handleUpdateRole = async (userId: string, newRole: string) => {
-    try {
-      await updateUser({
-        variables: { 
-          id: userId, 
-          input: { role: newRole.toUpperCase() }
-        },
-      });
-      toast.success('User role updated successfully');
-      refetch();
-    } catch (error) {
-      console.error('Update role error:', error);
-      toast.error('Failed to update user role');
-    }
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -144,6 +126,10 @@ export function UserTable({
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const handleNewUserSuccess = () => {
+    setIsNewUserModalOpen(false);
   };
 
 
@@ -171,6 +157,27 @@ export function UserTable({
 
   return (
     <>
+      {/* Header */}
+      <div className="md:flex md:items-center md:justify-between">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            User Management
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage users, roles, and permissions for the Showcase Apps platform.
+          </p>
+        </div>
+        <div className="mt-4 flex md:mt-0 md:ml-4">
+          <button
+            onClick={() => setIsNewUserModalOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
+            New User
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white shadow-sm rounded-lg">
         {/* Search and Filters */}
         <div className="p-6 border-b border-gray-200">
@@ -185,7 +192,7 @@ export function UserTable({
                   type="text"
                   placeholder="Search users by name or email..."
                   value={searchTerm}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   aria-label="Search users by name or email"
                   autoComplete="off"
@@ -199,14 +206,16 @@ export function UserTable({
                 id="role-filter"
                 name="role-filter"
                 value={roleFilter}
-                onChange={(e) => onRoleFilterChange(e.target.value)}
+                onChange={(e) => setRoleFilter(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 aria-label="Filter users by role"
               >
                 <option value="">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="developer">Developer</option>
-                <option value="viewer">Viewer</option>
+                {USER_ROLE_OPTIONS.map((option: EnumOption) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -216,13 +225,16 @@ export function UserTable({
                 id="status-filter"
                 name="status-filter"
                 value={statusFilter}
-                onChange={(e) => onStatusFilterChange(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 aria-label="Filter users by status"
               >
                 <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                {USER_STATUS_OPTIONS.map((option: EnumOption) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -280,18 +292,11 @@ export function UserTable({
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      id={`role-${user.id}`}
-                      name={`role-${user.id}`}
-                      value={user.role}
-                      onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                      className={`text-xs font-medium px-8 py-2 rounded-full border-0 focus:ring-2 focus:ring-primary-500 ${getRoleBadgeColor(user.role)}`}
-                      aria-label={`Change role for ${user.name}`}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUserRoleBadgeColor(user.role)}`}
                     >
-                      <option value="admin">Admin</option>
-                      <option value="developer">Developer</option>
-                      <option value="viewer">Viewer</option>
-                    </select>
+                      {getUserRoleDisplay(user.role)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {user.organization ? (
@@ -316,19 +321,11 @@ export function UserTable({
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      id={`status-${user.id}`}
-                      name={`status-${user.id}`}
-                      onClick={() => handleToggleStatus(user.id, user.isActive)}
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        user.isActive
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                          : 'bg-red-100 text-red-800 hover:bg-red-200'
-                      }`}
-                      aria-label={`Toggle status for ${user.name} (currently ${user.isActive ? 'active' : 'inactive'})`}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUserStatusBadgeColor(user.isActive)}`}
                     >
-                      {user.isActive ? 'Active' : 'Inactive'}
-                    </button>
+                      {getUserStatusDisplay(user.isActive)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Never'}
@@ -351,7 +348,7 @@ export function UserTable({
                       <button
                         id={`delete-${user.id}`}
                         name={`delete-${user.id}`}
-                        onClick={() => setDeleteConfirmId(user.id)}
+                        onClick={() => handleDeleteUser(user.id, user.name)}
                         className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
                         title="Delete user"
                         aria-label={`Delete user ${user.name}`}
@@ -412,11 +409,10 @@ export function UserTable({
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          currentPage === page
-                            ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
-                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                        }`}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page
+                          ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          }`}
                       >
                         {page}
                       </button>
@@ -437,41 +433,21 @@ export function UserTable({
       </div>
 
       {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <TrashIcon className="h-6 w-6 text-red-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-4">Delete User</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  Are you sure you want to delete this user? This action cannot be undone.
-                </p>
-              </div>
-              <div className="items-center px-4 py-3">
-                <button
-                  onClick={() => handleDeleteUser(deleteConfirmId)}
-                  className="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-red-700"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => setDeleteConfirmId(null)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md w-24 hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete User"
+        message={`Are you sure you want to delete "${deleteModal.userName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
 
       {/* User Form Modal */}
       {isModalOpen && selectedUser && (
-        <UserFormModal
+        <AdminUserEditModal
           user={selectedUser}
           isOpen={isModalOpen}
           onClose={() => {
@@ -485,6 +461,13 @@ export function UserTable({
           }}
         />
       )}
+
+      {/* New User Modal */}
+      <AdminUserNewModal
+        isOpen={isNewUserModalOpen}
+        onClose={() => setIsNewUserModalOpen(false)}
+        onSuccess={handleNewUserSuccess}
+      />
     </>
   );
 }

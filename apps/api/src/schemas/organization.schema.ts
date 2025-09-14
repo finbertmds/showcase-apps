@@ -26,7 +26,6 @@ export class Organization {
   @Prop({ type: Types.ObjectId, ref: 'User' })
   ownerId: Types.ObjectId;
 
-
   createdAt: Date;
   updatedAt: Date;
 }

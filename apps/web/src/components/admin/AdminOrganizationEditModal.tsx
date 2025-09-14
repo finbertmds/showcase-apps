@@ -7,14 +7,14 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-interface OrganizationFormModalProps {
+interface AdminOrganizationEditModalProps {
   organization: Organization;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess }: OrganizationFormModalProps) {
+export function AdminOrganizationEditModal({ organization, isOpen, onClose, onSuccess }: AdminOrganizationEditModalProps) {
   const [formData, setFormData] = useState({
     name: organization.name,
     slug: organization.slug,
@@ -29,23 +29,23 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous field errors
     setFieldErrors({});
-    
+
     try {
       // Check if any field changed
-      const hasChanges = 
+      const hasChanges =
         formData.name !== organization.name ||
         formData.slug !== organization.slug ||
         formData.description !== (organization.description || '') ||
         formData.website !== (organization.website || '') ||
         formData.logo !== (organization.logo || '') ||
         formData.isActive !== organization.isActive;
-      
+
       if (hasChanges) {
         const updateInput: any = {};
-        
+
         if (formData.name !== organization.name) updateInput.name = formData.name;
         if (formData.slug !== organization.slug) updateInput.slug = formData.slug;
         if (formData.description !== (organization.description || '')) {
@@ -72,12 +72,12 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
     } catch (error: any) {
       console.error('Update organization error:', error);
       console.error('GraphQL Errors:', error.graphQLErrors);
-      
+
       // Handle field-specific errors
       if (error.graphQLErrors && error.graphQLErrors.length > 0) {
         const graphQLError = error.graphQLErrors[0];
         console.error('GraphQL Error extensions:', graphQLError.extensions);
-        
+
         if (graphQLError.extensions?.fieldErrors) {
           console.error('Field errors found:', graphQLError.extensions.fieldErrors);
           const errors: Record<string, string> = {};
@@ -88,14 +88,14 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
           return; // Don't show generic toast
         }
       }
-      
+
       toast.error('Failed to update organization');
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     // Clear field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => {
@@ -104,7 +104,7 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
         return newErrors;
       });
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
@@ -115,7 +115,7 @@ export function OrganizationFormModal({ organization, isOpen, onClose, onSuccess
     const baseClass = "mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500";
     const errorClass = "border-red-300 focus:ring-red-500 focus:border-red-500";
     const normalClass = "border-gray-300";
-    
+
     return `${baseClass} ${fieldErrors[fieldName] ? errorClass : normalClass}`;
   };
 

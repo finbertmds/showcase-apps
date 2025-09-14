@@ -1,8 +1,11 @@
 'use client';
 
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { GET_APPS } from '@/lib/graphql/queries';
-import { useQuery } from '@apollo/client';
+import { DELETE_APP, GET_APPS } from '@/lib/graphql/queries';
+import { normalizeApps } from '@/lib/utils/app';
+import { APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, getAppPlatformDisplay, getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   EyeIcon,
   PencilIcon,
@@ -11,17 +14,71 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export function AdminAppsList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [visibilityFilter, setVisibilityFilter] = useState('all');
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    appId: string;
+    appTitle: string;
+  }>({
+    isOpen: false,
+    appId: '',
+    appTitle: '',
+  });
 
   const { data, loading, error } = useQuery(GET_APPS, {
-    variables: { 
+    variables: {
       limit: 100,
       ...(statusFilter !== 'all' && { status: statusFilter }),
+      ...(visibilityFilter !== 'all' && { visibility: visibilityFilter }),
     },
   });
+
+  const [deleteApp, { loading: isDeleting }] = useMutation(DELETE_APP, {
+    onCompleted: () => {
+      toast.success('App deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('Error deleting app:', error);
+      toast.error('Failed to delete app');
+    },
+    refetchQueries: [
+      {
+        query: GET_APPS,
+        variables: {
+          limit: 100,
+          ...(statusFilter !== 'all' && { status: statusFilter }),
+          ...(visibilityFilter !== 'all' && { visibility: visibilityFilter }),
+        },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
+
+  const handleDeleteApp = (appId: string, appTitle: string) => {
+    setDeleteModal({
+      isOpen: true,
+      appId,
+      appTitle,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteApp({ variables: { id: deleteModal.appId } });
+      setDeleteModal({ isOpen: false, appId: '', appTitle: '' });
+    } catch (error) {
+      console.error('Error deleting app:', error);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({ isOpen: false, appId: '', appTitle: '' });
+  };
 
   if (loading) {
     return (
@@ -39,8 +96,8 @@ export function AdminAppsList() {
     );
   }
 
-  const apps = data?.apps || [];
-  const filteredApps = apps.filter((app: any) =>
+  const normalizedApps = normalizeApps(data?.apps || []);
+  const filteredApps = normalizedApps.filter((app: any) =>
     app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     app.shortDesc.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -54,7 +111,7 @@ export function AdminAppsList() {
             Manage your applications
           </p>
         </div>
-        
+
         <Link
           href="/admin/apps/new"
           className="btn-primary inline-flex items-center space-x-2 p-2"
@@ -77,7 +134,7 @@ export function AdminAppsList() {
               autoComplete="off"
             />
           </div>
-          
+
           <div className="sm:w-48">
             <select
               value={statusFilter}
@@ -85,9 +142,26 @@ export function AdminAppsList() {
               className="input w-full"
             >
               <option value="all">All Status</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-              <option value="archived">Archived</option>
+              {APP_STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="sm:w-48">
+            <select
+              value={visibilityFilter}
+              onChange={(e) => setVisibilityFilter(e.target.value)}
+              className="input w-full"
+            >
+              <option value="all">All Visibility</option>
+              {APP_VISIBILITY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -109,6 +183,9 @@ export function AdminAppsList() {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Visibility
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Platforms
@@ -135,15 +212,16 @@ export function AdminAppsList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          app.status === 'published'
-                            ? 'bg-green-100 text-green-800'
-                            : app.status === 'draft'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppStatusBadgeColor(app.status)}`}
                       >
-                        {app.status}
+                        {getAppStatusDisplay(app.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppVisibilityBadgeColor(app.visibility)}`}
+                      >
+                        {getAppVisibilityDisplay(app.visibility)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -153,7 +231,7 @@ export function AdminAppsList() {
                             key={platform}
                             className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded"
                           >
-                            {platform}
+                            {getAppPlatformDisplay(platform)}
                           </span>
                         ))}
                         {app.platforms.length > 2 && (
@@ -179,7 +257,7 @@ export function AdminAppsList() {
                         >
                           <EyeIcon className="h-4 w-4" />
                         </Link>
-                        
+
                         <Link
                           href={`/admin/apps/${app.id}/edit`}
                           className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -187,9 +265,11 @@ export function AdminAppsList() {
                         >
                           <PencilIcon className="h-4 w-4" />
                         </Link>
-                        
+
                         <button
-                          className="text-gray-400 hover:text-red-600 transition-colors"
+                          onClick={() => handleDeleteApp(app.id, app.title)}
+                          disabled={isDeleting}
+                          className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Delete app"
                         >
                           <TrashIcon className="h-4 w-4" />
@@ -203,6 +283,19 @@ export function AdminAppsList() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete App"
+        message={`Are you sure you want to delete "${deleteModal.appTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { AppStatus, AppVisibility } from '@/schemas/app.schema';
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { MUTATIONS, QUERIES } from '../../constants/graphql-operations';
 import { AppDto, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
 import { User, UserRole } from '../../schemas/user.schema';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -13,7 +14,7 @@ import { AppsService } from './apps.service';
 export class AppsResolver {
   constructor(private readonly appsService: AppsService) {}
 
-  @Mutation(() => AppDto)
+  @Mutation(() => AppDto, { name: MUTATIONS.CREATE_APP })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.DEVELOPER)
   async createApp(
@@ -23,7 +24,7 @@ export class AppsResolver {
     return this.appsService.create(createAppInput, user.id, user.organizationId?.toString() || null) as any;
   }
 
-  @Query(() => [AppDto], { name: 'apps' })
+  @Query(() => [AppDto], { name: QUERIES.APPS })
   async findAll(
     @Args('status', { nullable: true }) status?: AppStatus,
     @Args('visibility', { nullable: true }) visibility?: AppVisibility,
@@ -49,7 +50,7 @@ export class AppsResolver {
     return apps as any;
   }
 
-  @Query(() => [AppDto], { name: 'timelineApps' })
+  @Query(() => [AppDto], { name: QUERIES.TIMELINE_APPS })
   async getTimelineApps(
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
@@ -58,17 +59,17 @@ export class AppsResolver {
     return apps as any;
   }
 
-  @Query(() => AppDto, { name: 'app' })
+  @Query(() => AppDto, { name: QUERIES.APP })
   async findOne(@Args('id') id: string): Promise<AppDto> {
     return this.appsService.findOne(id) as any;
   }
 
-  @Query(() => AppDto, { name: 'appBySlug' })
+  @Query(() => AppDto, { name: QUERIES.APP_BY_SLUG })
   async findBySlug(@Args('slug') slug: string): Promise<AppDto> {
     return this.appsService.findBySlug(slug) as any;
   }
 
-  @Mutation(() => AppDto)
+  @Mutation(() => AppDto, { name: MUTATIONS.UPDATE_APP })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.DEVELOPER)
   async updateApp(
@@ -80,7 +81,7 @@ export class AppsResolver {
     return this.appsService.update(id, updateAppInput, user._id.toString(), user.role) as any;
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { name: MUTATIONS.REMOVE_APP })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.DEVELOPER)
   async removeApp(
@@ -91,13 +92,13 @@ export class AppsResolver {
     return this.appsService.remove(id, user.id, user.role);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { name: MUTATIONS.INCREMENT_APP_VIEW })
   async incrementAppView(@Args('id') id: string): Promise<boolean> {
     await this.appsService.incrementViewCount(id);
     return true;
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { name: MUTATIONS.INCREMENT_APP_LIKE })
   async incrementAppLike(@Args('id') id: string): Promise<boolean> {
     await this.appsService.incrementLikeCount(id);
     return true;

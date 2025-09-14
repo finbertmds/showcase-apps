@@ -25,7 +25,7 @@ export function Header() {
               <span className="text-2xl font-bold text-primary-600">Showcase</span>
             </Link>
           </div>
-          
+
           <div className="ml-10 flex items-center space-x-4">
             {/* Desktop navigation */}
             <div className="hidden md:flex md:space-x-8">
@@ -52,7 +52,7 @@ export function Header() {
                       Admin
                     </Link>
                   )}
-                  
+
                   {/* User menu */}
                   <div className="relative">
                     <button
@@ -63,7 +63,7 @@ export function Header() {
                       <UserCircleIcon className="h-6 w-6" />
                       <span>{user?.name}</span>
                     </button>
-                    
+
                     {userMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                         <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-200">
@@ -77,7 +77,7 @@ export function Header() {
                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                             onClick={() => setUserMenuOpen(false)}
                           >
-                            Admin Panel
+                            Admin Page
                           </Link>
                         )}
                         <button
@@ -143,7 +143,7 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
-              
+
               {/* Mobile auth section */}
               <div className="border-t border-gray-200 pt-4">
                 {isAuthenticated ? (

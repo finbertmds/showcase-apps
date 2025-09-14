@@ -1,27 +1,36 @@
 'use client';
 
+import { AdminOrganizationEditModal } from '@/components/admin/AdminOrganizationEditModal';
+import { AdminOrganizationNewModal } from '@/components/admin/AdminOrganizationNewModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DELETE_ORGANIZATION, LIST_ORGANIZATIONS, UPDATE_ORGANIZATION } from '@/lib/graphql/queries';
+import { EnumOption, getOrganizationStatusBadgeColor, getOrganizationStatusDisplay, ORGANIZATION_STATUS_OPTIONS } from '@/lib/utils/enum-display';
 import { Organization } from '@/types';
 import { useMutation, useQuery } from '@apollo/client';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { OrganizationFormModal } from './OrganizationFormModal';
 
-interface OrganizationTableProps {
-  searchTerm: string;
-  statusFilter: string;
-}
-
-export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTableProps) {
+export function AdminOrganizationsList() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isNewOrganizationModalOpen, setIsNewOrganizationModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    organizationId: string;
+    organizationName: string;
+  }>({
+    isOpen: false,
+    organizationId: '',
+    organizationName: '',
+  });
 
   const { data, loading, error, refetch } = useQuery(LIST_ORGANIZATIONS);
   const [updateOrganization] = useMutation(UPDATE_ORGANIZATION);
-  const [deleteOrganization] = useMutation(DELETE_ORGANIZATION);
+  const [deleteOrganization, { loading: isDeleting }] = useMutation(DELETE_ORGANIZATION);
 
   // Client-side filtering and pagination
   const filteredOrganizations = useMemo(() => {
@@ -66,28 +75,44 @@ export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTabl
     setIsModalOpen(true);
   };
 
-  const handleDeleteOrganization = async (id: string) => {
+  const handleDeleteOrganization = (organizationId: string, organizationName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      organizationId,
+      organizationName,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
     try {
       await deleteOrganization({
-        variables: { id },
+        variables: { id: deleteModal.organizationId },
         update: (cache) => {
           const existingOrganizations = cache.readQuery({ query: LIST_ORGANIZATIONS }) as any;
           if (existingOrganizations?.organizations) {
             cache.writeQuery({
               query: LIST_ORGANIZATIONS,
               data: {
-                organizations: existingOrganizations.organizations.filter((org: Organization) => org.id !== id),
+                organizations: existingOrganizations.organizations.filter((org: Organization) => org.id !== deleteModal.organizationId),
               },
             });
           }
         },
       });
       toast.success('Organization deleted successfully');
-      setDeleteConfirmId(null);
+      setDeleteModal({ isOpen: false, organizationId: '', organizationName: '' });
     } catch (error) {
       console.error('Delete organization error:', error);
       toast.error('Failed to delete organization');
     }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({ isOpen: false, organizationId: '', organizationName: '' });
+  };
+
+  const handleNewOrganizationSuccess = () => {
+    setIsNewOrganizationModalOpen(false);
   };
 
   const handleToggleStatus = async (organizationId: string, currentStatus: boolean) => {
@@ -121,6 +146,65 @@ export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTabl
 
   return (
     <>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
+          <p className="text-gray-600">Manage organizations and their settings</p>
+        </div>
+        <button
+          onClick={() => setIsNewOrganizationModalOpen(true)}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          <PlusIcon className="h-4 w-4 mr-2" />
+          New Organization
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Search */}
+          <div>
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+              Search Organizations
+            </label>
+            <input
+              type="text"
+              id="search"
+              name="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Search by name, slug, or description..."
+              autoComplete="off"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="all">All Organizations</option>
+              {ORGANIZATION_STATUS_OPTIONS.map((option: EnumOption) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Organizations Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -174,13 +258,9 @@ export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTabl
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleToggleStatus(organization.id, organization.isActive)}
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        organization.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrganizationStatusBadgeColor(organization.isActive)}`}
                     >
-                      {organization.isActive ? 'Active' : 'Inactive'}
+                      {getOrganizationStatusDisplay(organization.isActive)}
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -210,7 +290,7 @@ export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTabl
                         <PencilIcon className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => setDeleteConfirmId(organization.id)}
+                        onClick={() => handleDeleteOrganization(organization.id, organization.name)}
                         className="text-red-600 hover:text-red-900"
                         aria-label="Delete organization"
                       >
@@ -266,11 +346,10 @@ export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTabl
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        page === currentPage
-                          ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                      }`}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${page === currentPage
+                        ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        }`}
                     >
                       {page}
                     </button>
@@ -290,44 +369,34 @@ export function OrganizationTable({ searchTerm, statusFilter }: OrganizationTabl
       </div>
 
       {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg font-medium text-gray-900">Delete Organization</h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  Are you sure you want to delete this organization? This action cannot be undone.
-                </p>
-              </div>
-              <div className="flex justify-center space-x-4 mt-4">
-                <button
-                  onClick={() => setDeleteConfirmId(null)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDeleteOrganization(deleteConfirmId)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Organization"
+        message={`Are you sure you want to delete "${deleteModal.organizationName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
 
       {/* Edit Organization Modal */}
       {isModalOpen && selectedOrganization && (
-        <OrganizationFormModal
+        <AdminOrganizationEditModal
           organization={selectedOrganization}
           isOpen={isModalOpen}
           onClose={handleModalClose}
           onSuccess={handleModalSuccess}
         />
       )}
+
+      {/* New Organization Modal */}
+      <AdminOrganizationNewModal
+        isOpen={isNewOrganizationModalOpen}
+        onClose={() => setIsNewOrganizationModalOpen(false)}
+        onSuccess={handleNewOrganizationSuccess}
+      />
     </>
   );
 }

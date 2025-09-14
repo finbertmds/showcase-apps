@@ -42,7 +42,6 @@ export class UsersService {
         ...userData,
         password: hashedPassword,
       });
-      console.log('Creating user with data:', user);
       return user.save();
     } catch (error) {
       console.error('Error creating user:', error);
@@ -145,7 +144,6 @@ export class UsersService {
     try {
       const user = await this.userModel
         .findByIdAndUpdate(id, updateData, { new: true })
-        .populate('organizationId', 'name slug')
         .exec();
 
       if (!user) {

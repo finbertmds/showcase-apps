@@ -255,6 +255,86 @@ export const INCREMENT_APP_LIKE = gql`
   }
 `;
 
+export const CREATE_APP = gql`
+  mutation CreateApp($input: CreateAppInput!) {
+    createApp(input: $input) {
+      id
+      title
+      slug
+      shortDesc
+      longDesc
+      status
+      visibility
+      releaseDate
+      platforms
+      languages
+      tags
+      website
+      repository
+      demoUrl
+      downloadUrl
+      appStoreUrl
+      playStoreUrl
+      viewCount
+      likeCount
+      createdAt
+      updatedAt
+      createdBy
+      createdByUser {
+        id
+        name
+        email
+      }
+      organizationId
+      organization {
+        id
+        name
+        slug
+      }
+    }
+  }
+`;
+
+export const UPDATE_APP = gql`
+  mutation UpdateApp($id: String!, $input: UpdateAppInput!) {
+    updateApp(id: $id, input: $input) {
+      id
+      title
+      slug
+      shortDesc
+      longDesc
+      status
+      visibility
+      releaseDate
+      platforms
+      languages
+      tags
+      website
+      repository
+      demoUrl
+      downloadUrl
+      appStoreUrl
+      playStoreUrl
+      viewCount
+      likeCount
+      createdAt
+      updatedAt
+      createdBy
+      createdByUser {
+        id
+        name
+        email
+      }
+      organizationId
+      organization {
+        id
+        name
+        slug
+      }
+    }
+  }
+`;
+
 // Authentication queries
 export const LOGIN = gql`
   mutation Login($input: LoginInput!) {
@@ -447,5 +527,11 @@ export const CREATE_ORGANIZATION = gql`
       createdAt
       updatedAt
     }
+  }
+`;
+
+export const DELETE_APP = gql`
+  mutation DeleteApp($id: String!) {
+    removeApp(id: $id)
   }
 `;

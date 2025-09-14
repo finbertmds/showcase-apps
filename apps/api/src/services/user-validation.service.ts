@@ -209,16 +209,6 @@ export class UserValidationService {
       });
     }
 
-    // Check name format (letters, spaces, hyphens, apostrophes)
-    const nameRegex = /^[a-zA-Z\s\-']+$/;
-    if (!nameRegex.test(name)) {
-      errors.push({
-        field: 'name',
-        message: 'Name can only contain letters, spaces, hyphens, and apostrophes',
-        code: 'INVALID_NAME_FORMAT',
-      });
-    }
-
     return errors;
   }
 

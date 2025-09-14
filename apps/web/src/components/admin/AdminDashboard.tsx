@@ -2,11 +2,12 @@
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { GET_APPS } from '@/lib/graphql/queries';
+import { getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
 import { useQuery } from '@apollo/client';
 import {
-    EyeIcon,
-    HeartIcon,
-    Squares2X2Icon
+  EyeIcon,
+  HeartIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 
 export function AdminDashboard() {
@@ -115,6 +116,9 @@ export function AdminDashboard() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Visibility
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Views
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -133,15 +137,16 @@ export function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          app.status === 'published'
-                            ? 'bg-green-100 text-green-800'
-                            : app.status === 'draft'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppStatusBadgeColor(app.status)}`}
                       >
-                        {app.status}
+                        {getAppStatusDisplay(app.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppVisibilityBadgeColor(app.visibility)}`}
+                      >
+                        {getAppVisibilityDisplay(app.visibility)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

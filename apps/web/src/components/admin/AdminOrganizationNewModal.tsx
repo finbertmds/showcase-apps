@@ -7,13 +7,13 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-interface NewOrganizationModalProps {
+interface AdminOrganizationNewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganizationModalProps) {
+export function AdminOrganizationNewModal({ isOpen, onClose, onSuccess }: AdminOrganizationNewModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -28,16 +28,16 @@ export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganiza
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous field errors
     setFieldErrors({});
-    
+
     // Basic validation
     if (!formData.name.trim()) {
       setFieldErrors({ name: 'Organization name is required' });
       return;
     }
-    
+
     if (!formData.slug.trim()) {
       setFieldErrors({ slug: 'Slug is required' });
       return;
@@ -77,12 +77,12 @@ export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganiza
     } catch (error: any) {
       console.error('Create organization error:', error);
       console.error('GraphQL Errors:', error.graphQLErrors);
-      
+
       // Handle field-specific errors
       if (error.graphQLErrors && error.graphQLErrors.length > 0) {
         const graphQLError = error.graphQLErrors[0];
         console.error('GraphQL Error extensions:', graphQLError.extensions);
-        
+
         if (graphQLError.extensions?.fieldErrors) {
           console.error('Field errors found:', graphQLError.extensions.fieldErrors);
           const errors: Record<string, string> = {};
@@ -93,7 +93,7 @@ export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganiza
           return; // Don't show generic toast
         }
       }
-      
+
       const errorMessage = error.message || 'Failed to create organization';
       toast.error(errorMessage);
     }
@@ -101,7 +101,7 @@ export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganiza
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     // Clear field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors(prev => {
@@ -110,7 +110,7 @@ export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganiza
         return newErrors;
       });
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
@@ -121,7 +121,7 @@ export function NewOrganizationModal({ isOpen, onClose, onSuccess }: NewOrganiza
     const baseClass = "mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500";
     const errorClass = "border-red-300 focus:ring-red-500 focus:border-red-500";
     const normalClass = "border-gray-300";
-    
+
     return `${baseClass} ${fieldErrors[fieldName] ? errorClass : normalClass}`;
   };
 

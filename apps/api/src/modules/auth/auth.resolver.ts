@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { MUTATIONS, QUERIES } from '../../constants/graphql-operations';
 import { AuthResponse, ChangePasswordInput, LoginInput, RegisterInput } from '../../dto/auth.dto';
 import { UserDto } from '../../dto/user.dto';
 import { AuthService } from './auth.service';
@@ -9,23 +10,23 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Query(() => UserDto, { name: 'me' })
+  @Query(() => UserDto, { name: QUERIES.ME })
   @UseGuards(JwtAuthGuard)
   async getCurrentUser(@Context() context: any): Promise<UserDto> {
     return context.req.user;
   }
 
-  @Mutation(() => AuthResponse)
+  @Mutation(() => AuthResponse, { name: MUTATIONS.LOGIN })
   async login(@Args('input') loginInput: LoginInput): Promise<AuthResponse> {
     return this.authService.login(loginInput);
   }
 
-  @Mutation(() => AuthResponse)
+  @Mutation(() => AuthResponse, { name: MUTATIONS.REGISTER })
   async register(@Args('input') registerInput: RegisterInput): Promise<AuthResponse> {
     return this.authService.register(registerInput);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { name: MUTATIONS.CHANGE_PASSWORD })
   @UseGuards(JwtAuthGuard)
   async changePassword(
     @Args('input') changePasswordInput: ChangePasswordInput,

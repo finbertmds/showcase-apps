@@ -25,19 +25,6 @@ export function normalizeUsers(users: User[]): User[] {
 }
 
 /**
- * Get role badge color class based on normalized role
+ * Get role badge color class based on normalized role - moved to enum-display.ts for consistency
+ * Use getUserRoleBadgeColor from enum-display.ts instead
  */
-export function getRoleBadgeColor(role: string): string {
-  const normalizedRole = normalizeUserRole(role);
-  
-  switch (normalizedRole) {
-    case 'admin':
-      return 'bg-red-100 text-red-800';
-    case 'developer':
-      return 'bg-blue-100 text-blue-800';
-    case 'viewer':
-      return 'bg-gray-100 text-gray-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-}
