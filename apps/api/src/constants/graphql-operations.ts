@@ -13,6 +13,7 @@
 export const QUERIES = {
   // App Queries
   APPS: 'apps',
+  APPS_PAGINATED: 'appsPaginated',
   TIMELINE_APPS: 'timelineApps',
   APP: 'app',
   APP_BY_SLUG: 'appBySlug',

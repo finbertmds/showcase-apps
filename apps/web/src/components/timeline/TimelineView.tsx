@@ -1,14 +1,19 @@
 'use client';
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { DEFAULT_TIMELINE_PAGE_SIZE } from '@/constants';
 import { GET_TIMELINE_APPS } from '@/lib/graphql/queries';
+import { normalizeApps } from '@/lib/utils/app';
 import { App } from '@/types';
 import { useQuery } from '@apollo/client';
+import { useState } from 'react';
 import { TimelineItem } from './TimelineItem';
 
 export function TimelineView() {
+  const [hasMoreData, setHasMoreData] = useState(true);
+
   const { data, loading, error, fetchMore } = useQuery(GET_TIMELINE_APPS, {
-    variables: { limit: 20, offset: 0 },
+    variables: { limit: DEFAULT_TIMELINE_PAGE_SIZE, offset: 0 },
     notifyOnNetworkStatusChange: true,
   });
 
@@ -28,7 +33,7 @@ export function TimelineView() {
     );
   }
 
-  const apps: App[] = data?.timelineApps || [];
+  const apps: App[] = normalizeApps(data?.timelineApps || []);
 
   if (apps.length === 0) {
     return (
@@ -45,6 +50,13 @@ export function TimelineView() {
       },
       updateQuery: (prev, { fetchMoreResult }) => {
         if (!fetchMoreResult) return prev;
+
+        // Check if new data is empty
+        if (fetchMoreResult.timelineApps.length === 0) {
+          setHasMoreData(false);
+          return prev;
+        }
+
         return {
           timelineApps: [...prev.timelineApps, ...fetchMoreResult.timelineApps],
         };
@@ -54,7 +66,7 @@ export function TimelineView() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="space-y-8">
+      <div className="space-y-4">
         {apps.map((app, index) => (
           <TimelineItem key={app.id} app={app} index={index} />
         ))}
@@ -66,7 +78,7 @@ export function TimelineView() {
         </div>
       )}
 
-      {!loading && apps.length > 0 && (
+      {!loading && apps.length > 0 && hasMoreData && (
         <div className="text-center py-8">
           <button
             onClick={loadMore}

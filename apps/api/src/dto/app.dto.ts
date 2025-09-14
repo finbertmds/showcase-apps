@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 import { AppStatus, AppVisibility, Platform } from '../schemas/app.schema';
 import { OrganizationDto } from './organization.dto';
@@ -263,4 +263,19 @@ export class UpdateAppInput {
   @IsOptional()
   @IsUrl()
   playStoreUrl?: string;
+}
+
+@ObjectType()
+export class AppsPage {
+  @Field(() => [AppDto])
+  items: AppDto[];
+
+  @Field(() => Int)
+  totalCount: number;
+
+  @Field(() => Int)
+  limit: number;
+
+  @Field(() => Int)
+  offset: number;
 }

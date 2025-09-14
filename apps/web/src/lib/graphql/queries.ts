@@ -47,13 +47,76 @@ export const GET_APPS = gql`
         id
         name
         email
+        avatar
       }
       organizationId
       organization {
         id
         name
         slug
+        logo
+        website
+        isActive
       }
+    }
+  }
+`;
+
+export const GET_APPS_PAGINATED = gql`
+  query GetAppsPaginated(
+    $limit: Int!
+    $offset: Int!
+    $search: String
+    $category: String
+  ) {
+    appsPaginated(
+      limit: $limit
+      offset: $offset
+      search: $search
+      category: $category
+    ) {
+      items {
+        id
+        title
+        slug
+        shortDesc
+        longDesc
+        status
+        visibility
+        releaseDate
+        platforms
+        languages
+        tags
+        website
+        repository
+        demoUrl
+        downloadUrl
+        appStoreUrl
+        playStoreUrl
+        viewCount
+        likeCount
+        createdAt
+        updatedAt
+        createdBy
+        createdByUser {
+          id
+          name
+          email
+          avatar
+        }
+        organizationId
+        organization {
+          id
+          name
+          slug
+          logo
+          website
+          isActive
+        }
+      }
+      totalCount
+      limit
+      offset
     }
   }
 `;
@@ -87,12 +150,16 @@ export const GET_TIMELINE_APPS = gql`
         id
         name
         email
+        avatar
       }
       organizationId
       organization {
         id
         name
         slug
+        logo
+        website
+        isActive
       }
     }
   }
@@ -127,12 +194,16 @@ export const GET_APP_BY_SLUG = gql`
         id
         name
         email
+        avatar
       }
       organizationId
       organization {
         id
         name
         slug
+        logo
+        website
+        isActive
       }
     }
   }
@@ -167,12 +238,16 @@ export const GET_APP_BYID = gql`
         id
         name
         email
+        avatar
       }
       organizationId
       organization {
         id
         name
         slug
+        logo
+        website
+        isActive
       }
     }
   }
@@ -195,6 +270,7 @@ export const GET_TIMELINE_EVENTS = gql`
         id
         name
         email
+        avatar
       }
       createdAt
       updatedAt
@@ -284,12 +360,16 @@ export const CREATE_APP = gql`
         id
         name
         email
+        avatar
       }
       organizationId
       organization {
         id
         name
         slug
+        logo
+        website
+        isActive
       }
     }
   }
@@ -324,12 +404,16 @@ export const UPDATE_APP = gql`
         id
         name
         email
+        avatar
       }
       organizationId
       organization {
         id
         name
         slug
+        logo
+        website
+        isActive
       }
     }
   }
@@ -417,6 +501,8 @@ export const LIST_USERS = gql`
         name
         slug
         isActive
+        logo
+        website
       }
       isActive
       avatar
@@ -441,6 +527,7 @@ export const UPDATE_USER = gql`
       lastLoginAt
       createdAt
       updatedAt
+      avatar
     }
   }
 `;
@@ -467,6 +554,7 @@ export const CREATE_USER = gql`
         lastLoginAt
         createdAt
         updatedAt
+        avatar
       }
     }
   }
@@ -490,6 +578,7 @@ export const LIST_ORGANIZATIONS = gql`
         username
         role
         isActive
+        avatar
       }
       createdAt
       updatedAt

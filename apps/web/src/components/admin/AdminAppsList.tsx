@@ -2,7 +2,9 @@
 
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { DELETE_APP, GET_APPS } from '@/lib/graphql/queries';
+import { Pagination } from '@/components/ui/Pagination';
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants';
+import { DELETE_APP, GET_APPS_PAGINATED } from '@/lib/graphql/queries';
 import { normalizeApps } from '@/lib/utils/app';
 import { APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, getAppPlatformDisplay, getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
 import { useMutation, useQuery } from '@apollo/client';
@@ -20,6 +22,8 @@ export function AdminAppsList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [visibilityFilter, setVisibilityFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     appId: string;
@@ -30,11 +34,12 @@ export function AdminAppsList() {
     appTitle: '',
   });
 
-  const { data, loading, error } = useQuery(GET_APPS, {
+  const { data, loading, error } = useQuery(GET_APPS_PAGINATED, {
     variables: {
-      limit: 100,
-      ...(statusFilter !== 'all' && { status: statusFilter }),
-      ...(visibilityFilter !== 'all' && { visibility: visibilityFilter }),
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
+      search: searchTerm || undefined,
+      category: statusFilter !== 'all' ? statusFilter : undefined,
     },
   });
 
@@ -48,11 +53,12 @@ export function AdminAppsList() {
     },
     refetchQueries: [
       {
-        query: GET_APPS,
+        query: GET_APPS_PAGINATED,
         variables: {
-          limit: 100,
-          ...(statusFilter !== 'all' && { status: statusFilter }),
-          ...(visibilityFilter !== 'all' && { visibility: visibilityFilter }),
+          limit: pageSize,
+          offset: (currentPage - 1) * pageSize,
+          search: searchTerm || undefined,
+          category: statusFilter !== 'all' ? statusFilter : undefined,
         },
       },
     ],
@@ -80,6 +86,15 @@ export function AdminAppsList() {
     setDeleteModal({ isOpen: false, appId: '', appTitle: '' });
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -96,11 +111,16 @@ export function AdminAppsList() {
     );
   }
 
-  const normalizedApps = normalizeApps(data?.apps || []);
-  const filteredApps = normalizedApps.filter((app: any) =>
-    app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.shortDesc.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredApps = normalizeApps(data?.appsPaginated?.items || []);
+  const paginationData = data?.appsPaginated || {
+    totalCount: 0,
+    limit: DEFAULT_PAGE_SIZE,
+    offset: 0,
+  };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(paginationData.totalCount / paginationData.limit);
+  const currentPageFromData = Math.floor(paginationData.offset / paginationData.limit) + 1;
 
   return (
     <div className="space-y-6">
@@ -283,6 +303,18 @@ export function AdminAppsList() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPageFromData}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        pageSize={paginationData.limit}
+        totalItems={paginationData.totalCount}
+        onPageSizeChange={handlePageSizeChange}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showPageSizeSelector={true}
+      />
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

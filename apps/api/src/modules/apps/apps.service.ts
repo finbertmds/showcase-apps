@@ -94,6 +94,48 @@ export class AppsService {
     return { apps: appsWithDetails, total };
   }
 
+  async findPaginated(
+    filters: any = {},
+    limit: number,
+    offset: number,
+  ): Promise<{ apps: AppDto[]; total: number }> {
+    const [apps, total] = await Promise.all([
+      this.appModel
+        .find(filters)
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit)
+        .exec(),
+      this.appModel.countDocuments(filters).exec(),
+    ]);
+
+    // Populate createdByUser and organization for each app
+    const appsWithDetails = await Promise.all(
+      apps.map(async (app) => {
+        let user = null;
+        if (app.createdBy) {
+          user = await this.userModel.findById(app.createdBy).exec();
+        }
+
+        let organization = null;
+        if (app.organizationId) {
+          organization = await this.organizationModel.findById(app.organizationId).exec();
+        }
+
+        return {
+          ...app.toObject(),
+          id: app._id.toString(),
+          createdBy: app.createdBy.toString(),
+          createdByUser: user,
+          organizationId: app.organizationId?.toString(),
+          organization: organization,
+        };
+      })
+    );
+
+    return { apps: appsWithDetails, total };
+  }
+
   async findOne(id: string): Promise<AppDto> {
     const app = await this.appModel
       .findById(id)

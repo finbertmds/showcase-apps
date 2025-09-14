@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { ValidationException } from '../../exceptions/validation.exception';
+import { App, AppDocument } from '../../schemas/app.schema';
 import { Organization, OrganizationDocument } from '../../schemas/organization.schema';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
 import { UserValidationService } from '../../services/user-validation.service';
@@ -13,6 +14,7 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Organization.name) private organizationModel: Model<OrganizationDocument>,
+    @InjectModel(App.name) private appModel: Model<AppDocument>,
     private validationService: UserValidationService,
   ) {}
 
@@ -175,6 +177,16 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<boolean> {
+    // Check if user exists
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Delete all apps created by this user
+    await this.appModel.deleteMany({ createdBy: id }).exec();
+
+    // Delete the user
     const result = await this.userModel.findByIdAndDelete(id).exec();
     return !!result;
   }

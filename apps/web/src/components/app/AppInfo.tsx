@@ -1,12 +1,12 @@
 import { App } from '@/types';
 import {
-    BuildingOfficeIcon,
-    CalendarIcon,
-    CodeBracketIcon,
-    ComputerDesktopIcon,
-    DevicePhoneMobileIcon,
-    GlobeAltIcon,
-    UserIcon,
+  BuildingOfficeIcon,
+  CalendarIcon,
+  CodeBracketIcon,
+  ComputerDesktopIcon,
+  DevicePhoneMobileIcon,
+  GlobeAltIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -93,23 +93,23 @@ export function AppInfo({ app }: AppInfoProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <UserIcon className="h-4 w-4" />
-          <span>Created by {app.createdBy}</span>
+          <span>Created by {app.createdByUser?.name}</span>
         </div>
-        
-        {app.organizationId && (
+
+        {app.organization && (
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <BuildingOfficeIcon className="h-4 w-4" />
-            <span>{app.organizationId}</span>
+            <span>{app.organization?.name}</span>
           </div>
         )}
-        
+
         {app.releaseDate && (
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <CalendarIcon className="h-4 w-4" />
             <span>Released {formatDate(app.releaseDate)}</span>
           </div>
         )}
-        
+
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <CalendarIcon className="h-4 w-4" />
           <span>Added {formatDate(app.createdAt)}</span>

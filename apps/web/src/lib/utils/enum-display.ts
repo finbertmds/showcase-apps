@@ -3,6 +3,13 @@
  * Centralized mapping of enum values to display text for consistent UI
  */
 
+import {
+  CodeBracketIcon,
+  ComputerDesktopIcon,
+  DevicePhoneMobileIcon,
+  GlobeAltIcon
+} from '@heroicons/react/24/outline';
+
 // Type definitions for enum options
 export interface EnumOption {
   value: string;
@@ -58,6 +65,23 @@ export function getAppVisibilityDisplay(visibility: string): string {
 
 export function getAppPlatformDisplay(platform: string): string {
   return APP_PLATFORM_DISPLAY[platform as keyof typeof APP_PLATFORM_DISPLAY] || platform;
+}
+
+export function getAppPlatformIcon(platform: string) {
+  switch (platform) {
+    case 'mobile':
+    case 'ios':
+    case 'android':
+      return DevicePhoneMobileIcon;
+    case 'desktop':
+      return ComputerDesktopIcon;
+    case 'web':
+      return GlobeAltIcon;
+    case 'api':
+      return CodeBracketIcon;
+    default:
+      return GlobeAltIcon;
+  }
 }
 
 export function getUserRoleDisplay(role: string): string {

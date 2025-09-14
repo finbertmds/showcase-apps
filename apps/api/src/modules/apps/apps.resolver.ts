@@ -2,7 +2,7 @@ import { AppStatus, AppVisibility } from '@/schemas/app.schema';
 import { UseGuards } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MUTATIONS, QUERIES } from '../../constants/graphql-operations';
-import { AppDto, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
+import { AppDto, AppsPage, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
 import { User, UserRole } from '../../schemas/user.schema';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -48,6 +48,33 @@ export class AppsResolver {
       offset,
     );
     return apps as any;
+  }
+
+  @Query(() => AppsPage, { name: QUERIES.APPS_PAGINATED })
+  async findPaginated(
+    @Args('limit', { type: () => Int }) limit: number,
+    @Args('offset', { type: () => Int }) offset: number,
+    @Args('search', { nullable: true }) search?: string,
+    @Args('category', { nullable: true }) category?: string,
+  ): Promise<AppsPage> {
+    const filters: any = {};
+    
+    if (search) {
+      filters.$text = { $search: search };
+    }
+    
+    if (category) {
+      filters.tags = { $in: [category] };
+    }
+
+    const { apps, total } = await this.appsService.findPaginated(filters, limit, offset);
+    
+    return {
+      items: apps as any,
+      totalCount: total,
+      limit,
+      offset,
+    };
   }
 
   @Query(() => [AppDto], { name: QUERIES.TIMELINE_APPS })

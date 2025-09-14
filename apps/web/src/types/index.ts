@@ -21,7 +21,9 @@ export interface App {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  createdByUser: User | null;
   organizationId: string;
+  organization: Organization | null;
 }
 
 export interface TimelineEvent {

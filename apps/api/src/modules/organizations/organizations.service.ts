@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateOrganizationInput, OrganizationDto, UpdateOrganizationInput } from '../../dto/organization.dto';
 import { ValidationException } from '../../exceptions/validation.exception';
+import { App, AppDocument } from '../../schemas/app.schema';
 import { Organization, OrganizationDocument } from '../../schemas/organization.schema';
 import { User, UserDocument } from '../../schemas/user.schema';
 import { OrganizationValidationService } from '../../services/organization-validation.service';
@@ -12,6 +13,7 @@ export class OrganizationsService {
   constructor(
     @InjectModel(Organization.name) private organizationModel: Model<OrganizationDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(App.name) private appModel: Model<AppDocument>,
     private readonly validationService: OrganizationValidationService,
   ) {}
 
@@ -145,10 +147,26 @@ export class OrganizationsService {
   }
 
   async remove(id: string): Promise<boolean> {
-    const result = await this.organizationModel.findByIdAndDelete(id).exec();
-    if (!result) {
+    // Check if organization exists
+    const organization = await this.organizationModel.findById(id).exec();
+    if (!organization) {
       throw new NotFoundException('Organization not found');
     }
+
+    // Get all users belonging to this organization
+    const users = await this.userModel.find({ organizationId: id }).exec();
+    
+    // Delete all apps created by these users
+    for (const user of users) {
+      await this.appModel.deleteMany({ createdBy: user._id }).exec();
+    }
+
+    // Delete all users belonging to this organization
+    await this.userModel.deleteMany({ organizationId: id }).exec();
+
+    // Delete the organization
+    await this.organizationModel.findByIdAndDelete(id).exec();
+    
     return true;
   }
 }

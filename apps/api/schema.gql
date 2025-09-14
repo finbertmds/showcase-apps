@@ -44,6 +44,13 @@ enum AppVisibility {
   UNLISTED
 }
 
+type AppsPage {
+  items: [AppDto!]!
+  limit: Int!
+  offset: Int!
+  totalCount: Int!
+}
+
 type AuthResponse {
   access_token: String!
   user: UserDto!
@@ -218,6 +225,7 @@ type Query {
   app(id: String!): AppDto!
   appBySlug(slug: String!): AppDto!
   apps(limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
+  appsPaginated(category: String, limit: Int!, offset: Int!, search: String): AppsPage!
   me: UserDto!
   mediaByApp(appId: String!): [MediaDto!]!
   mediaByAppAndType(appId: String!, type: MediaType!): [MediaDto!]!

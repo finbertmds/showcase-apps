@@ -1,7 +1,9 @@
 'use client';
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { DASHBOARD_DISPLAY } from '@/constants';
 import { GET_APPS } from '@/lib/graphql/queries';
+import { normalizeApps } from '@/lib/utils/app';
 import { getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
 import { useQuery } from '@apollo/client';
 import {
@@ -31,7 +33,7 @@ export function AdminDashboard() {
     );
   }
 
-  const apps = data?.apps || [];
+  let apps = normalizeApps(data?.apps || []);
   const totalViews = apps.reduce((sum: number, app: any) => sum + app.viewCount, 0);
   const totalLikes = apps.reduce((sum: number, app: any) => sum + app.likeCount, 0);
   const publishedApps = apps.filter((app: any) => app.status === 'published').length;
@@ -127,7 +129,7 @@ export function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {apps.slice(0, 10).map((app: any) => (
+                {apps.slice(0, DASHBOARD_DISPLAY.RECENT_APPS_LIMIT).map((app: any) => (
                   <tr key={app.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
