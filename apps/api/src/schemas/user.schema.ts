@@ -6,9 +6,9 @@ import { Document, Types } from 'mongoose';
 export type UserDocument = User & Document;
 
 export enum UserRole {
-  ADMIN = 'admin',
-  DEVELOPER = 'developer',
-  VIEWER = 'viewer',
+  ADMIN = 'ADMIN',
+  DEVELOPER = 'DEVELOPER',
+  VIEWER = 'VIEWER',
 }
 
 @Schema({ timestamps: true })

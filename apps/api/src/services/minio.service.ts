@@ -34,17 +34,55 @@ export class MinioService implements OnModuleInit {
         await this.client.makeBucket(this.bucketName, 'us-east-1');
         console.log(`Created bucket: ${this.bucketName}`);
       }
+      
+      // Set CORS policy for the bucket
+      await this.setBucketCorsPolicy();
+      
+      // Set bucket policy for public read access
+      await this.setPublicReadPolicy();
     } catch (error) {
       console.error('Error ensuring bucket exists:', error);
     }
   }
 
+  private async setBucketCorsPolicy(): Promise<void> {
+    try {
+      // Note: MinIO client doesn't have setBucketCors method
+      // CORS is typically configured at the MinIO server level
+      console.log(`ℹ️ CORS policy should be configured at MinIO server level for bucket: ${this.bucketName}`);
+    } catch (error) {
+      console.error('Error setting CORS policy:', error);
+    }
+  }
+
+  private async setPublicReadPolicy(): Promise<void> {
+    try {
+      const policy = {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Principal: '*',
+            Action: 's3:GetObject',
+            Resource: `arn:aws:s3:::${this.bucketName}/*`,
+          },
+        ],
+      };
+
+      await this.client.setBucketPolicy(this.bucketName, JSON.stringify(policy));
+      console.log(`✅ Public read policy set for bucket: ${this.bucketName}`);
+    } catch (error) {
+      console.error('Error setting public read policy:', error);
+    }
+  }
+
   async uploadFile(
-    file: Express.Multer.File,
+    file: any,
     folder: string = 'uploads',
+    customFilename?: string,
   ): Promise<{ url: string; filename: string }> {
-    const fileExtension = file.originalname.split('.').pop();
-    const filename = `${folder}/${uuidv4()}.${fileExtension}`;
+    // Use custom filename if provided, otherwise generate new one
+    const filename = customFilename || `${folder}/${uuidv4()}.${file.originalname.split('.').pop()}`;
 
     try {
       await this.client.putObject(
@@ -58,7 +96,7 @@ export class MinioService implements OnModuleInit {
         },
       );
 
-      const url = await this.getFileUrl(filename);
+      const url = await this.getPublicUrl(filename);
       return { url, filename };
     } catch (error) {
       console.error('Error uploading file to MinIO:', error);
@@ -66,14 +104,6 @@ export class MinioService implements OnModuleInit {
     }
   }
 
-  async deleteFile(filename: string): Promise<void> {
-    try {
-      await this.client.removeObject(this.bucketName, filename);
-    } catch (error) {
-      console.error('Error deleting file from MinIO:', error);
-      throw new Error('Failed to delete file');
-    }
-  }
 
   async getFileUrl(filename: string, expiresIn: number = 7 * 24 * 60 * 60): Promise<string> {
     try {
@@ -86,6 +116,25 @@ export class MinioService implements OnModuleInit {
     } catch (error) {
       console.error('Error getting file URL from MinIO:', error);
       throw new Error('Failed to get file URL');
+    }
+  }
+
+  // Get public URL for file (no expiration)
+  async getPublicUrl(filename: string): Promise<string> {
+    try {
+      // For public access, we'll use the direct URL format
+      // This assumes the bucket is configured for public read access
+      const protocol = this.configService.get('minio.useSSL') ? 'https' : 'http';
+      const endPoint = this.configService.get('minio.endPoint');
+      const port = this.configService.get('minio.port');
+      
+      // If port is 80/443, don't include it in URL
+      const portSuffix = (port === 80 || port === 443) ? '' : `:${port}`;
+      
+      return `${protocol}://${endPoint}${portSuffix}/${this.bucketName}/${filename}`;
+    } catch (error) {
+      console.error('Error getting public URL from MinIO:', error);
+      throw new Error('Failed to get public URL');
     }
   }
 
@@ -167,6 +216,17 @@ export class MinioService implements OnModuleInit {
     } catch (error) {
       console.error('Error setting bucket policy in MinIO:', error);
       throw new Error('Failed to set bucket policy');
+    }
+  }
+
+  // Delete file
+  async deleteFile(filename: string): Promise<void> {
+    try {
+      await this.client.removeObject(this.bucketName, filename);
+      console.log(`✅ Deleted file: ${filename}`);
+    } catch (error) {
+      console.error('Error deleting file from MinIO:', error);
+      throw new Error('Failed to delete file from storage');
     }
   }
 }

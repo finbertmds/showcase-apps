@@ -4,12 +4,12 @@ import { Document, Types } from 'mongoose';
 export type TimelineEventDocument = TimelineEvent & Document;
 
 export enum EventType {
-  RELEASE = 'release',
-  UPDATE = 'update',
-  MILESTONE = 'milestone',
-  ANNOUNCEMENT = 'announcement',
-  FEATURE = 'feature',
-  BUGFIX = 'bugfix',
+  RELEASE = 'RELEASE',
+  UPDATE = 'UPDATE',
+  MILESTONE = 'MILESTONE',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+  FEATURE = 'FEATURE',
+  BUGFIX = 'BUGFIX',
 }
 
 @Schema({ timestamps: true })

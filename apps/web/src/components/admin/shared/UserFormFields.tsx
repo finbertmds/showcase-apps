@@ -1,6 +1,7 @@
 'use client';
 
 import { EnumOption, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from '@/lib/utils/enum-display';
+import { UserRole } from '@/types';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { OrganizationSelect } from './OrganizationSelect';
 
@@ -10,7 +11,7 @@ export interface UserFormData {
   name: string;
   password?: string;
   confirmPassword?: string;
-  role: 'admin' | 'developer' | 'viewer';
+  role: UserRole;
   organizationId: string;
   isActive?: boolean;
   avatar?: string;

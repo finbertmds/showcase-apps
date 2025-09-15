@@ -35,6 +35,7 @@ export const QUERIES = {
   // Media Queries
   MEDIA_BY_APP: 'mediaByApp',
   MEDIA_BY_APP_AND_TYPE: 'mediaByAppAndType',
+  GET_APP_MEDIA: 'getAppMedia',
 
   // Timeline Queries
   TIMELINE_EVENTS: 'timelineEvents',
@@ -70,6 +71,10 @@ export const MUTATIONS = {
   // Media Mutations
   UPLOAD_MEDIA: 'uploadMedia',
   REMOVE_MEDIA: 'removeMedia',
+  UPLOAD_APP_LOGO: 'uploadAppLogo',
+  UPLOAD_APP_SCREENSHOT: 'uploadAppScreenshot',
+  CREATE_MEDIA: 'createMedia',
+  DELETE_MEDIA: 'deleteMedia',
 
   // Timeline Mutations
   CREATE_TIMELINE_EVENT: 'createTimelineEvent',

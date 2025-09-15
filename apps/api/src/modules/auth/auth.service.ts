@@ -115,7 +115,7 @@ export class AuthService {
           console.error(`Validation error on field "${field}": ${error.errors[field].message}`);
         }
       } else if (error?.name === 'MongoServerError') {
-        console.log(
+        console.error(
           'Mongo validation error details:',
           JSON.stringify(error.errInfo.details, null, 2)
         );

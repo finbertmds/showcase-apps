@@ -1,56 +1,20 @@
-import { App } from '@/types';
 import { AppFormData } from './app-form';
 
 /**
- * Normalize app status to lowercase
+ * No normalization needed - backend now uses uppercase values
+ * App data comes directly from API with correct uppercase enum values
  */
-export function normalizeAppStatus(status: string): string {
-  return status.toLowerCase();
-}
-
-/**
- * Normalize app visibility to lowercase
- */
-export function normalizeAppVisibility(visibility: string): string {
-  return visibility.toLowerCase();
-}
-
-/**
- * Normalize app platforms to lowercase
- */
-export function normalizeAppPlatforms(platforms: string[]): string[] {
-  return platforms.map(platform => platform.toLowerCase());
-}
-
-/**
- * Normalize app data by converting all enum fields to lowercase
- */
-export function normalizeApp(app: App): App {
-  return {
-    ...app,
-    status: normalizeAppStatus(app.status) as 'draft' | 'published' | 'archived',
-    visibility: normalizeAppVisibility(app.visibility) as 'public' | 'private' | 'unlisted',
-    platforms: normalizeAppPlatforms(app.platforms),
-  };
-}
-
-/**
- * Normalize array of apps by converting all enum fields to lowercase
- */
-export function normalizeApps(apps: App[]): App[] {
-  return apps.map(normalizeApp);
-}
 
 /**
  * Get Tailwind CSS classes for status badge color
  */
 export function getStatusBadgeColor(status: string): string {
-  switch (status.toLowerCase()) {
-    case 'published':
+  switch (status) {
+    case 'PUBLISHED':
       return 'bg-green-100 text-green-800';
-    case 'draft':
+    case 'DRAFT':
       return 'bg-yellow-100 text-yellow-800';
-    case 'archived':
+    case 'ARCHIVED':
       return 'bg-gray-100 text-gray-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -61,12 +25,12 @@ export function getStatusBadgeColor(status: string): string {
  * Get Tailwind CSS classes for visibility badge color
  */
 export function getVisibilityBadgeColor(visibility: string): string {
-  switch (visibility.toLowerCase()) {
-    case 'public':
+  switch (visibility) {
+    case 'PUBLIC':
       return 'bg-blue-100 text-blue-800';
-    case 'private':
+    case 'PRIVATE':
       return 'bg-red-100 text-red-800';
-    case 'unlisted':
+    case 'UNLISTED':
       return 'bg-purple-100 text-purple-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -81,27 +45,7 @@ export function getVisibilityBadgeColor(visibility: string): string {
  * Use getAppStatusDisplay, getAppVisibilityDisplay from enum-display.ts instead
  */
 
-// API conversion functions (convert to uppercase for GraphQL API)
-/**
- * Convert app status to uppercase for API
- */
-export function convertAppStatusForAPI(status: string): string {
-  return status.toUpperCase();
-}
-
-/**
- * Convert app visibility to uppercase for API
- */
-export function convertAppVisibilityForAPI(visibility: string): string {
-  return visibility.toUpperCase();
-}
-
-/**
- * Convert app platforms to uppercase for API
- */
-export function convertAppPlatformsForAPI(platforms: string[]): string[] {
-  return platforms.map(platform => platform.toUpperCase());
-}
+// No conversion needed - frontend now uses uppercase values directly
 
 /**
  * Check if a string value is empty (null, undefined, or empty string after trim)
@@ -118,19 +62,19 @@ export function emptyStringToNull(value: string | null | undefined): string | nu
 }
 
 /**
- * Convert app data for API by converting all enum fields to uppercase
- * and only including fields that have actual values (not empty strings)
+ * Prepare app data for API - no conversion needed since frontend uses uppercase values
+ * Only filter out empty optional fields
  */
-export function convertAppDataForAPI(appData: AppFormData): AppFormData {
+export function prepareAppDataForAPI(appData: AppFormData): AppFormData {
   const result: AppFormData = {
     // Required fields
     title: appData.title,
     slug: appData.slug,
     shortDesc: appData.shortDesc,
     longDesc: appData.longDesc,
-    status: convertAppStatusForAPI(appData.status) as 'draft' | 'published' | 'archived',
-    visibility: convertAppVisibilityForAPI(appData.visibility) as 'public' | 'private' | 'unlisted',
-    platforms: convertAppPlatformsForAPI(appData.platforms),
+    status: appData.status, // Already uppercase
+    visibility: appData.visibility, // Already uppercase
+    platforms: appData.platforms, // Already uppercase
     languages: appData.languages,
     tags: appData.tags,
   };

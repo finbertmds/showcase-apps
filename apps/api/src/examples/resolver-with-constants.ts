@@ -186,7 +186,7 @@ export class ExampleTestHelper {
    */
   static getTestDataForOperation(operation: string) {
     const testData: Record<string, any> = {
-      [QUERIES.APPS]: { status: 'published', limit: 10 },
+      [QUERIES.APPS]: { status: 'PUBLISHED', limit: 10 },
       [QUERIES.APP]: { id: 'test-app-id' },
       [MUTATIONS.CREATE_APP]: { input: { title: 'Test App', slug: 'test-app' } },
       [MUTATIONS.UPDATE_APP]: { id: 'test-app-id', input: { title: 'Updated App' } },

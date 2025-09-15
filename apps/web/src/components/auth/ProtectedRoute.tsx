@@ -1,19 +1,20 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiredRole?: 'admin' | 'developer' | 'viewer';
+  requiredRole?: UserRole;
   redirectTo?: string;
 }
 
-export function ProtectedRoute({ 
-  children, 
-  requiredRole, 
-  redirectTo = '/login' 
+export function ProtectedRoute({
+  children,
+  requiredRole,
+  redirectTo = '/login'
 }: ProtectedRouteProps) {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
@@ -25,9 +26,9 @@ export function ProtectedRoute({
         return;
       }
 
-      if (requiredRole && user?.role?.toLowerCase() !== requiredRole.toLowerCase()) {
+      if (requiredRole && user?.role !== requiredRole) {
         // Check role hierarchy: admin > developer > viewer
-        const roleHierarchy = { admin: 3, developer: 2, viewer: 1 };
+        const roleHierarchy = { ADMIN: 3, DEVELOPER: 2, VIEWER: 1 };
         const userRoleLevel = roleHierarchy[user?.role as keyof typeof roleHierarchy] || 0;
         const requiredRoleLevel = roleHierarchy[requiredRole];
 
@@ -51,8 +52,8 @@ export function ProtectedRoute({
     return null;
   }
 
-  if (requiredRole && user?.role?.toLowerCase() !== requiredRole.toLowerCase()) {
-    const roleHierarchy = { admin: 3, developer: 2, viewer: 1 };
+  if (requiredRole && user?.role !== requiredRole) {
+    const roleHierarchy = { ADMIN: 3, DEVELOPER: 2, VIEWER: 1 };
     const userRoleLevel = roleHierarchy[user?.role as keyof typeof roleHierarchy] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole];
 

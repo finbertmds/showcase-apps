@@ -97,6 +97,7 @@ export const GET_APPS_PAGINATED = gql`
         playStoreUrl
         viewCount
         likeCount
+        logoUrl
         createdAt
         updatedAt
         createdBy
@@ -147,6 +148,7 @@ export const GET_TIMELINE_APPS = gql`
       likeCount
       userLiked
       userViewed
+      logoUrl
       createdAt
       updatedAt
       createdBy
@@ -321,6 +323,84 @@ export const GET_MEDIA_BY_APP = gql`
       isActive
       meta
       uploadedBy
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_APP_MEDIA = gql`
+  query GetAppMedia($input: GetAppMediaInput!) {
+    getAppMedia(input: $input) {
+      id
+      appId
+      organizationId
+      userId
+      type
+      url
+      filename
+      originalName
+      mimeType
+      size
+      width
+      height
+      order
+      isActive
+      meta
+      uploadedBy
+      createdBy
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPLOAD_APP_LOGO = gql`
+  mutation UploadAppLogo($input: UploadAppLogoInput!, $file: Upload!) {
+    uploadAppLogo(input: $input, file: $file) {
+      id
+      appId
+      organizationId
+      userId
+      type
+      url
+      filename
+      originalName
+      mimeType
+      size
+      width
+      height
+      order
+      isActive
+      meta
+      uploadedBy
+      createdBy
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPLOAD_APP_SCREENSHOT = gql`
+  mutation UploadAppScreenshot($input: UploadAppScreenshotInput!, $file: Upload!) {
+    uploadAppScreenshot(input: $input, file: $file) {
+      id
+      appId
+      organizationId
+      userId
+      type
+      url
+      filename
+      originalName
+      mimeType
+      size
+      width
+      height
+      order
+      isActive
+      meta
+      uploadedBy
+      createdBy
       createdAt
       updatedAt
     }
@@ -665,5 +745,99 @@ export const GET_USER_LIKED_APPS = gql`
 export const GET_USER_VIEWED_APPS = gql`
   query GetUserViewedApps {
     getUserViewedApps
+  }
+`;
+
+// Media Mutations
+export const CREATE_MEDIA = gql`
+  mutation CreateMedia($input: CreateMediaInput!) {
+    createMedia(input: $input) {
+      id
+      appId
+      organizationId
+      userId
+      type
+      url
+      filename
+      originalName
+      mimeType
+      size
+      width
+      height
+      order
+      isActive
+      meta
+      uploadedBy
+      createdBy
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_MEDIA = gql`
+  mutation DeleteMedia($id: String!) {
+    deleteMedia(id: $id)
+  }
+`;
+
+// Auth Queries & Mutations
+export const ME_QUERY = gql`
+  query Me {
+    me {
+      id
+      email
+      username
+      name
+      role
+      organizationId
+      isActive
+      avatar
+      lastLoginAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const LOGIN_MUTATION = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      access_token
+      user {
+        id
+        email
+        username
+        name
+        role
+        organizationId
+        isActive
+        avatar
+        lastLoginAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const REGISTER_MUTATION = gql`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      access_token
+      user {
+        id
+        email
+        username
+        name
+        role
+        organizationId
+        isActive
+        avatar
+        lastLoginAt
+        createdAt
+        updatedAt
+      }
+    }
   }
 `;

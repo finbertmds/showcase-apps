@@ -17,6 +17,8 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Note: File upload handling is configured in GraphQL module
+
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -36,7 +38,7 @@ async function bootstrap() {
   const port = configService.get('PORT', 4000);
   await app.listen(port);
   
-  console.log(`🚀 API server running on: http://localhost:${port}/graphql`);
+  console.log(`🚀 API server running on: http://localhost:${port}`);
 }
 
 bootstrap();

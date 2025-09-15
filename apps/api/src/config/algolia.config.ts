@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { algoliasearch, SearchClient } from 'algoliasearch';
+import algoliasearch, { SearchClient } from 'algoliasearch';
 
 export const algoliaConfig = registerAs('algolia', () => ({
   appId: process.env.ALGOLIA_APP_ID,

@@ -8,7 +8,7 @@ export const newUserFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters'),
-  role: z.enum(['admin', 'developer', 'viewer']),
+  role: z.enum(['ADMIN', 'DEVELOPER', 'VIEWER'] as const),
   organizationId: z.string().optional(),
 });
 
@@ -17,7 +17,7 @@ export const editUserFormSchema = z.object({
   username: z.string().min(1, 'Username is required').max(50, 'Username must be less than 50 characters'),
   email: z.string().email('Invalid email address'),
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
-  role: z.enum(['admin', 'developer', 'viewer']),
+  role: z.enum(['ADMIN', 'DEVELOPER', 'VIEWER'] as const),
   organizationId: z.string().optional(),
   isActive: z.boolean(),
   avatar: z.string().url('Invalid URL').optional().or(z.literal('')),
@@ -31,7 +31,7 @@ export function getDefaultNewUserFormData(): UserFormData {
     name: '',
     password: '',
     confirmPassword: '',
-    role: 'viewer',
+    role: 'VIEWER',
     organizationId: '',
   };
 }
@@ -42,7 +42,7 @@ export function getDefaultEditUserFormData(): UserFormData {
     username: '',
     email: '',
     name: '',
-    role: 'viewer',
+    role: 'VIEWER',
     organizationId: '',
     isActive: true,
     avatar: '',

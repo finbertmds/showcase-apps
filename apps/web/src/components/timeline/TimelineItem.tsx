@@ -104,15 +104,39 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
             {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <Link
-                  href={`/apps/${app.slug}`}
-                  onClick={handleView}
-                  className="group"
-                >
-                  <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-                    {app.title}
-                  </h3>
-                </Link>
+                <div className="flex items-start space-x-4">
+                  {/* App Logo */}
+                  <div className="flex-shrink-0">
+                    {app.logoUrl ? (
+                      <img
+                        src={app.logoUrl}
+                        alt={`${app.title} logo`}
+                        className="w-8 h-8 rounded-lg object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs font-medium">
+                          {app.title.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1">
+                    <Link
+                      href={`/apps/${app.slug}`}
+                      onClick={handleView}
+                      className="group"
+                    >
+                      <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+                        {app.title}
+                      </h3>
+                    </Link>
+                  </div>
+                </div>
 
                 <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                   {/* Author and Organization */}

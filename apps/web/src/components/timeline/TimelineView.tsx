@@ -4,7 +4,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DEFAULT_TIMELINE_PAGE_SIZE } from '@/constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { GET_TIMELINE_APPS } from '@/lib/graphql/queries';
-import { normalizeApps } from '@/lib/utils/app';
+// No normalization needed - backend now uses uppercase values
 import { App } from '@/types';
 import { useQuery } from '@apollo/client';
 import { useEffect, useState } from 'react';
@@ -43,7 +43,7 @@ export function TimelineView() {
     );
   }
 
-  const apps: App[] = normalizeApps(data?.timelineApps || []);
+  const apps: App[] = data?.timelineApps || [];
 
   if (apps.length === 0) {
     return (

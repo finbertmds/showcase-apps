@@ -6,6 +6,7 @@ import { AppDto, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
 import { AppLike, AppLikeDocument } from '../../schemas/app-like.schema';
 import { AppView, AppViewDocument } from '../../schemas/app-view.schema';
 import { App, AppDocument } from '../../schemas/app.schema';
+import { Media, MediaDocument } from '../../schemas/media.schema';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class AppsService {
     @InjectModel(App.name) private appModel: Model<AppDocument>,
     @InjectModel(AppLike.name) private appLikeModel: Model<AppLikeDocument>,
     @InjectModel(AppView.name) private appViewModel: Model<AppViewDocument>,
+    @InjectModel(Media.name) private mediaModel: Model<MediaDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Organization.name) private organizationModel: Model<OrganizationDocument>,
   ) {}
@@ -131,6 +133,32 @@ export class AppsService {
           organization = await this.organizationModel.findById(app.organizationId).exec();
         }
 
+        // Get logo URL from media
+        let logoUrl = null;
+        try {
+          const logoMedia = await this.mediaModel.findOne({
+            appId: app._id,
+            type: 'LOGO',
+            isActive: true
+          }).exec();
+          
+          if (logoMedia) {
+            // Try to get thumbnail first, fallback to original URL
+            if (logoMedia.meta?.thumbnails) {
+              const smallThumbnail = logoMedia.meta.thumbnails.find(t => t.size === 'small');
+              if (smallThumbnail) {
+                logoUrl = smallThumbnail.url;
+              } else {
+                logoUrl = logoMedia.url;
+              }
+            } else {
+              logoUrl = logoMedia.url;
+            }
+          }
+        } catch (error) {
+          console.warn(`Failed to get logo for app ${app._id}:`, error.message);
+        }
+
         return {
           ...app.toObject(),
           id: app._id.toString(),
@@ -138,6 +166,7 @@ export class AppsService {
           createdByUser: user,
           organizationId: app.organizationId?.toString(),
           organization: organization,
+          logoUrl: logoUrl,
         };
       })
     );
@@ -379,8 +408,8 @@ export class AppsService {
 
   async getTimelineApps(limit = 20, offset = 0, userId?: string): Promise<{ apps: AppDto[]; total: number }> {
     const query = {
-      status: 'published',
-      visibility: 'public',
+      status: 'PUBLISHED',
+      visibility: 'PUBLIC',
     };
 
     const [apps, total] = await Promise.all([
@@ -406,6 +435,32 @@ export class AppsService {
           organization = await this.organizationModel.findById(app.organizationId).exec();
         }
 
+        // Get logo URL from media
+        let logoUrl = null;
+        try {
+          const logoMedia = await this.mediaModel.findOne({
+            appId: app._id,
+            type: 'LOGO',
+            isActive: true
+          }).exec();
+          
+          if (logoMedia) {
+            // Try to get thumbnail first, fallback to original URL
+            if (logoMedia.meta?.thumbnails) {
+              const smallThumbnail = logoMedia.meta.thumbnails.find(t => t.size === 'small');
+              if (smallThumbnail) {
+                logoUrl = smallThumbnail.url;
+              } else {
+                logoUrl = logoMedia.url;
+              }
+            } else {
+              logoUrl = logoMedia.url;
+            }
+          }
+        } catch (error) {
+          console.warn(`Failed to get logo for app ${app._id}:`, error.message);
+        }
+
         return {
           ...app.toObject(),
           id: app._id.toString(),
@@ -413,6 +468,7 @@ export class AppsService {
           createdByUser: user,
           organizationId: app.organizationId?.toString(),
           organization: organization,
+          logoUrl: logoUrl,
         } as AppDto;
       })
     );

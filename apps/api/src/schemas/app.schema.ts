@@ -5,24 +5,24 @@ import { Document, Types } from 'mongoose';
 export type AppDocument = App & Document;
 
 export enum AppStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVED = 'ARCHIVED',
 }
 
 export enum AppVisibility {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-  UNLISTED = 'unlisted',
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  UNLISTED = 'UNLISTED',
 }
 
 export enum Platform {
-  WEB = 'web',
-  MOBILE = 'mobile',
-  IOS = 'ios',
-  ANDROID = 'android',
-  DESKTOP = 'desktop',
-  API = 'api',
+  WEB = 'WEB',
+  MOBILE = 'MOBILE',
+  IOS = 'IOS',
+  ANDROID = 'ANDROID',
+  DESKTOP = 'DESKTOP',
+  API = 'API',
 }
 
 @Schema({ timestamps: true })

@@ -18,29 +18,41 @@ export interface EnumOption {
 
 // App Enums
 export const APP_STATUS_DISPLAY = {
-  draft: 'Draft',
-  published: 'Published',
-  archived: 'Archived',
+  DRAFT: 'Draft',
+  PUBLISHED: 'Published',
+  ARCHIVED: 'Archived',
 } as const;
 
 export const APP_VISIBILITY_DISPLAY = {
-  public: 'Public',
-  private: 'Private',
-  unlisted: 'Unlisted',
+  PUBLIC: 'Public',
+  PRIVATE: 'Private',
+  UNLISTED: 'Unlisted',
 } as const;
 
 export const APP_PLATFORM_DISPLAY = {
-  web: 'Web',
-  mobile: 'Mobile',
-  desktop: 'Desktop',
-  api: 'API',
+  WEB: 'Web',
+  MOBILE: 'Mobile',
+  DESKTOP: 'Desktop',
+  API: 'API',
+  IOS: 'iOS',
+  ANDROID: 'Android',
+} as const;
+
+// Media Enums
+export const MEDIA_TYPE_DISPLAY = {
+  SCREENSHOT: 'Screenshot',
+  LOGO: 'Logo',
+  COVER: 'Cover',
+  ICON: 'Icon',
+  VIDEO: 'Video',
+  DOCUMENT: 'Document',
 } as const;
 
 // User Enums
 export const USER_ROLE_DISPLAY = {
-  admin: 'Admin',
-  developer: 'Developer',
-  viewer: 'Viewer',
+  ADMIN: 'Admin',
+  DEVELOPER: 'Developer',
+  VIEWER: 'Viewer',
 } as const;
 
 export const USER_STATUS_DISPLAY = {
@@ -68,20 +80,24 @@ export function getAppPlatformDisplay(platform: string): string {
 }
 
 export function getAppPlatformIcon(platform: string) {
-  switch (platform) {
-    case 'mobile':
-    case 'ios':
-    case 'android':
+  switch (platform.toUpperCase()) {
+    case 'MOBILE':
+    case 'IOS':
+    case 'ANDROID':
       return DevicePhoneMobileIcon;
-    case 'desktop':
+    case 'DESKTOP':
       return ComputerDesktopIcon;
-    case 'web':
+    case 'WEB':
       return GlobeAltIcon;
-    case 'api':
+    case 'API':
       return CodeBracketIcon;
     default:
       return GlobeAltIcon;
   }
+}
+
+export function getMediaTypeDisplay(type: string): string {
+  return MEDIA_TYPE_DISPLAY[type as keyof typeof MEDIA_TYPE_DISPLAY] || type;
 }
 
 export function getUserRoleDisplay(role: string): string {
@@ -150,28 +166,39 @@ export function getOrganizationStatusBadgeColor(isActive: boolean): string {
 
 // Options for select dropdowns
 export const APP_STATUS_OPTIONS: EnumOption[] = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Published' },
-  { value: 'archived', label: 'Archived' },
+  { value: 'DRAFT', label: 'Draft' },
+  { value: 'PUBLISHED', label: 'Published' },
+  { value: 'ARCHIVED', label: 'Archived' },
 ];
 
 export const APP_VISIBILITY_OPTIONS: EnumOption[] = [
-  { value: 'public', label: 'Public' },
-  { value: 'private', label: 'Private' },
-  { value: 'unlisted', label: 'Unlisted' },
+  { value: 'PUBLIC', label: 'Public' },
+  { value: 'PRIVATE', label: 'Private' },
+  { value: 'UNLISTED', label: 'Unlisted' },
 ];
 
 export const APP_PLATFORM_OPTIONS: EnumOption[] = [
-  { value: 'web', label: 'Web' },
-  { value: 'mobile', label: 'Mobile' },
-  { value: 'desktop', label: 'Desktop' },
-  { value: 'api', label: 'API' },
+  { value: 'WEB', label: 'Web' },
+  { value: 'MOBILE', label: 'Mobile' },
+  { value: 'DESKTOP', label: 'Desktop' },
+  { value: 'API', label: 'API' },
+  { value: 'IOS', label: 'iOS' },
+  { value: 'ANDROID', label: 'Android' },
+];
+
+export const MEDIA_TYPE_OPTIONS: EnumOption[] = [
+  { value: 'SCREENSHOT', label: 'Screenshot' },
+  { value: 'LOGO', label: 'Logo' },
+  { value: 'COVER', label: 'Cover' },
+  { value: 'ICON', label: 'Icon' },
+  { value: 'VIDEO', label: 'Video' },
+  { value: 'DOCUMENT', label: 'Document' },
 ];
 
 export const USER_ROLE_OPTIONS: EnumOption[] = [
-  { value: 'viewer', label: 'Viewer' },
-  { value: 'developer', label: 'Developer' },
-  { value: 'admin', label: 'Admin' },
+  { value: 'VIEWER', label: 'Viewer' },
+  { value: 'DEVELOPER', label: 'Developer' },
+  { value: 'ADMIN', label: 'Admin' },
 ];
 
 export const USER_STATUS_OPTIONS: EnumOption[] = [

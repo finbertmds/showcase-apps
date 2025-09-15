@@ -1,11 +1,11 @@
 import { TimelineEvent } from '@/types';
 import {
-    ArrowPathIcon,
-    BugAntIcon,
-    MegaphoneIcon,
-    RocketLaunchIcon,
-    SparklesIcon,
-    StarIcon,
+  ArrowPathIcon,
+  BugAntIcon,
+  MegaphoneIcon,
+  RocketLaunchIcon,
+  SparklesIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -17,17 +17,17 @@ interface AppTimelineProps {
 export function AppTimeline({ events, loading }: AppTimelineProps) {
   const getEventIcon = (type: string) => {
     switch (type) {
-      case 'release':
+      case 'RELEASE':
         return <RocketLaunchIcon className="h-5 w-5" />;
-      case 'update':
+      case 'UPDATE':
         return <ArrowPathIcon className="h-5 w-5" />;
-      case 'milestone':
+      case 'MILESTONE':
         return <StarIcon className="h-5 w-5" />;
-      case 'announcement':
+      case 'ANNOUNCEMENT':
         return <MegaphoneIcon className="h-5 w-5" />;
-      case 'feature':
+      case 'FEATURE':
         return <SparklesIcon className="h-5 w-5" />;
-      case 'bugfix':
+      case 'BUGFIX':
         return <BugAntIcon className="h-5 w-5" />;
       default:
         return <MegaphoneIcon className="h-5 w-5" />;
@@ -36,17 +36,17 @@ export function AppTimeline({ events, loading }: AppTimelineProps) {
 
   const getEventColor = (type: string) => {
     switch (type) {
-      case 'release':
+      case 'RELEASE':
         return 'bg-green-100 text-green-800';
-      case 'update':
+      case 'UPDATE':
         return 'bg-blue-100 text-blue-800';
-      case 'milestone':
+      case 'MILESTONE':
         return 'bg-yellow-100 text-yellow-800';
-      case 'announcement':
+      case 'ANNOUNCEMENT':
         return 'bg-purple-100 text-purple-800';
-      case 'feature':
+      case 'FEATURE':
         return 'bg-indigo-100 text-indigo-800';
-      case 'bugfix':
+      case 'BUGFIX':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -91,7 +91,7 @@ export function AppTimeline({ events, loading }: AppTimelineProps) {
           {index !== events.length - 1 && (
             <div className="absolute left-5 top-10 w-0.5 h-16 bg-gray-200" />
           )}
-          
+
           <div className="flex items-start space-x-4">
             {/* Event icon */}
             <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getEventColor(event.type)}`}>
@@ -108,17 +108,17 @@ export function AppTimeline({ events, loading }: AppTimelineProps) {
                   </span>
                 )}
               </div>
-              
+
               <div className="flex items-center space-x-4 text-sm text-gray-500 mb-2">
                 <span>{formatDate(event.date)}</span>
                 <span>•</span>
                 <span className="capitalize">{event.type}</span>
               </div>
-              
+
               {event.description && (
                 <p className="text-gray-600 mb-3">{event.description}</p>
               )}
-              
+
               {event.url && (
                 <a
                   href={event.url}

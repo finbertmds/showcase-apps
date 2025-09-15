@@ -14,9 +14,9 @@ interface AppScreenshotsProps {
 
 export function AppScreenshots({ media, loading, appTitle }: AppScreenshotsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  const screenshots = media.filter(m => m.type === 'screenshot' || m.type === 'cover');
-  const logo = media.find(m => m.type === 'logo');
+
+  const screenshots = media.filter(m => m.type === 'SCREENSHOT' || m.type === 'COVER');
+  const logo = media.find(m => m.type === 'LOGO');
 
   if (loading) {
     return (
@@ -67,7 +67,7 @@ export function AppScreenshots({ media, loading, appTitle }: AppScreenshotsProps
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         )}
-        
+
         {/* Navigation Arrows */}
         {hasMultipleImages && (
           <>
@@ -96,11 +96,10 @@ export function AppScreenshots({ media, loading, appTitle }: AppScreenshotsProps
             <button
               key={screenshot.id}
               onClick={() => setCurrentIndex(index)}
-              className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                index === currentIndex
+              className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${index === currentIndex
                   ? 'border-primary-500'
                   : 'border-gray-200 hover:border-gray-300'
-              }`}
+                }`}
             >
               <Image
                 src={screenshot.url}

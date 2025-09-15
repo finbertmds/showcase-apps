@@ -1,13 +1,22 @@
+// Enum Type Definitions
+export type AppStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type AppVisibility = 'PUBLIC' | 'PRIVATE' | 'UNLISTED';
+export type Platform = 'WEB' | 'MOBILE' | 'IOS' | 'ANDROID' | 'DESKTOP' | 'API';
+export type UserRole = 'ADMIN' | 'DEVELOPER' | 'VIEWER';
+export type EventType = 'RELEASE' | 'UPDATE' | 'MILESTONE' | 'ANNOUNCEMENT' | 'FEATURE' | 'BUGFIX';
+export type MediaType = 'SCREENSHOT' | 'LOGO' | 'COVER' | 'ICON' | 'VIDEO' | 'DOCUMENT';
+
+// Main Interfaces
 export interface App {
   id: string;
   title: string;
   slug: string;
   shortDesc: string;
   longDesc: string;
-  status: 'draft' | 'published' | 'archived';
-  visibility: 'public' | 'private' | 'unlisted';
+  status: AppStatus;
+  visibility: AppVisibility;
   releaseDate?: string;
-  platforms: string[];
+  platforms: Platform[];
   languages: string[];
   tags: string[];
   website?: string;
@@ -26,6 +35,7 @@ export interface App {
   createdByUser: User | null;
   organizationId: string;
   organization: Organization | null;
+  logoUrl?: string;
 }
 
 export interface TimelineEvent {
@@ -33,7 +43,7 @@ export interface TimelineEvent {
   appId: string;
   title: string;
   description?: string;
-  type: 'release' | 'update' | 'milestone' | 'announcement' | 'feature' | 'bugfix';
+  type: EventType;
   date: string;
   isPublic: boolean;
   version?: string;
@@ -46,7 +56,7 @@ export interface TimelineEvent {
 
 export interface Media {
   id: string;
-  type: 'screenshot' | 'logo' | 'cover' | 'icon' | 'video' | 'document';
+  type: MediaType;
   url: string;
   filename: string;
   originalName: string;
@@ -67,7 +77,7 @@ export interface User {
   email: string;
   username: string;
   name: string;
-  role: 'admin' | 'developer' | 'viewer';
+  role: UserRole;
   organizationId?: string;
   organization?: Organization;
   isActive: boolean;

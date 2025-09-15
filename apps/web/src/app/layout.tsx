@@ -34,8 +34,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <ApolloWrapper>
+        <ApolloWrapper>
+          <AuthProvider>
             {children}
             <Toaster
               position="top-right"
@@ -47,8 +47,8 @@ export default function RootLayout({
                 },
               }}
             />
-          </ApolloWrapper>
-        </AuthProvider>
+          </AuthProvider>
+        </ApolloWrapper>
       </body>
     </html>
   );

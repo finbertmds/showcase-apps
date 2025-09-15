@@ -1,10 +1,12 @@
 'use client';
 
+import MediaManager from '@/components/admin/MediaManager';
+import MediaUpload from '@/components/admin/MediaUpload';
 import { AppFormActions } from '@/components/admin/shared/AppFormActions';
 import { AppFormFields } from '@/components/admin/shared/AppFormFields';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { GET_APP_BYID, UPDATE_APP } from '@/lib/graphql/queries';
-import { emptyStringToNull, normalizeApp } from '@/lib/utils/app';
+import { emptyStringToNull } from '@/lib/utils/app';
 import { AppFormData, appFormSchema, arraysEqual, getDefaultAppFormData } from '@/lib/utils/app-form';
 import { useMutation, useQuery } from '@apollo/client';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -47,24 +49,23 @@ export function AdminAppEditForm({ appId }: AdminAppEditFormProps) {
   // Load app data when it's available
   useEffect(() => {
     if (data?.app) {
-      const normalizedApp = normalizeApp(data.app);
       const appFormData = {
-        title: normalizedApp.title || '',
-        slug: normalizedApp.slug || '',
-        shortDesc: normalizedApp.shortDesc || '',
-        longDesc: normalizedApp.longDesc || '',
-        status: normalizedApp.status || 'draft',
-        visibility: normalizedApp.visibility || 'public',
-        platforms: normalizedApp.platforms || [],
-        languages: normalizedApp.languages || [],
-        tags: normalizedApp.tags || [],
-        website: normalizedApp.website || '',
-        repository: normalizedApp.repository || '',
-        demoUrl: normalizedApp.demoUrl || '',
-        downloadUrl: normalizedApp.downloadUrl || '',
-        appStoreUrl: normalizedApp.appStoreUrl || '',
-        playStoreUrl: normalizedApp.playStoreUrl || '',
-        releaseDate: normalizedApp.releaseDate || '',
+        title: data.app.title || '',
+        slug: data.app.slug || '',
+        shortDesc: data.app.shortDesc || '',
+        longDesc: data.app.longDesc || '',
+        status: data.app.status || 'DRAFT',
+        visibility: data.app.visibility || 'PUBLIC',
+        platforms: data.app.platforms || [],
+        languages: data.app.languages || [],
+        tags: data.app.tags || [],
+        website: data.app.website || '',
+        repository: data.app.repository || '',
+        demoUrl: data.app.demoUrl || '',
+        downloadUrl: data.app.downloadUrl || '',
+        appStoreUrl: data.app.appStoreUrl || '',
+        playStoreUrl: data.app.playStoreUrl || '',
+        releaseDate: data.app.releaseDate || '',
       };
 
       // Store original data for comparison
@@ -225,6 +226,46 @@ export function AdminAppEditForm({ appId }: AdminAppEditFormProps) {
           tagInput={tagInput}
           setTagInput={setTagInput}
         />
+
+        {/* Media Upload Section */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">Media Management</h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Logo Upload */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">App Logo</h3>
+              <MediaUpload
+                appId={appId}
+                type="LOGO"
+                onUploadSuccess={(media) => {
+                  toast.success('Logo uploaded successfully!');
+                }}
+                onUploadError={(error) => {
+                  toast.error(`Failed to upload logo: ${error}`);
+                }}
+              />
+            </div>
+
+            {/* Screenshot Upload */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">App Screenshots</h3>
+              <MediaUpload
+                appId={appId}
+                type="SCREENSHOT"
+                onUploadSuccess={(media) => {
+                  toast.success('Screenshot uploaded successfully!');
+                }}
+                onUploadError={(error) => {
+                  toast.error(`Failed to upload screenshot: ${error}`);
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Media Manager */}
+          <MediaManager appId={appId} />
+        </div>
 
         <AppFormActions
           isSubmitting={isSubmitting}

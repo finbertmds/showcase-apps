@@ -8,8 +8,8 @@ export const sentryConfig = registerAs('sentry', () => ({
   debug: process.env.NODE_ENV === 'development',
   integrations: [
     Sentry.httpIntegration(),
-    Sentry.expressIntegration(),
-    Sentry.mongoIntegration(),
+    // Sentry.expressIntegration(), // Not available in this version
+    // Sentry.mongoIntegration(), // Not available in this version
   ],
 }));
 

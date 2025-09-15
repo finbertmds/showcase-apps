@@ -1,3 +1,4 @@
+import { Media, MediaSchema } from '@/schemas/media.schema';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppLike, AppLikeSchema } from '../../schemas/app-like.schema';
@@ -16,6 +17,7 @@ import { AppsService } from './apps.service';
       { name: AppView.name, schema: AppViewSchema },
       { name: User.name, schema: UserSchema },
       { name: Organization.name, schema: OrganizationSchema },
+      { name: Media.name, schema: MediaSchema },
     ]),
   ],
   providers: [AppsResolver, AppsService],

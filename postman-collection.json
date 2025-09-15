@@ -1,780 +1,1300 @@
 {
-	"info": {
-		"_postman_id": "d4615165-a669-4d7f-8eb9-93194a1e068d",
-		"name": "Showcase Apps API",
-		"description": "GraphQL API collection for Showcase Apps with JWT Authentication",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "350399"
-	},
-	"item": [
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Register User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.register) {",
-									"        pm.collectionVariables.set('authToken', response.data.register.access_token);",
-									"        console.log('Auth token saved:', response.data.register.access_token);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation Register($input: RegisterInput!) {\\n    register(input: $input) {\\n      access_token\\n      user {\\n        id\\n        email\\n        username\\n        name\\n        role\\n        organizationId\\n        isActive\\n        avatar\\n        lastLoginAt\\n        createdAt\\n        updatedAt\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"username\": \"testuser\",\n      \"email\": \"test@example.com\",\n      \"name\": \"Test User\",\n      \"password\": \"password123\",\n      \"role\": \"ADMIN\"\n    }\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    if (response.data && response.data.login) {",
-									"        pm.collectionVariables.set('authToken', response.data.login.access_token);",
-									"        console.log('Auth token saved:', response.data.login.access_token);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation Login($input: LoginInput!) {\\n    login(input: $input) {\\n      access_token\\n      user {\\n        id\\n        email\\n        username\\n        name\\n        role\\n        organizationId\\n        isActive\\n        avatar\\n        lastLoginAt\\n        createdAt\\n        updatedAt\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"usernameOrEmail\": \"test@example.com\",\n      \"password\": \"password123\"\n    }\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Current User (Me)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query Me {\\n    me {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Change Password",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation ChangePassword($input: ChangePasswordInput!) {\\n    changePassword(input: $input)\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"currentPassword\": \"password123\",\n      \"newPassword\": \"newpassword123\"\n    }\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Public Queries",
-			"item": [
-				{
-					"name": "Get All Apps",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetApps {\\n    apps {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      status\\n      visibility\\n      platforms\\n      languages\\n      tags\\n      viewCount\\n      likeCount\\n      createdAt\\n    }\\n  }\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Apps with Filters",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetAppsWithFilters($status: String, $visibility: String, $platforms: [String!], $tags: [String!], $search: String, $limit: Int, $offset: Int) {\\n    apps(status: $status, visibility: $visibility, platforms: $platforms, tags: $tags, search: $search, limit: $limit, offset: $offset) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      status\\n      visibility\\n      platforms\\n      languages\\n      tags\\n      viewCount\\n      likeCount\\n      createdAt\\n    }\\n  }\",\n  \"variables\": {\n    \"status\": \"PUBLISHED\",\n    \"visibility\": \"PUBLIC\",\n    \"platforms\": [\"WEB\", \"MOBILE\"],\n    \"search\": \"app\",\n    \"limit\": 10,\n    \"offset\": 0\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get App by ID",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "graphql",
-							"graphql": {
-								"query": "query GetAppById($id: String!) {\n      app(id: $id) {\n        id\n        title\n        slug\n        shortDesc\n        longDesc\n        status\n        visibility\n        releaseDate\n        platforms\n        languages\n        tags\n        website\n        repository\n        demoUrl\n        downloadUrl\n        appStoreUrl\n        playStoreUrl\n        viewCount\n        likeCount\n        createdAt\n        updatedAt\n        createdBy\n        createdByUser {\n          id\n          name\n          email\n        }\n        organizationId\n        organization {\n          id\n          name\n          slug\n        }\n      }\n    }",
-								"variables": "{\n    \"id\": \"68bd92952e823e2cef1cab3f\"\n}"
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get App by Slug",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetAppBySlug($slug: String!) {\\n    appBySlug(slug: $slug) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      longDesc\\n      status\\n      visibility\\n      releaseDate\\n      platforms\\n      languages\\n      tags\\n      website\\n      repository\\n      demoUrl\\n      downloadUrl\\n      appStoreUrl\\n      playStoreUrl\\n      viewCount\\n      likeCount\\n      createdAt\\n      updatedAt\\n      createdBy\\n      organizationId\\n    }\\n  }\",\n  \"variables\": {\n    \"slug\": \"my-new-app\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Timeline Apps",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetTimelineApps($limit: Int, $offset: Int) {\\n    timelineApps(limit: $limit, offset: $offset) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      status\\n      visibility\\n      platforms\\n      languages\\n      tags\\n      viewCount\\n      likeCount\\n      createdAt\\n    }\\n  }\",\n  \"variables\": {\n    \"limit\": 20,\n    \"offset\": 0\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Timeline Events",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetTimelineEvents($limit: Int, $offset: Int) {\\n    timelineEvents(limit: $limit, offset: $offset) {\\n      _id\\n      appId\\n      title\\n      description\\n      type\\n      date\\n      isPublic\\n      version\\n      url\\n      metadata\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"limit\": 20,\n    \"offset\": 0\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Timeline Events by App",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetTimelineEventsByApp($appId: String!, $isPublic: Boolean) {\\n    timelineEventsByApp(appId: $appId, isPublic: $isPublic) {\\n      _id\\n      title\\n      description\\n      type\\n      date\\n      isPublic\\n      version\\n      url\\n      metadata\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"appId\": \"APP_ID_HERE\",\n    \"isPublic\": true\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Media by App",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetMediaByApp($appId: String!) {\\n    mediaByApp(appId: $appId) {\\n      _id\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"appId\": \"68bd9d7db218c97b7d48d094\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Organizations",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetOrganizations {\\n    organizations {\\n      _id\\n      name\\n      slug\\n      description\\n      logo\\n      website\\n      isActive\\n      ownerId\\n      createdAt\\n      updatedAt\\n    }\\n  }\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Organization by ID",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetOrganizationById($id: String!) {\\n    organization(id: $id) {\\n      _id\\n      name\\n      slug\\n      description\\n      logo\\n      website\\n      isActive\\n      ownerId\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"ORG_ID_HERE\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Organization by Slug",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetOrganizationBySlug($slug: String!) {\\n    organizationBySlug(slug: $slug) {\\n      _id\\n      name\\n      slug\\n      description\\n      logo\\n      website\\n      isActive\\n      ownerId\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"slug\": \"org-slug-here\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Protected Queries (Require JWT)",
-			"item": [
-				{
-					"name": "Get All Users (Admin Only)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetAllUsers {\\n    users {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get User by ID",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"query GetUserById($id: String!) {\\n    user(id: $id) {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"USER_ID_HERE\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Mutations (Require JWT)",
-			"item": [
-				{
-					"name": "Create App",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation CreateApp($input: CreateAppInput!) {\\n    createApp(input: $input) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      longDesc\\n      status\\n      visibility\\n      releaseDate\\n      platforms\\n      languages\\n      tags\\n      website\\n      repository\\n      demoUrl\\n      downloadUrl\\n      appStoreUrl\\n      playStoreUrl\\n      viewCount\\n      likeCount\\n      createdAt\\n      updatedAt\\n      createdBy\\n      organizationId\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"title\": \"My New App2\",\n      \"slug\": \"my-new-app2\",\n      \"shortDesc\": \"A brief description of my app\",\n      \"longDesc\": \"A detailed description of my app and its features\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"platforms\": [\"WEB\", \"MOBILE\"],\n      \"languages\": [\"en\", \"vi\"],\n      \"tags\": [\"react\", \"nodejs\", \"typescript\"],\n      \"website\": \"https://myapp.com\",\n      \"repository\": \"https://github.com/user/myapp\"\n    }\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update App",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation UpdateApp($id: String!, $input: UpdateAppInput!) {\\n    updateApp(id: $id, input: $input) {\\n      _id\\n      title\\n      slug\\n      shortDesc\\n      longDesc\\n      status\\n      visibility\\n      releaseDate\\n      platforms\\n      languages\\n      tags\\n      website\\n      repository\\n      demoUrl\\n      downloadUrl\\n      appStoreUrl\\n      playStoreUrl\\n      viewCount\\n      likeCount\\n      createdAt\\n      updatedAt\\n      createdBy\\n      organizationId\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\",\n    \"input\": {\n      \"title\": \"Updated App Title\",\n      \"shortDesc\": \"Updated description\",\n      \"status\": \"PUBLISHED\",\n      \"tags\": [\"react\", \"nodejs\", \"typescript\", \"updated\"]\n    }\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete App",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation DeleteApp($id: String!) {\\n    removeApp(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update User (Admin Only)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation UpdateUser($id: String!, $role: UserRole, $isActive: Boolean) {\\n    updateUser(id: $id, role: $role, isActive: $isActive) {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"USER_ID_HERE\",\n    \"role\": \"DEVELOPER\",\n    \"isActive\": true\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User (Admin Only)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation DeleteUser($id: String!) {\\n    removeUser(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"USER_ID_HERE\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Public Mutations",
-			"item": [
-				{
-					"name": "Increment App View",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation IncrementAppView($id: String!) {\\n    incrementAppView(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Increment App Like",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation IncrementAppLike($id: String!) {\\n    incrementAppLike(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/graphql",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"graphql"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Health Check",
-			"item": [
-				{
-					"name": "API Health Check",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/health",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"health"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:4000",
-			"type": "string"
-		},
-		{
-			"key": "webUrl",
-			"value": "http://localhost:3000",
-			"type": "string"
-		},
-		{
-			"key": "authToken",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "d4615165-a669-4d7f-8eb9-93194a1e068d",
+    "name": "Showcase Apps API",
+    "description": "GraphQL API collection for Showcase Apps with JWT Authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "350399"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.register) {",
+                  "        pm.collectionVariables.set('authToken', response.data.register.access_token);",
+                  "        console.log('Auth token saved:', response.data.register.access_token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation Register($input: RegisterInput!) {\\n    register(input: $input) {\\n      access_token\\n      user {\\n        id\\n        email\\n        username\\n        name\\n        role\\n        organizationId\\n        isActive\\n        avatar\\n        lastLoginAt\\n        createdAt\\n        updatedAt\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"username\": \"testuser\",\n      \"email\": \"test@example.com\",\n      \"name\": \"Test User\",\n      \"password\": \"password123\",\n      \"role\": \"ADMIN\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.login) {",
+                  "        pm.collectionVariables.set('authToken', response.data.login.access_token);",
+                  "        console.log('Auth token saved:', response.data.login.access_token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation Login($input: LoginInput!) {\\n    login(input: $input) {\\n      access_token\\n      user {\\n        id\\n        email\\n        username\\n        name\\n        role\\n        organizationId\\n        isActive\\n        avatar\\n        lastLoginAt\\n        createdAt\\n        updatedAt\\n      }\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"usernameOrEmail\": \"test@example.com\",\n      \"password\": \"password123\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query Me {\\n    me {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation ChangePassword($input: ChangePasswordInput!) {\\n    changePassword(input: $input)\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"currentPassword\": \"password123\",\n      \"newPassword\": \"newpassword123\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public Queries",
+      "item": [
+        {
+          "name": "Get All Apps",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetApps {\\n    apps {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      status\\n      visibility\\n      platforms\\n      languages\\n      tags\\n      viewCount\\n      likeCount\\n      createdAt\\n    }\\n  }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Apps with Filters",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetAppsWithFilters($status: String, $visibility: String, $platforms: [String!], $tags: [String!], $search: String, $limit: Int, $offset: Int) {\\n    apps(status: $status, visibility: $visibility, platforms: $platforms, tags: $tags, search: $search, limit: $limit, offset: $offset) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      status\\n      visibility\\n      platforms\\n      languages\\n      tags\\n      viewCount\\n      likeCount\\n      createdAt\\n    }\\n  }\",\n  \"variables\": {\n    \"status\": \"PUBLISHED\",\n    \"visibility\": \"PUBLIC\",\n    \"platforms\": [\"WEB\", \"MOBILE\"],\n    \"search\": \"app\",\n    \"limit\": 10,\n    \"offset\": 0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get App by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetAppById($id: String!) {\n      app(id: $id) {\n        id\n        title\n        slug\n        shortDesc\n        longDesc\n        status\n        visibility\n        releaseDate\n        platforms\n        languages\n        tags\n        website\n        repository\n        demoUrl\n        downloadUrl\n        appStoreUrl\n        playStoreUrl\n        viewCount\n        likeCount\n        createdAt\n        updatedAt\n        createdBy\n        createdByUser {\n          id\n          name\n          email\n        }\n        organizationId\n        organization {\n          id\n          name\n          slug\n        }\n      }\n    }",
+                "variables": "{\n    \"id\": \"68bd92952e823e2cef1cab3f\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get App by Slug",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetAppBySlug($slug: String!) {\\n    appBySlug(slug: $slug) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      longDesc\\n      status\\n      visibility\\n      releaseDate\\n      platforms\\n      languages\\n      tags\\n      website\\n      repository\\n      demoUrl\\n      downloadUrl\\n      appStoreUrl\\n      playStoreUrl\\n      viewCount\\n      likeCount\\n      createdAt\\n      updatedAt\\n      createdBy\\n      organizationId\\n    }\\n  }\",\n  \"variables\": {\n    \"slug\": \"my-new-app\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Timeline Apps",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetTimelineApps($limit: Int, $offset: Int) {\\n    timelineApps(limit: $limit, offset: $offset) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      status\\n      visibility\\n      platforms\\n      languages\\n      tags\\n      viewCount\\n      likeCount\\n      createdAt\\n    }\\n  }\",\n  \"variables\": {\n    \"limit\": 20,\n    \"offset\": 0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Timeline Events",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetTimelineEvents($limit: Int, $offset: Int) {\\n    timelineEvents(limit: $limit, offset: $offset) {\\n      _id\\n      appId\\n      title\\n      description\\n      type\\n      date\\n      isPublic\\n      version\\n      url\\n      metadata\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"limit\": 20,\n    \"offset\": 0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Timeline Events by App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetTimelineEventsByApp($appId: String!, $isPublic: Boolean) {\\n    timelineEventsByApp(appId: $appId, isPublic: $isPublic) {\\n      _id\\n      title\\n      description\\n      type\\n      date\\n      isPublic\\n      version\\n      url\\n      metadata\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"appId\": \"APP_ID_HERE\",\n    \"isPublic\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Media by App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetMediaByApp($appId: String!) {\\n    mediaByApp(appId: $appId) {\\n      _id\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"appId\": \"68bd9d7db218c97b7d48d094\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Organizations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetOrganizations {\\n    organizations {\\n      _id\\n      name\\n      slug\\n      description\\n      logo\\n      website\\n      isActive\\n      ownerId\\n      createdAt\\n      updatedAt\\n    }\\n  }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Organization by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetOrganizationById($id: String!) {\\n    organization(id: $id) {\\n      _id\\n      name\\n      slug\\n      description\\n      logo\\n      website\\n      isActive\\n      ownerId\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"ORG_ID_HERE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Organization by Slug",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetOrganizationBySlug($slug: String!) {\\n    organizationBySlug(slug: $slug) {\\n      _id\\n      name\\n      slug\\n      description\\n      logo\\n      website\\n      isActive\\n      ownerId\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"slug\": \"org-slug-here\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Protected Queries (Require JWT)",
+      "item": [
+        {
+          "name": "Get All Users (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetAllUsers {\\n    users {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetUserById($id: String!) {\\n    user(id: $id) {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"USER_ID_HERE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mutations (Require JWT)",
+      "item": [
+        {
+          "name": "Create App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation CreateApp($input: CreateAppInput!) {\\n    createApp(input: $input) {\\n      id\\n      title\\n      slug\\n      shortDesc\\n      longDesc\\n      status\\n      visibility\\n      releaseDate\\n      platforms\\n      languages\\n      tags\\n      website\\n      repository\\n      demoUrl\\n      downloadUrl\\n      appStoreUrl\\n      playStoreUrl\\n      viewCount\\n      likeCount\\n      createdAt\\n      updatedAt\\n      createdBy\\n      organizationId\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"title\": \"My New App2\",\n      \"slug\": \"my-new-app2\",\n      \"shortDesc\": \"A brief description of my app\",\n      \"longDesc\": \"A detailed description of my app and its features\",\n      \"status\": \"PUBLISHED\",\n      \"visibility\": \"PUBLIC\",\n      \"platforms\": [\"WEB\", \"MOBILE\"],\n      \"languages\": [\"en\", \"vi\"],\n      \"tags\": [\"react\", \"nodejs\", \"typescript\"],\n      \"website\": \"https://myapp.com\",\n      \"repository\": \"https://github.com/user/myapp\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation UpdateApp($id: String!, $input: UpdateAppInput!) {\\n    updateApp(id: $id, input: $input) {\\n      _id\\n      title\\n      slug\\n      shortDesc\\n      longDesc\\n      status\\n      visibility\\n      releaseDate\\n      platforms\\n      languages\\n      tags\\n      website\\n      repository\\n      demoUrl\\n      downloadUrl\\n      appStoreUrl\\n      playStoreUrl\\n      viewCount\\n      likeCount\\n      createdAt\\n      updatedAt\\n      createdBy\\n      organizationId\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\",\n    \"input\": {\n      \"title\": \"Updated App Title\",\n      \"shortDesc\": \"Updated description\",\n      \"status\": \"PUBLISHED\",\n      \"tags\": [\"react\", \"nodejs\", \"typescript\", \"updated\"]\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation DeleteApp($id: String!) {\\n    removeApp(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation UpdateUser($id: String!, $role: UserRole, $isActive: Boolean) {\\n    updateUser(id: $id, role: $role, isActive: $isActive) {\\n      id\\n      email\\n      username\\n      name\\n      role\\n      organizationId\\n      isActive\\n      avatar\\n      lastLoginAt\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"id\": \"USER_ID_HERE\",\n    \"role\": \"DEVELOPER\",\n    \"isActive\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation DeleteUser($id: String!) {\\n    removeUser(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"USER_ID_HERE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public Mutations",
+      "item": [
+        {
+          "name": "Increment App View",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation IncrementAppView($id: String!) {\\n    incrementAppView(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Increment App Like",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation IncrementAppLike($id: String!) {\\n    incrementAppLike(id: $id)\\n  }\",\n  \"variables\": {\n    \"id\": \"APP_ID_HERE\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "API Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Media Management",
+      "item": [
+        {
+          "name": "Complete Media Upload Workflow",
+          "item": [
+            {
+              "name": "1. Get Presigned URL for Logo",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.uploadUrl) {",
+                      "        pm.collectionVariables.set('presignedUploadUrl', response.uploadUrl);",
+                      "        pm.collectionVariables.set('mediaFilename', response.filename);",
+                      "        const baseUrl = response.uploadUrl.split('?')[0];",
+                      "        pm.collectionVariables.set('mediaUrl', baseUrl);",
+                      "        console.log('✅ Step 1: Presigned URL received');",
+                      "        console.log('Upload URL:', response.uploadUrl.substring(0, 100) + '...');",
+                      "        console.log('Filename:', response.filename);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentType\": \"image/png\",\n  \"filename\": \"app-logo.png\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/apps/{{appId}}/media/logo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "apps", "{{appId}}", "media", "logo"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "2. Upload File to S3/MinIO",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    console.log('✅ Step 2: File uploaded successfully to S3/MinIO');",
+                      "    console.log('Response status:', pm.response.status);",
+                      "} else {",
+                      "    console.log('❌ Step 2: Upload failed');",
+                      "    console.log('Status:', pm.response.status);",
+                      "    console.log('Response:', pm.response.text());",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "image/png"
+                  }
+                ],
+                "body": {
+                  "mode": "file",
+                  "file": {
+                    "src": "/path/to/your/logo.png"
+                  }
+                },
+                "url": {
+                  "raw": "{{presignedUploadUrl}}",
+                  "host": ["{{presignedUploadUrl}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "3. Save Media Metadata",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.data && response.data.createMedia) {",
+                      "        pm.collectionVariables.set('mediaId', response.data.createMedia.id);",
+                      "        console.log('✅ Step 3: Media metadata saved successfully');",
+                      "        console.log('Media ID:', response.data.createMedia.id);",
+                      "        console.log('Media URL:', response.data.createMedia.url);",
+                      "        console.log('🎉 Complete workflow finished!');",
+                      "    } else if (response.errors) {",
+                      "        console.log('❌ Step 3: GraphQL errors:', response.errors);",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Step 3: Request failed');",
+                      "    console.log('Status:', pm.response.status);",
+                      "    console.log('Response:', pm.response.text());",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"mutation CreateMedia($input: CreateMediaInput!) {\\n    createMedia(input: $input) {\\n      id\\n      appId\\n      organizationId\\n      userId\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"appId\": \"{{appId}}\",\n      \"type\": \"LOGO\",\n      \"url\": \"{{mediaUrl}}\",\n      \"filename\": \"{{mediaFilename}}\",\n      \"originalName\": \"app-logo.png\",\n      \"mimeType\": \"image/png\",\n      \"size\": 1024,\n      \"width\": 512,\n      \"height\": 512,\n      \"order\": 0\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/graphql",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["graphql"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Complete Screenshot Upload Workflow",
+          "item": [
+            {
+              "name": "1. Get Presigned URL for Screenshot",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.uploadUrl) {",
+                      "        pm.collectionVariables.set('presignedUploadUrl', response.uploadUrl);",
+                      "        pm.collectionVariables.set('mediaFilename', response.filename);",
+                      "        const baseUrl = response.uploadUrl.split('?')[0];",
+                      "        pm.collectionVariables.set('mediaUrl', baseUrl);",
+                      "        console.log('✅ Step 1: Presigned URL received for screenshot');",
+                      "        console.log('Upload URL:', response.uploadUrl.substring(0, 100) + '...');",
+                      "        console.log('Filename:', response.filename);",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contentType\": \"image/png\",\n  \"filename\": \"app-screenshot.png\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/apps/{{appId}}/media/screenshot",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "apps", "{{appId}}", "media", "screenshot"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "2. Upload Screenshot to S3/MinIO",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    console.log('✅ Step 2: Screenshot uploaded successfully to S3/MinIO');",
+                      "    console.log('Response status:', pm.response.status);",
+                      "} else {",
+                      "    console.log('❌ Step 2: Screenshot upload failed');",
+                      "    console.log('Status:', pm.response.status);",
+                      "    console.log('Response:', pm.response.text());",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "image/png"
+                  }
+                ],
+                "body": {
+                  "mode": "file",
+                  "file": {
+                    "src": "/path/to/your/screenshot.png"
+                  }
+                },
+                "url": {
+                  "raw": "{{presignedUploadUrl}}",
+                  "host": ["{{presignedUploadUrl}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "3. Save Screenshot Metadata",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.data && response.data.createMedia) {",
+                      "        pm.collectionVariables.set('mediaId', response.data.createMedia.id);",
+                      "        console.log('✅ Step 3: Screenshot metadata saved successfully');",
+                      "        console.log('Media ID:', response.data.createMedia.id);",
+                      "        console.log('Media URL:', response.data.createMedia.url);",
+                      "        console.log('🎉 Screenshot workflow finished!');",
+                      "    } else if (response.errors) {",
+                      "        console.log('❌ Step 3: GraphQL errors:', response.errors);",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Step 3: Request failed');",
+                      "    console.log('Status:', pm.response.status);",
+                      "    console.log('Response:', pm.response.text());",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"mutation CreateMedia($input: CreateMediaInput!) {\\n    createMedia(input: $input) {\\n      id\\n      appId\\n      organizationId\\n      userId\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"appId\": \"{{appId}}\",\n      \"type\": \"SCREENSHOT\",\n      \"url\": \"{{mediaUrl}}\",\n      \"filename\": \"{{mediaFilename}}\",\n      \"originalName\": \"app-screenshot.png\",\n      \"mimeType\": \"image/png\",\n      \"size\": 2048,\n      \"width\": 1024,\n      \"height\": 768,\n      \"order\": 0\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/graphql",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["graphql"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get Presigned URL for Logo Upload",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.uploadUrl) {",
+                  "        pm.collectionVariables.set('presignedUploadUrl', response.uploadUrl);",
+                  "        pm.collectionVariables.set('mediaFilename', response.filename);",
+                  "        // Extract the base URL without query parameters",
+                  "        const baseUrl = response.uploadUrl.split('?')[0];",
+                  "        pm.collectionVariables.set('mediaUrl', baseUrl);",
+                  "        console.log('Presigned URL saved:', response.uploadUrl);",
+                  "        console.log('Media filename saved:', response.filename);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contentType\": \"image/png\",\n  \"filename\": \"app-logo.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/apps/{{appId}}/media/logo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apps", "{{appId}}", "media", "logo"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Presigned URL for Screenshot Upload",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.uploadUrl) {",
+                  "        pm.collectionVariables.set('presignedUploadUrl', response.uploadUrl);",
+                  "        pm.collectionVariables.set('mediaFilename', response.filename);",
+                  "        // Extract the base URL without query parameters",
+                  "        const baseUrl = response.uploadUrl.split('?')[0];",
+                  "        pm.collectionVariables.set('mediaUrl', baseUrl);",
+                  "        console.log('Presigned URL saved:', response.uploadUrl);",
+                  "        console.log('Media filename saved:', response.filename);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contentType\": \"image/png\",\n  \"filename\": \"app-screenshot.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/apps/{{appId}}/media/screenshot",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apps", "{{appId}}", "media", "screenshot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload File to Presigned URL",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "image/png"
+              }
+            ],
+            "body": {
+              "mode": "file",
+              "file": {
+                "src": "/path/to/your/image.png"
+              }
+            },
+            "url": {
+              "raw": "{{presignedUploadUrl}}",
+              "host": ["{{presignedUploadUrl}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Media Metadata (GraphQL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.createMedia) {",
+                  "        pm.collectionVariables.set('mediaId', response.data.createMedia.id);",
+                  "        console.log('Media ID saved:', response.data.createMedia.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation CreateMedia($input: CreateMediaInput!) {\\n    createMedia(input: $input) {\\n      id\\n      appId\\n      organizationId\\n      userId\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"appId\": \"{{appId}}\",\n      \"type\": \"LOGO\",\n      \"url\": \"{{mediaUrl}}\",\n      \"filename\": \"{{mediaFilename}}\",\n      \"originalName\": \"app-logo.png\",\n      \"mimeType\": \"image/png\",\n      \"size\": 1024,\n      \"width\": 512,\n      \"height\": 512,\n      \"order\": 0\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get App Media (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetAppMedia($input: GetAppMediaInput!) {\\n    getAppMedia(input: $input) {\\n      id\\n      appId\\n      organizationId\\n      userId\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"appId\": \"{{appId}}\",\n      \"type\": \"LOGO\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All App Media (GraphQL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetAppMedia($input: GetAppMediaInput!) {\\n    getAppMedia(input: $input) {\\n      id\\n      appId\\n      organizationId\\n      userId\\n      type\\n      url\\n      filename\\n      originalName\\n      mimeType\\n      size\\n      width\\n      height\\n      order\\n      isActive\\n      meta\\n      uploadedBy\\n      createdBy\\n      createdAt\\n      updatedAt\\n    }\\n  }\",\n  \"variables\": {\n    \"input\": {\n      \"appId\": \"{{appId}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Legacy: Upload App Logo (Direct)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/your/logo.png"
+                },
+                {
+                  "key": "appId",
+                  "value": "{{appId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "logo",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "upload"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Legacy: Upload App Screenshot (Direct)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "/path/to/your/screenshot.png"
+                },
+                {
+                  "key": "appId",
+                  "value": "{{appId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "screenshot",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "media", "upload"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "webUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "appId",
+      "value": "507f1f77bcf86cd799439011",
+      "type": "string"
+    },
+    {
+      "key": "mediaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "presignedUploadUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mediaUrl",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mediaFilename",
+      "value": "",
+      "type": "string"
+    }
+  ]
 }

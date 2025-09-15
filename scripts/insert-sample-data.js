@@ -18,7 +18,7 @@ const sampleUsers = [
     name: 'John Doe',
     username: 'johndoe',
     password: 'password123',
-    role: 'admin',
+    role: 'ADMIN',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john',
   },
@@ -27,7 +27,7 @@ const sampleUsers = [
     name: 'Jane Smith',
     username: 'janesmith',
     password: 'password123',
-    role: 'developer',
+    role: 'DEVELOPER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=jane',
   },
@@ -36,7 +36,7 @@ const sampleUsers = [
     name: 'Mike Johnson',
     username: 'mikejohnson',
     password: 'password123',
-    role: 'developer',
+    role: 'DEVELOPER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mike',
   },
@@ -45,7 +45,7 @@ const sampleUsers = [
     name: 'Sarah Wilson',
     username: 'sarahwilson',
     password: 'password123',
-    role: 'viewer',
+    role: 'VIEWER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
   },
@@ -54,7 +54,7 @@ const sampleUsers = [
     name: 'David Brown',
     username: 'davidbrown',
     password: 'password123',
-    role: 'developer',
+    role: 'DEVELOPER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=david',
   },
@@ -63,7 +63,7 @@ const sampleUsers = [
     name: 'Lisa Garcia',
     username: 'lisagarcia',
     password: 'password123',
-    role: 'admin',
+    role: 'ADMIN',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisa',
   },
@@ -72,7 +72,7 @@ const sampleUsers = [
     name: 'Alex Martinez',
     username: 'alexmartinez',
     password: 'password123',
-    role: 'developer',
+    role: 'DEVELOPER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
   },
@@ -81,7 +81,7 @@ const sampleUsers = [
     name: 'Emma Davis',
     username: 'emmadavis',
     password: 'password123',
-    role: 'viewer',
+    role: 'VIEWER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emma',
   },
@@ -90,7 +90,7 @@ const sampleUsers = [
     name: 'Ryan Taylor',
     username: 'ryantaylor',
     password: 'password123',
-    role: 'admin',
+    role: 'ADMIN',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ryan',
   },
@@ -99,9 +99,18 @@ const sampleUsers = [
     name: 'Olivia Anderson',
     username: 'oliviaanderson',
     password: 'password123',
-    role: 'developer',
+    role: 'DEVELOPER',
     isActive: true,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=olivia',
+  },
+  {
+    email: 'test@example.com',
+    name: 'Admin',
+    username: 'admin',
+    password: 'password123',
+    role: 'ADMIN',
+    isActive: true,
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
   },
 ];
 
@@ -194,10 +203,10 @@ const sampleApps = [
     slug: 'projectmanager-pro',
     shortDesc: 'Advanced project management tool for teams',
     longDesc: 'A comprehensive project management solution that helps teams organize, track, and deliver projects on time. Features include task management, team collaboration, time tracking, and detailed reporting.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-01-15'),
-    platforms: ['web', 'desktop'],
+    platforms: ['WEB', 'DESKTOP'],
     languages: ['JavaScript', 'TypeScript', 'React'],
     tags: ['productivity', 'project-management', 'collaboration'],
     website: 'https://projectmanager-pro.com',
@@ -212,10 +221,10 @@ const sampleApps = [
     slug: 'dataviz-studio',
     shortDesc: 'Interactive data visualization platform',
     longDesc: 'Create stunning interactive charts, graphs, and dashboards from your data. Supports multiple data sources, real-time updates, and customizable visualizations for business intelligence.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-02-20'),
-    platforms: ['web', 'desktop'],
+    platforms: ['WEB', 'DESKTOP'],
     languages: ['Python', 'JavaScript', 'D3.js'],
     tags: ['data-visualization', 'analytics', 'business-intelligence'],
     website: 'https://dataviz-studio.io',
@@ -229,10 +238,10 @@ const sampleApps = [
     slug: 'cloudsync-manager',
     shortDesc: 'Multi-cloud file synchronization tool',
     longDesc: 'Seamlessly sync files across multiple cloud providers including AWS S3, Google Drive, Dropbox, and OneDrive. Features automatic backup, version control, and conflict resolution.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-03-10'),
-    platforms: ['desktop', 'mobile'],
+    platforms: ['DESKTOP', 'MOBILE'],
     languages: ['Go', 'React Native', 'TypeScript'],
     tags: ['cloud-storage', 'file-sync', 'backup'],
     website: 'https://cloudsync-manager.com',
@@ -246,10 +255,10 @@ const sampleApps = [
     slug: 'ai-chat-assistant',
     shortDesc: 'Intelligent chatbot with natural language processing',
     longDesc: 'Advanced AI-powered chatbot that can understand context, provide intelligent responses, and integrate with various business systems. Supports multiple languages and custom training.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-04-05'),
-    platforms: ['web', 'mobile'],
+    platforms: ['WEB', 'MOBILE'],
     languages: ['Python', 'JavaScript', 'TensorFlow'],
     tags: ['ai', 'chatbot', 'nlp', 'automation'],
     website: 'https://ai-chat-assistant.com',
@@ -263,10 +272,10 @@ const sampleApps = [
     slug: 'mobile-task-tracker',
     shortDesc: 'Simple and intuitive task management app',
     longDesc: 'Clean and simple task management app designed for mobile users. Features include quick task creation, due date reminders, priority levels, and offline synchronization.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-05-12'),
-    platforms: ['mobile'],
+    platforms: ['MOBILE'],
     languages: ['React Native', 'TypeScript'],
     tags: ['mobile', 'task-management', 'productivity'],
     appStoreUrl: 'https://apps.apple.com/app/mobile-task-tracker',
@@ -279,10 +288,10 @@ const sampleApps = [
     slug: 'ml-model-builder',
     shortDesc: 'No-code machine learning model creation tool',
     longDesc: 'Drag-and-drop interface for creating machine learning models without coding. Supports various algorithms, data preprocessing, model training, and deployment to cloud platforms.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-06-18'),
-    platforms: ['web'],
+    platforms: ['WEB'],
     languages: ['Python', 'JavaScript', 'TensorFlow'],
     tags: ['machine-learning', 'no-code', 'ai', 'data-science'],
     website: 'https://ml-model-builder.com',
@@ -296,10 +305,10 @@ const sampleApps = [
     slug: 'code-review-assistant',
     shortDesc: 'Automated code review and quality analysis tool',
     longDesc: 'AI-powered code review tool that analyzes code quality, suggests improvements, detects bugs, and enforces coding standards. Integrates with popular version control systems.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-07-25'),
-    platforms: ['web', 'desktop'],
+    platforms: ['WEB', 'DESKTOP'],
     languages: ['TypeScript', 'Python', 'Go'],
     tags: ['code-review', 'quality-assurance', 'developer-tools'],
     website: 'https://code-review-assistant.com',
@@ -313,10 +322,10 @@ const sampleApps = [
     slug: 'startup-dashboard',
     shortDesc: 'Comprehensive startup metrics and analytics dashboard',
     longDesc: 'All-in-one dashboard for startups to track key metrics, user engagement, revenue, and growth. Features real-time analytics, custom reports, and investor-ready presentations.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-08-30'),
-    platforms: ['web'],
+    platforms: ['WEB'],
     languages: ['React', 'Node.js', 'PostgreSQL'],
     tags: ['startup', 'analytics', 'metrics', 'dashboard'],
     website: 'https://startup-dashboard.io',
@@ -330,10 +339,10 @@ const sampleApps = [
     slug: 'enterprise-security-suite',
     shortDesc: 'Comprehensive enterprise security and compliance platform',
     longDesc: 'Enterprise-grade security platform providing threat detection, compliance monitoring, access control, and security analytics. Designed for large organizations with complex security requirements.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-09-15'),
-    platforms: ['web', 'desktop'],
+    platforms: ['WEB', 'DESKTOP'],
     languages: ['Java', 'React', 'Spring Boot'],
     tags: ['security', 'enterprise', 'compliance', 'monitoring'],
     website: 'https://enterprise-security-suite.com',
@@ -346,10 +355,10 @@ const sampleApps = [
     slug: 'techstart-hub',
     shortDesc: 'Innovation platform for tech startups and entrepreneurs',
     longDesc: 'Platform connecting tech startups with investors, mentors, and resources. Features include startup profiles, funding opportunities, mentorship matching, and resource sharing.',
-    status: 'published',
-    visibility: 'public',
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
     releaseDate: new Date('2024-10-22'),
-    platforms: ['web', 'mobile'],
+    platforms: ['WEB', 'MOBILE'],
     languages: ['Vue.js', 'Node.js', 'MongoDB'],
     tags: ['startup', 'networking', 'funding', 'mentorship'],
     website: 'https://techstart-hub.io',
@@ -445,17 +454,19 @@ async function updateUsersWithOrganizations(db, users, organizations) {
   
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
-    const organization = organizations[i];
-    
-    await usersCollection.updateOne(
-      { _id: user._id },
-      { 
-        $set: { 
-          organizationId: organization._id,
-          updatedAt: new Date()
+    if (organizations[i] && user) {
+      const organization = organizations[i];
+      
+      await usersCollection.updateOne(
+        { _id: user._id },
+        { 
+          $set: { 
+            organizationId: organization._id,
+            updatedAt: new Date()
+          }
         }
-      }
-    );
+      );
+    }
   }
   
   console.log('✅ Updated users with organization references');
@@ -535,11 +546,25 @@ async function deleteSampleData() {
     // Delete all apps first (due to foreign key constraints)
     const appsResult = await db.collection('apps').deleteMany({});
     console.log(`🗑️  Deleted ${appsResult.deletedCount} apps`);
+
+    // Delete all app views, app likes
+    const appViewsResult = await db.collection('appviews').deleteMany({});
+    console.log(`🗑️  Deleted ${appViewsResult.deletedCount} app views`);
+    const appLikesResult = await db.collection('applikes').deleteMany({});
+    console.log(`🗑️  Deleted ${appLikesResult.deletedCount} app likes`);
+
+    // Delete all media
+    const mediaResult = await db.collection('media').deleteMany({});
+    console.log(`🗑️  Deleted ${mediaResult.deletedCount} media`);
+
+    // Delete all timeline events
+    const timelineEventsResult = await db.collection('timelineevents').deleteMany({});
+    console.log(`🗑️  Deleted ${timelineEventsResult.deletedCount} timeline events`);
     
     // Delete all organizations
     const orgsResult = await db.collection('organizations').deleteMany({});
     console.log(`🗑️  Deleted ${orgsResult.deletedCount} organizations`);
-    
+
     // Delete all users
     const usersResult = await db.collection('users').deleteMany({});
     console.log(`🗑️  Deleted ${usersResult.deletedCount} users`);
@@ -547,6 +572,10 @@ async function deleteSampleData() {
     console.log('\n✅ Sample data deletion completed successfully!');
     console.log('📊 Summary:');
     console.log(`   Apps deleted: ${appsResult.deletedCount}`);
+    console.log(`   App views deleted: ${appViewsResult.deletedCount}`);
+    console.log(`   App likes deleted: ${appLikesResult.deletedCount}`);
+    console.log(`   Media deleted: ${mediaResult.deletedCount}`);
+    console.log(`   Timeline events deleted: ${timelineEventsResult.deletedCount}`);
     console.log(`   Organizations deleted: ${orgsResult.deletedCount}`);
     console.log(`   Users deleted: ${usersResult.deletedCount}`);
     
@@ -641,12 +670,64 @@ async function deleteSampleDataByPattern() {
   }
 }
 
+/**
+ * Drop all collections in the database
+ * WARNING: This will permanently delete ALL data from the database!
+ */
+async function dropAllCollections() {
+  const client = new MongoClient(MONGODB_URI);
+  
+  try {
+    await client.connect();
+    console.log('🔗 Connected to MongoDB');
+    
+    const db = client.db('showcase');
+    
+    // Get all collection names
+    const collections = await db.listCollections().toArray();
+    console.log(`📋 Found ${collections.length} collections to drop`);
+    
+    if (collections.length === 0) {
+      console.log('ℹ️  No collections found in database');
+      return;
+    }
+    
+    // List all collections that will be dropped
+    console.log('\n📝 Collections that will be dropped:');
+    collections.forEach((collection, index) => {
+      console.log(`   ${index + 1}. ${collection.name}`);
+    });
+    
+    // Drop each collection
+    let droppedCount = 0;
+    for (const collection of collections) {
+      try {
+        await db.collection(collection.name).drop();
+        console.log(`✅ Dropped collection: ${collection.name}`);
+        droppedCount++;
+      } catch (error) {
+        console.log(`⚠️  Failed to drop collection ${collection.name}: ${error.message}`);
+      }
+    }
+    
+    console.log(`\n🎉 Successfully dropped ${droppedCount} out of ${collections.length} collections`);
+    
+  } catch (error) {
+    console.error('❌ Error dropping collections:', error.message);
+    throw error;
+  } finally {
+    await client.close();
+    console.log('🔌 Disconnected from MongoDB');
+  }
+}
+
 module.exports = { 
   insertUsers, 
   insertOrganizations, 
   insertApps, 
   deleteSampleData,
   deleteSampleDataByPattern,
+  dropAllCollections,
   sampleUsers, 
   sampleOrganizations, 
   sampleApps 

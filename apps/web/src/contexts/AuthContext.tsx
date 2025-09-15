@@ -1,6 +1,8 @@
 'use client';
 
-import { apolloClient } from '@/lib/apollo-wrapper';
+import { LOGIN_MUTATION, ME_QUERY, REGISTER_MUTATION } from '@/lib/graphql/queries';
+import { UserRole } from '@/types';
+import { useApolloClient, useLazyQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -10,7 +12,7 @@ export interface User {
   email: string;
   username: string;
   name: string;
-  role: 'admin' | 'developer' | 'viewer';
+  role: UserRole;
   organizationId?: string;
   isActive: boolean;
   avatar?: string;
@@ -38,6 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const hasFetchedUserData = useRef(false);
 
+  // Apollo hooks
+  const apolloClient = useApolloClient();
+  const [loginMutation] = useMutation(LOGIN_MUTATION);
+  const [registerMutation] = useMutation(REGISTER_MUTATION);
+  const [getMe, { loading: meLoading }] = useLazyQuery(ME_QUERY);
+
   const isAuthenticated = !!user && !!token;
 
   const fetchUserData = useCallback(async (authToken: string) => {
@@ -49,37 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hasFetchedUserData.current = true;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          query: `
-            query Me {
-              me {
-                id
-                email
-                username
-                name
-                role
-                organizationId
-                isActive
-                avatar
-                lastLoginAt
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-        }),
-      });
+      const { data, error } = await getMe();
 
-      const { data, errors } = await response.json();
-
-      if (errors) {
-        throw new Error(errors[0]?.message || 'Failed to fetch user data');
+      if (error) {
+        throw new Error(error.message || 'Failed to fetch user data');
       }
 
       if (data?.me) {
@@ -96,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getMe]);
 
   useEffect(() => {
     // Check for existing token on mount (only on client side)
@@ -118,49 +99,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `
-            mutation Login($input: LoginInput!) {
-              login(input: $input) {
-                access_token
-                user {
-                  id
-                  email
-                  username
-                  name
-                  role
-                  organizationId
-                  isActive
-                  avatar
-                  lastLoginAt
-                  createdAt
-                  updatedAt
-                }
-              }
-            }
-          `,
-          variables: {
-            input: {
-              usernameOrEmail,
-              password,
-            },
+      const result = await loginMutation({
+        variables: {
+          input: {
+            usernameOrEmail,
+            password,
           },
-        }),
+        },
       });
 
-      const { data, errors } = await response.json();
-
-      if (errors) {
-        throw new Error(errors[0]?.message || 'Login failed');
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || 'Login failed');
       }
 
-      if (data?.login) {
-        const { access_token, user: userData } = data.login;
+      if (result.data?.login) {
+        const { access_token, user: userData } = result.data.login;
 
         // Store token (only on client side)
         if (typeof window !== 'undefined') {
@@ -189,57 +142,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     name: string,
     password: string,
-    role: string = 'viewer'
+    role: string = 'VIEWER'
   ): Promise<boolean> => {
     try {
       setLoading(true);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `
-            mutation Register($input: RegisterInput!) {
-              register(input: $input) {
-                access_token
-                user {
-                  id
-                  email
-                  username
-                  name
-                  role
-                  organizationId
-                  isActive
-                  avatar
-                  lastLoginAt
-                  createdAt
-                  updatedAt
-                }
-              }
-            }
-          `,
-          variables: {
-            input: {
-              username,
-              email,
-              name,
-              password,
-              role: role.toUpperCase(),
-            },
+      const result = await registerMutation({
+        variables: {
+          input: {
+            username,
+            email,
+            name,
+            password,
+            role: role.toUpperCase(),
           },
-        }),
+        },
       });
 
-      const { data, errors } = await response.json();
-
-      if (errors) {
-        throw new Error(errors[0]?.message || 'Registration failed');
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || 'Registration failed');
       }
 
-      if (data?.register) {
-        const { access_token, user: userData } = data.register;
+      if (result.data?.register) {
+        const { access_token, user: userData } = result.data.register;
 
         // Store token (only on client side)
         if (typeof window !== 'undefined') {

@@ -14,32 +14,32 @@ export class AlgoliaService implements OnModuleInit {
     
     if (this.client) {
       // Configure index settings
-      await this.client.setSettings({
-        indexName: this.index,
-        indexSettings: {
-          searchableAttributes: [
-          'title',
-          'shortDesc',
-          'longDesc',
-          'tags',
-          'platforms',
-          'languages',
-        ],
-        attributesForFaceting: [
-          'searchable(platforms)',
-          'searchable(tags)',
-          'searchable(languages)',
-          'searchable(status)',
-          'searchable(visibility)',
-        ],
-        customRanking: [
-          'desc(viewCount)',
-          'desc(likeCount)',
-          'desc(createdAt)',
-        ],
-        hitsPerPage: 20,
-        maxValuesPerFacet: 100,
-      }});
+      // await this.client.setSettings({
+      //   indexName: this.index,
+      //   indexSettings: {
+      //     searchableAttributes: [
+      //     'title',
+      //     'shortDesc',
+      //     'longDesc',
+      //     'tags',
+      //     'platforms',
+      //     'languages',
+      //   ],
+      //   attributesForFaceting: [
+      //     'searchable(platforms)',
+      //     'searchable(tags)',
+      //     'searchable(languages)',
+      //     'searchable(status)',
+      //     'searchable(visibility)',
+      //   ],
+      //   customRanking: [
+      //     'desc(viewCount)',
+      //     'desc(likeCount)',
+      //     'desc(createdAt)',
+      //   ],
+      //   hitsPerPage: 20,
+      //   maxValuesPerFacet: 100,
+      // }});
     }
   }
 
@@ -66,10 +66,10 @@ export class AlgoliaService implements OnModuleInit {
         createdBy: app.createdBy.toString(),
       };
 
-      await this.client.saveObject({
-        indexName: this.index,
-        body: algoliaObject,
-      });
+      // await this.client.saveObject({
+      //   indexName: this.index,
+      //   body: algoliaObject,
+      // });
     } catch (error) {
       console.error('Error indexing app to Algolia:', error);
     }
@@ -83,10 +83,10 @@ export class AlgoliaService implements OnModuleInit {
     if (!this.client) return;
 
     try {
-      await this.client.deleteObject({
-        indexName: this.index,
-        objectID: appId,
-      });
+      // await this.client.deleteObject({
+      //   indexName: this.index,
+      //   objectID: appId,
+      // });
     } catch (error) {
       console.error('Error deleting app from Algolia:', error);
     }

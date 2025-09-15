@@ -4,18 +4,33 @@ import { Document, Types } from 'mongoose';
 export type MediaDocument = Media & Document;
 
 export enum MediaType {
-  SCREENSHOT = 'screenshot',
-  LOGO = 'logo',
-  COVER = 'cover',
-  ICON = 'icon',
-  VIDEO = 'video',
-  DOCUMENT = 'document',
+  LOGO = 'LOGO',
+  SCREENSHOT = 'SCREENSHOT',
+  COVER = 'COVER',
+  ICON = 'ICON',
+  VIDEO = 'VIDEO',
+  DOCUMENT = 'DOCUMENT',
 }
+
+export const MediaTypePriority = {
+  [MediaType.LOGO]: 1,
+  [MediaType.SCREENSHOT]: 2,
+  [MediaType.COVER]: 3,
+  [MediaType.ICON]: 4,
+  [MediaType.VIDEO]: 5,
+  [MediaType.DOCUMENT]: 6,
+};
 
 @Schema({ timestamps: true })
 export class Media {
   @Prop({ type: Types.ObjectId, ref: 'App', required: true })
   appId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Organization', required: false })
+  organizationId?: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  userId?: Types.ObjectId;
 
   @Prop({ 
     type: String, 
@@ -57,11 +72,19 @@ export class Media {
     caption?: string;
     colors?: string[];
     dominantColor?: string;
+    thumbnails?: Array<{
+      size: string;
+      url: string;
+    }>;
+    processed?: boolean;
     [key: string]: any;
   };
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   uploadedBy: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  createdBy: Types.ObjectId;
 
   createdAt: Date;
   updatedAt: Date;

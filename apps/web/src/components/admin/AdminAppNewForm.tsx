@@ -3,7 +3,7 @@
 import { AppFormActions } from '@/components/admin/shared/AppFormActions';
 import { AppFormFields } from '@/components/admin/shared/AppFormFields';
 import { CREATE_APP, GET_APPS } from '@/lib/graphql/queries';
-import { convertAppDataForAPI } from '@/lib/utils/app';
+import { prepareAppDataForAPI } from '@/lib/utils/app';
 import { AppFormData, appFormSchema, getDefaultAppFormData } from '@/lib/utils/app-form';
 import { FieldError } from '@/types';
 import { useMutation } from '@apollo/client';
@@ -70,8 +70,8 @@ export function AdminAppNewForm() {
     setFieldErrors({});
 
     try {
-      // Convert enum fields to uppercase for API
-      const apiData = convertAppDataForAPI(data);
+      // Prepare data for API (no conversion needed - already uppercase)
+      const apiData = prepareAppDataForAPI(data);
 
       // Call the createApp mutation
       await createApp({

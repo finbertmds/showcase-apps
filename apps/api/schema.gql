@@ -12,6 +12,7 @@ type AppDto {
   id: ID!
   languages: [String!]!
   likeCount: Float
+  logoUrl: String
   longDesc: String!
   organization: OrganizationDto
   organizationId: String
@@ -83,10 +84,18 @@ input CreateAppInput {
 }
 
 input CreateMediaInput {
-  appId: String!
-  meta: JSON
+  appId: ID!
+  filename: String!
+  height: Float
+  mimeType: String!
   order: Float
+  organizationId: String
+  originalName: String!
+  size: Float!
   type: MediaType!
+  url: String!
+  userId: String
+  width: Float
 }
 
 input CreateOrganizationInput {
@@ -125,6 +134,11 @@ enum EventType {
   UPDATE
 }
 
+input GetAppMediaInput {
+  appId: ID!
+  type: MediaType
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -138,6 +152,7 @@ input LoginInput {
 type MediaDto {
   appId: String!
   createdAt: DateTime!
+  createdBy: String!
   filename: String!
   height: Float
   id: ID!
@@ -145,12 +160,14 @@ type MediaDto {
   meta: JSON
   mimeType: String!
   order: Float!
+  organizationId: String
   originalName: String!
   size: Float!
   type: MediaType!
   updatedAt: DateTime!
   uploadedBy: String!
   url: String!
+  userId: String
   width: Float
 }
 
@@ -167,14 +184,15 @@ enum MediaType {
 type Mutation {
   changePassword(input: ChangePasswordInput!): Boolean!
   createApp(input: CreateAppInput!): AppDto!
+  createMedia(input: CreateMediaInput!): MediaDto!
   createOrganization(input: CreateOrganizationInput!): OrganizationDto!
   createTimelineEvent(input: CreateTimelineEventInput!): TimelineEventDto!
+  deleteMedia(id: String!): Boolean!
   incrementAppLike(id: String!): Boolean!
   incrementAppView(id: String!): Boolean!
   login(input: LoginInput!): AuthResponse!
   register(input: RegisterInput!): AuthResponse!
   removeApp(id: String!): Boolean!
-  removeMedia(id: String!): Boolean!
   removeOrganization(id: String!): Boolean!
   removeTimelineEvent(id: String!): Boolean!
   removeUser(id: String!): Boolean!
@@ -182,7 +200,8 @@ type Mutation {
   updateOrganization(id: String!, input: UpdateOrganizationInput!): OrganizationDto!
   updateTimelineEvent(id: String!, input: UpdateTimelineEventInput!): TimelineEventDto!
   updateUser(id: String!, input: UpdateUserInput!): UserDto!
-  uploadMedia(input: CreateMediaInput!): MediaDto!
+  uploadAppLogo(file: Upload!, input: UploadAppLogoInput!): MediaDto!
+  uploadAppScreenshot(file: Upload!, input: UploadAppScreenshotInput!): MediaDto!
 }
 
 type OrganizationDto {
@@ -228,13 +247,12 @@ type Query {
   appBySlug(slug: String!): AppDto!
   apps(limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
   appsPaginated(category: String, limit: Int!, offset: Int!, search: String): AppsPage!
+  getAppMedia(input: GetAppMediaInput!): [MediaDto!]!
   getUserLikedApps: [String!]!
   getUserViewedApps: [String!]!
   hasUserLikedApp(appId: String!): Boolean!
   hasUserViewedApp(appId: String!): Boolean!
   me: UserDto!
-  mediaByApp(appId: String!): [MediaDto!]!
-  mediaByAppAndType(appId: String!, type: MediaType!): [MediaDto!]!
   organization(id: String!): OrganizationDto!
   organizationBySlug(slug: String!): OrganizationDto!
   organizations: [OrganizationDto!]!
@@ -317,6 +335,18 @@ input UpdateUserInput {
   organizationId: String
   role: UserRole
   username: String
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input UploadAppLogoInput {
+  appId: ID!
+}
+
+input UploadAppScreenshotInput {
+  appId: ID!
+  order: Float
 }
 
 type UserDto {

@@ -44,7 +44,7 @@ export function Header() {
             <div className="flex items-center space-x-4">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  {user?.role === 'admin' && (
+                  {user?.role === 'ADMIN' && (
                     <Link
                       href="/admin"
                       className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
@@ -71,7 +71,7 @@ export function Header() {
                           <div className="text-gray-500">{user?.email}</div>
                           <div className="text-xs text-gray-400 capitalize">{user?.role}</div>
                         </div>
-                        {user?.role?.toLowerCase() === 'admin' && (
+                        {user?.role === 'ADMIN' && (
                           <Link
                             href="/admin"
                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-200"
@@ -152,7 +152,7 @@ export function Header() {
                       <div className="font-medium">{user?.name}</div>
                       <div className="text-gray-500">{user?.email}</div>
                     </div>
-                    {user?.role === 'admin' && (
+                    {user?.role === 'ADMIN' && (
                       <Link
                         href="/admin"
                         className="block px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"

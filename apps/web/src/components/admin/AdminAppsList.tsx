@@ -5,7 +5,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants';
 import { DELETE_APP, GET_APPS_PAGINATED } from '@/lib/graphql/queries';
-import { normalizeApps } from '@/lib/utils/app';
+// No normalization needed - backend now uses uppercase values
 import { APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, getAppPlatformDisplay, getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
 import { useMutation, useQuery } from '@apollo/client';
 import {
@@ -111,7 +111,7 @@ export function AdminAppsList() {
     );
   }
 
-  const filteredApps = normalizeApps(data?.appsPaginated?.items || []);
+  const filteredApps = data?.appsPaginated?.items || [];
   const paginationData = data?.appsPaginated || {
     totalCount: 0,
     limit: DEFAULT_PAGE_SIZE,
@@ -199,6 +199,9 @@ export function AdminAppsList() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Logo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     App
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -224,6 +227,24 @@ export function AdminAppsList() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredApps.map((app: any) => (
                   <tr key={app.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {app.logoUrl ? (
+                        <img
+                          src={app.logoUrl}
+                          alt={`${app.title} logo`}
+                          className="w-8 h-8 rounded-lg object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400 text-xs font-medium">
+                            {app.title.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">{app.title}</div>

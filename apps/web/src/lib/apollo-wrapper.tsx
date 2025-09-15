@@ -3,6 +3,7 @@
 import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
+// Use regular httpLink for now - uploads will be handled differently
 const httpLink = createHttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL + '/graphql',
 });

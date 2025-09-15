@@ -14,7 +14,7 @@ const signupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
-  role: z.enum(['viewer', 'developer', 'admin']).default('viewer'),
+  role: z.enum(['VIEWER', 'DEVELOPER', 'ADMIN'] as const).default('VIEWER'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -35,7 +35,7 @@ export default function SignupPage() {
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      role: 'viewer',
+      role: 'VIEWER',
     },
   });
 

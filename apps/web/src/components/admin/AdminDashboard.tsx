@@ -3,7 +3,7 @@
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DASHBOARD_DISPLAY } from '@/constants';
 import { GET_APPS } from '@/lib/graphql/queries';
-import { normalizeApps } from '@/lib/utils/app';
+// No normalization needed - backend now uses uppercase values
 import { getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
 import { useQuery } from '@apollo/client';
 import {
@@ -33,11 +33,11 @@ export function AdminDashboard() {
     );
   }
 
-  let apps = normalizeApps(data?.apps || []);
+  let apps = data?.apps || [];
   const totalViews = apps.reduce((sum: number, app: any) => sum + app.viewCount, 0);
   const totalLikes = apps.reduce((sum: number, app: any) => sum + app.likeCount, 0);
-  const publishedApps = apps.filter((app: any) => app.status === 'published').length;
-  const draftApps = apps.filter((app: any) => app.status === 'draft').length;
+  const publishedApps = apps.filter((app: any) => app.status === 'PUBLISHED').length;
+  const draftApps = apps.filter((app: any) => app.status === 'DRAFT').length;
 
   const stats = [
     {

@@ -1,13 +1,14 @@
 'use client';
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { GET_APP_BY_SLUG, GET_MEDIA_BY_APP, GET_TIMELINE_EVENTS_BY_APP } from '@/lib/graphql/queries';
+import { GET_APP_BY_SLUG, GET_TIMELINE_EVENTS_BY_APP } from '@/lib/graphql/queries';
+import { App } from '@/types';
 import { useQuery } from '@apollo/client';
 import { useEffect } from 'react';
 import { AppActions } from './AppActions';
 import { AppInfo } from './AppInfo';
-import { AppScreenshots } from './AppScreenshots';
 import { AppTimeline } from './AppTimeline';
+import MediaDisplay from './MediaDisplay';
 
 interface AppDetailViewProps {
   slug: string;
@@ -18,18 +19,12 @@ export function AppDetailView({ slug }: AppDetailViewProps) {
     variables: { slug },
   });
 
-  const { data: mediaData, loading: mediaLoading } = useQuery(GET_MEDIA_BY_APP, {
-    variables: { appId: appData?.appBySlug?.id },
-    skip: !appData?.appBySlug?.id,
-  });
-
   const { data: timelineData, loading: timelineLoading } = useQuery(GET_TIMELINE_EVENTS_BY_APP, {
     variables: { appId: appData?.appBySlug?.id, isPublic: true },
     skip: !appData?.appBySlug?.id,
   });
 
-  const app = appData?.appBySlug;
-  const media = mediaData?.mediaByApp || [];
+  const app = appData?.appBySlug as App;
   const timelineEvents = timelineData?.timelineEventsByApp || [];
 
   // Increment view count when component mounts
@@ -72,13 +67,29 @@ export function AppDetailView({ slug }: AppDetailViewProps) {
             <AppActions app={app} />
           </div>
 
-          {/* Screenshots */}
-          <div>
-            <AppScreenshots
-              media={media}
-              loading={mediaLoading}
-              appTitle={app.title}
-            />
+          {/* Media Display */}
+          <div className="space-y-8">
+            {/* Logos */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Logos</h2>
+              <MediaDisplay
+                appId={app.id}
+                type="LOGO"
+                showLightbox={true}
+                maxItems={1}
+              />
+            </div>
+
+            {/* Screenshots */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Screenshots</h2>
+              <MediaDisplay
+                appId={app.id}
+                type="SCREENSHOT"
+                showLightbox={true}
+                maxItems={6}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -97,6 +97,9 @@ export class AppDto {
   userViewed?: boolean;
 
   @Field({ nullable: true })
+  logoUrl?: string;
+
+  @Field({ nullable: true })
   createdAt?: Date;
 
   @Field({ nullable: true })
