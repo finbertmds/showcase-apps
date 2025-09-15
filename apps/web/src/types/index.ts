@@ -18,6 +18,8 @@ export interface App {
   playStoreUrl?: string;
   viewCount: number;
   likeCount: number;
+  userLiked: boolean;
+  userViewed: boolean;
   createdAt: string;
   updatedAt: string;
   createdBy: string;

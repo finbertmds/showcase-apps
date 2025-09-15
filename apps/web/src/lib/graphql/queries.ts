@@ -40,6 +40,8 @@ export const GET_APPS = gql`
       playStoreUrl
       viewCount
       likeCount
+      userLiked
+      userViewed
       createdAt
       updatedAt
       createdBy
@@ -143,6 +145,8 @@ export const GET_TIMELINE_APPS = gql`
       playStoreUrl
       viewCount
       likeCount
+      userLiked
+      userViewed
       createdAt
       updatedAt
       createdBy
@@ -187,6 +191,8 @@ export const GET_APP_BY_SLUG = gql`
       playStoreUrl
       viewCount
       likeCount
+      userLiked
+      userViewed
       createdAt
       updatedAt
       createdBy
@@ -231,6 +237,8 @@ export const GET_APP_BYID = gql`
       playStoreUrl
       viewCount
       likeCount
+      userLiked
+      userViewed
       createdAt
       updatedAt
       createdBy
@@ -353,6 +361,8 @@ export const CREATE_APP = gql`
       playStoreUrl
       viewCount
       likeCount
+      userLiked
+      userViewed
       createdAt
       updatedAt
       createdBy
@@ -397,6 +407,8 @@ export const UPDATE_APP = gql`
       playStoreUrl
       viewCount
       likeCount
+      userLiked
+      userViewed
       createdAt
       updatedAt
       createdBy
@@ -629,5 +641,29 @@ export const CREATE_ORGANIZATION = gql`
 export const DELETE_APP = gql`
   mutation DeleteApp($id: String!) {
     removeApp(id: $id)
+  }
+`;
+
+export const HAS_USER_LIKED_APP = gql`
+  query HasUserLikedApp($appId: String!) {
+    hasUserLikedApp(appId: $appId)
+  }
+`;
+
+export const HAS_USER_VIEWED_APP = gql`
+  query HasUserViewedApp($appId: String!) {
+    hasUserViewedApp(appId: $appId)
+  }
+`;
+
+export const GET_USER_LIKED_APPS = gql`
+  query GetUserLikedApps {
+    getUserLikedApps
+  }
+`;
+
+export const GET_USER_VIEWED_APPS = gql`
+  query GetUserViewedApps {
+    getUserViewedApps
   }
 `;

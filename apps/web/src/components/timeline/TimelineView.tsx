@@ -2,20 +2,30 @@
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DEFAULT_TIMELINE_PAGE_SIZE } from '@/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { GET_TIMELINE_APPS } from '@/lib/graphql/queries';
 import { normalizeApps } from '@/lib/utils/app';
 import { App } from '@/types';
 import { useQuery } from '@apollo/client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TimelineItem } from './TimelineItem';
 
 export function TimelineView() {
   const [hasMoreData, setHasMoreData] = useState(true);
+  const { user } = useAuth();
 
-  const { data, loading, error, fetchMore } = useQuery(GET_TIMELINE_APPS, {
+  const { data, loading, error, fetchMore, refetch } = useQuery(GET_TIMELINE_APPS, {
     variables: { limit: DEFAULT_TIMELINE_PAGE_SIZE, offset: 0 },
     notifyOnNetworkStatusChange: true,
   });
+
+  // Refetch data when user authentication state changes
+  useEffect(() => {
+    if (user) {
+      // User just logged in, refetch to get user-specific data (userLiked, userViewed)
+      refetch();
+    }
+  }, [user, refetch]);
 
   if (loading && !data) {
     return (

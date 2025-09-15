@@ -1,5 +1,6 @@
 'use client';
 
+import { apolloClient } from '@/lib/apollo-wrapper';
 import { useRouter } from 'next/navigation';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -117,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,6 +270,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUser(null);
     hasFetchedUserData.current = false; // Reset flag to allow future fetches
+
+    // Clear Apollo cache to remove user-specific data
+    apolloClient.clearStore();
+
     toast.success('Logged out successfully');
     router.push('/');
   };

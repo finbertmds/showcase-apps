@@ -1,6 +1,10 @@
 'use client';
 
-import { INCREMENT_APP_LIKE, INCREMENT_APP_VIEW } from '@/lib/graphql/queries';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  INCREMENT_APP_LIKE,
+  INCREMENT_APP_VIEW
+} from '@/lib/graphql/queries';
 import { getAppPlatformIcon } from '@/lib/utils/enum-display';
 import { App } from '@/types';
 import { useMutation } from '@apollo/client';
@@ -8,7 +12,7 @@ import {
   EyeIcon,
   HeartIcon,
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { EyeIcon as EyeSolidIcon, HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -19,18 +23,55 @@ interface TimelineItemProps {
 }
 
 export function TimelineItem({ app, index }: TimelineItemProps) {
-  const [isLiked, setIsLiked] = useState(false);
   const [incrementView] = useMutation(INCREMENT_APP_VIEW);
   const [incrementLike] = useMutation(INCREMENT_APP_LIKE);
+  const { user } = useAuth();
 
-  const handleView = () => {
-    incrementView({ variables: { id: app.id } });
+  // Local state to track interactions
+  const [localIsLiked, setLocalIsLiked] = useState(app.userLiked || false);
+  const [localIsViewed, setLocalIsViewed] = useState(app.userViewed || false);
+
+  // Use local state if available, otherwise fallback to API response
+  const isLiked = localIsLiked;
+  const isViewed = localIsViewed;
+
+  const handleView = async () => {
+    // Always allow navigation to app details page
+    // Only increment view count if user is logged in and hasn't viewed yet
+    if (user && !isViewed) {
+      try {
+        const result = await incrementView({
+          variables: { id: app.id }
+        });
+        if (result.data?.incrementAppView) {
+          // Automatically update local state to show viewed
+          setLocalIsViewed(true);
+        }
+      } catch (error) {
+        console.error('Error incrementing view:', error);
+      }
+    }
   };
 
-  const handleLike = () => {
+  const handleLike = async () => {
+    if (!user) {
+      // User not logged in - could show login modal or redirect
+      console.log('Please login to like apps');
+      return;
+    }
+
     if (!isLiked) {
-      incrementLike({ variables: { id: app.id } });
-      setIsLiked(true);
+      try {
+        const result = await incrementLike({
+          variables: { id: app.id }
+        });
+        if (result.data?.incrementAppLike) {
+          // Automatically update local state to show liked
+          setLocalIsLiked(true);
+        }
+      } catch (error) {
+        console.error('Error incrementing like:', error);
+      }
     }
   };
 
@@ -45,14 +86,15 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
 
   return (
     <div className="relative">
-      {/* Timeline line */}
+      {/* Timeline line - connects to previous dot */}
       {index !== 0 && (
-        <div className="absolute left-4 top-0 w-0.5 h-8 bg-gray-300 -translate-y-8" />
+        <div className="absolute left-4 top-0 w-0.5 bg-gray-300 -translate-y-full"
+          style={{ height: 'calc(100% + 2rem)' }} />
       )}
 
       <div className="relative flex items-start space-x-4">
         {/* Timeline dot */}
-        <div className="flex-shrink-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+        <div className="flex-shrink-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center relative z-10">
           <div className="w-3 h-3 bg-white rounded-full" />
         </div>
 
@@ -140,8 +182,14 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={handleLike}
-                  className={`flex items-center space-x-1 text-sm ${isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
+                  disabled={!user}
+                  className={`flex items-center space-x-1 text-sm ${!user
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : isLiked
+                      ? 'text-red-500'
+                      : 'text-gray-500 hover:text-red-500'
                     } transition-colors`}
+                  title={!user ? 'Please login to like apps' : ''}
                 >
                   {isLiked ? (
                     <HeartSolidIcon className="h-4 w-4" />
@@ -152,7 +200,11 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
                 </button>
 
                 <div className="flex items-center space-x-1 text-sm text-gray-500">
-                  <EyeIcon className="h-4 w-4" />
+                  {isViewed ? (
+                    <EyeSolidIcon className="h-4 w-4 text-blue-500" />
+                  ) : (
+                    <EyeIcon className="h-4 w-4" />
+                  )}
                   <span>{app.viewCount}</span>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # MongoDB Database
@@ -88,7 +88,7 @@ services:
   #     - "3000:3000"
   #   environment:
   #     NODE_ENV: development
-  #     NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+  #     NEXT_PUBLIC_API_URL: http://localhost:4000
   #     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cmVmaW5lZC1zbmlwZS00Ny5jbGVyay5hY2NvdW50cy5kZXYk
   #     CLERK_SECRET_KEY: sk_test_lWEJJRMIFBL0UKfRHeE0GUomgRpb1rqFOhQMxbI0pe
 

@@ -17,6 +17,10 @@ export const QUERIES = {
   TIMELINE_APPS: 'timelineApps',
   APP: 'app',
   APP_BY_SLUG: 'appBySlug',
+  HAS_USER_LIKED_APP: 'hasUserLikedApp',
+  HAS_USER_VIEWED_APP: 'hasUserViewedApp',
+  GET_USER_LIKED_APPS: 'getUserLikedApps',
+  GET_USER_VIEWED_APPS: 'getUserViewedApps',
 
   // User Queries
   USERS: 'users',

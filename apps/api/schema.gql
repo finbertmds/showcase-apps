@@ -4,14 +4,14 @@
 
 type AppDto {
   appStoreUrl: String
-  createdAt: DateTime!
+  createdAt: DateTime
   createdBy: String!
   createdByUser: UserDto
   demoUrl: String
   downloadUrl: String
   id: ID!
   languages: [String!]!
-  likeCount: Float!
+  likeCount: Float
   longDesc: String!
   organization: OrganizationDto
   organizationId: String
@@ -24,8 +24,10 @@ type AppDto {
   status: AppStatus!
   tags: [String!]!
   title: String!
-  updatedAt: DateTime!
-  viewCount: Float!
+  updatedAt: DateTime
+  userLiked: Boolean
+  userViewed: Boolean
+  viewCount: Float
   visibility: AppVisibility!
   website: String
 }
@@ -226,6 +228,10 @@ type Query {
   appBySlug(slug: String!): AppDto!
   apps(limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
   appsPaginated(category: String, limit: Int!, offset: Int!, search: String): AppsPage!
+  getUserLikedApps: [String!]!
+  getUserViewedApps: [String!]!
+  hasUserLikedApp(appId: String!): Boolean!
+  hasUserViewedApp(appId: String!): Boolean!
   me: UserDto!
   mediaByApp(appId: String!): [MediaDto!]!
   mediaByAppAndType(appId: String!, type: MediaType!): [MediaDto!]!

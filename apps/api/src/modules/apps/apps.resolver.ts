@@ -1,5 +1,5 @@
 import { AppStatus, AppVisibility } from '@/schemas/app.schema';
-import { UseGuards } from '@nestjs/common';
+import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MUTATIONS, QUERIES } from '../../constants/graphql-operations';
 import { AppDto, AppsPage, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
@@ -25,6 +25,7 @@ export class AppsResolver {
   }
 
   @Query(() => [AppDto], { name: QUERIES.APPS })
+  @UseGuards(JwtAuthGuard)
   async findAll(
     @Args('status', { nullable: true }) status?: AppStatus,
     @Args('visibility', { nullable: true }) visibility?: AppVisibility,
@@ -34,7 +35,9 @@ export class AppsResolver {
     @Args('organizationId', { nullable: true }) organizationId?: string,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
+    @Context() context?: any,
   ): Promise<AppDto[]> {
+    const userId = context?.req?.user?.id;
     const { apps } = await this.appsService.findAll(
       {
         status: status?.toLowerCase(), 
@@ -46,16 +49,19 @@ export class AppsResolver {
       },
       limit,
       offset,
+      userId,
     );
     return apps as any;
   }
 
   @Query(() => AppsPage, { name: QUERIES.APPS_PAGINATED })
+  @UseGuards(JwtAuthGuard)
   async findPaginated(
     @Args('limit', { type: () => Int }) limit: number,
     @Args('offset', { type: () => Int }) offset: number,
     @Args('search', { nullable: true }) search?: string,
     @Args('category', { nullable: true }) category?: string,
+    @Context() context?: any,
   ): Promise<AppsPage> {
     const filters: any = {};
     
@@ -67,7 +73,8 @@ export class AppsResolver {
       filters.tags = { $in: [category] };
     }
 
-    const { apps, total } = await this.appsService.findPaginated(filters, limit, offset);
+    const userId = context?.req?.user?.id;
+    const { apps, total } = await this.appsService.findPaginated(filters, limit, offset, userId);
     
     return {
       items: apps as any,
@@ -78,22 +85,35 @@ export class AppsResolver {
   }
 
   @Query(() => [AppDto], { name: QUERIES.TIMELINE_APPS })
+  @UseGuards(JwtAuthGuard)
   async getTimelineApps(
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
+    @Context() context?: any,
   ): Promise<AppDto[]> {
-    const { apps } = await this.appsService.getTimelineApps(limit, offset);
+    const userId = context?.req?.user?.id;
+    const { apps } = await this.appsService.getTimelineApps(limit, offset, userId);
     return apps as any;
   }
 
   @Query(() => AppDto, { name: QUERIES.APP })
-  async findOne(@Args('id') id: string): Promise<AppDto> {
-    return this.appsService.findOne(id) as any;
+  @UseGuards(JwtAuthGuard)
+  async findOne(
+    @Args('id') id: string,
+    @Context() context?: any,
+  ): Promise<AppDto> {
+    const userId = context?.req?.user?.id;
+    return this.appsService.findOne(id, userId) as any;
   }
 
   @Query(() => AppDto, { name: QUERIES.APP_BY_SLUG })
-  async findBySlug(@Args('slug') slug: string): Promise<AppDto> {
-    return this.appsService.findBySlug(slug) as any;
+  @UseGuards(JwtAuthGuard)
+  async findBySlug(
+    @Args('slug') slug: string,
+    @Context() context?: any,
+  ): Promise<AppDto> {
+    const userId = context?.req?.user?.id;
+    return this.appsService.findBySlug(slug, userId) as any;
   }
 
   @Mutation(() => AppDto, { name: MUTATIONS.UPDATE_APP })
@@ -120,14 +140,82 @@ export class AppsResolver {
   }
 
   @Mutation(() => Boolean, { name: MUTATIONS.INCREMENT_APP_VIEW })
-  async incrementAppView(@Args('id') id: string): Promise<boolean> {
-    await this.appsService.incrementViewCount(id);
-    return true;
+  @UseGuards(JwtAuthGuard)
+  async incrementAppView(
+    @Args('id') id: string,
+    @Context() context: any
+  ): Promise<boolean> {
+    const userId = context.req?.user?.id;
+    if (!userId) {
+      // If user not authenticated, return false (no increment)
+      return false;
+    }
+    
+    return await this.appsService.incrementViewCount(id, userId);
   }
 
   @Mutation(() => Boolean, { name: MUTATIONS.INCREMENT_APP_LIKE })
-  async incrementAppLike(@Args('id') id: string): Promise<boolean> {
-    await this.appsService.incrementLikeCount(id);
-    return true;
+  @UseGuards(JwtAuthGuard)
+  async incrementAppLike(
+    @Args('id') id: string,
+    @Context() context: any
+  ): Promise<boolean> {
+    const userId = context.req?.user?.id;
+    if (!userId) {
+      // If user not authenticated, return false (no increment)
+      return false;
+    }
+    
+    return await this.appsService.incrementLikeCount(id, userId);
+  }
+
+  @Query(() => Boolean, { name: QUERIES.HAS_USER_LIKED_APP })
+  @UseGuards(JwtAuthGuard)
+  async hasUserLikedApp(
+    @Args('appId') appId: string,
+    @Context() context: any
+  ): Promise<boolean> {
+    const userId = context.req?.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    
+    return await this.appsService.hasUserLikedApp(appId, userId);
+  }
+
+  @Query(() => Boolean, { name: QUERIES.HAS_USER_VIEWED_APP })
+  @UseGuards(JwtAuthGuard)
+  async hasUserViewedApp(
+    @Args('appId') appId: string,
+    @Context() context: any
+  ): Promise<boolean> {
+    const userId = context.req?.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    
+    return await this.appsService.hasUserViewedApp(appId, userId);
+  }
+
+  @Query(() => [String], { name: QUERIES.GET_USER_LIKED_APPS })
+  @UseGuards(JwtAuthGuard)
+  async getUserLikedApps(@Context() context: any): Promise<string[]> {
+    const userId = context.req?.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    
+    return await this.appsService.getUserLikedApps(userId);
+  }
+
+  @Query(() => [String], { name: QUERIES.GET_USER_VIEWED_APPS })
+  @UseGuards(JwtAuthGuard)
+  async getUserViewedApps(@Context() context: any): Promise<string[]> {
+    const userId = context.req?.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    
+    return await this.appsService.getUserViewedApps(userId);
   }
 }

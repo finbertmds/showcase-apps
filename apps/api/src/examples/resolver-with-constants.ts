@@ -117,9 +117,13 @@ export class ExampleAppsResolver {
    * Example: Using MUTATIONS constant for increment view
    */
   @Mutation(() => Boolean)
-  async incrementAppView(@Args('id') id: string): Promise<boolean> {
+  async incrementAppView(
+    @Args('id') id: string,
+  @Context() context: any,
+): Promise<boolean> {
     // Method name: incrementAppView matches RESOLVER_METHODS[MUTATIONS.INCREMENT_APP_VIEW]
-    await this.appsService.incrementViewCount(id);
+    const user = context.req.user;
+    await this.appsService.incrementViewCount(id, user.id);
     return true;
   }
 
@@ -127,9 +131,13 @@ export class ExampleAppsResolver {
    * Example: Using MUTATIONS constant for increment like
    */
   @Mutation(() => Boolean)
-  async incrementAppLike(@Args('id') id: string): Promise<boolean> {
+  async incrementAppLike(
+    @Args('id') id: string,
+    @Context() context: any,
+  ): Promise<boolean> {
     // Method name: incrementAppLike matches RESOLVER_METHODS[MUTATIONS.INCREMENT_APP_LIKE]
-    await this.appsService.incrementLikeCount(id);
+    const user = context.req.user;
+    await this.appsService.incrementLikeCount(id, user.id);
     return true;
   }
 }

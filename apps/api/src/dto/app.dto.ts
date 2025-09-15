@@ -84,16 +84,22 @@ export class AppDto {
   @Field({ nullable: true })
   playStoreUrl?: string;
 
-  @Field()
-  viewCount: number;
+  @Field({ nullable: true })
+  viewCount?: number;
 
-  @Field()
-  likeCount: number;
+  @Field({ nullable: true })
+  likeCount?: number;
 
-  @Field()
-  createdAt: Date;
+  @Field({ nullable: true })
+  userLiked?: boolean;
 
-  @Field()
+  @Field({ nullable: true })
+  userViewed?: boolean;
+
+  @Field({ nullable: true })
+  createdAt?: Date;
+
+  @Field({ nullable: true })
   updatedAt: Date;
 }
 

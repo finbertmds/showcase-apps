@@ -10,7 +10,7 @@ const httpLink = createHttpLink({
 const authLink = setContext((_, { headers }) => {
   // Get the authentication token from localStorage
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth-token') : null;
-  
+
   return {
     headers: {
       ...headers,
@@ -19,7 +19,7 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const client = new ApolloClient({
+export const apolloClient = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
   defaultOptions: {
@@ -33,5 +33,5 @@ const client = new ApolloClient({
 });
 
 export function ApolloWrapper({ children }: { children: React.ReactNode }) {
-  return <ApolloProvider client={client}>{children}</ApolloProvider>;
+  return <ApolloProvider client={apolloClient}>{children}</ApolloProvider>;
 }

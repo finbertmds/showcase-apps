@@ -37,7 +37,7 @@ Next.js frontend application for the Showcase Apps platform.
 ## Environment Variables
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
+NEXT_PUBLIC_API_URL=http://localhost:4000
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
 CLERK_SECRET_KEY=your-clerk-secret-key
 ```
