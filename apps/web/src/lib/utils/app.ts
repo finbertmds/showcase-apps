@@ -6,6 +6,32 @@ import { AppFormData } from './app-form';
  */
 
 /**
+ * Convert ISO date string to YYYY-MM-DD format for date inputs
+ */
+export function formatDateForInput(isoDateString: string | null | undefined): string {
+  if (!isoDateString) return '';
+  try {
+    return new Date(isoDateString).toISOString().split('T')[0];
+  } catch (error) {
+    console.warn('Invalid date string:', isoDateString);
+    return '';
+  }
+}
+
+/**
+ * Convert YYYY-MM-DD format to ISO date string for API
+ */
+export function formatDateForAPI(dateString: string | null | undefined): string | null {
+  if (!dateString) return null;
+  try {
+    return new Date(dateString).toISOString();
+  } catch (error) {
+    console.warn('Invalid date string:', dateString);
+    return null;
+  }
+}
+
+/**
  * Get Tailwind CSS classes for status badge color
  */
 export function getStatusBadgeColor(status: string): string {

@@ -1,5 +1,54 @@
 import { gql } from '@apollo/client';
 
+export const GET_ALL_TAGS = gql`
+  query GetAllTags {
+    getAllTags
+  }
+`;
+
+export const LIST_APPS = gql`
+  query ListApps(
+    $search: String
+    $tags: [String!]
+    $platforms: [String!]
+    $category: String
+    $status: String
+    $visibility: String
+    $limit: Int
+    $offset: Int
+  ) {
+    apps(
+      search: $search
+      tags: $tags
+      platforms: $platforms
+      status: $status
+      visibility: $visibility
+      limit: $limit
+      offset: $offset
+      category: $category
+    ) {
+      id
+      title
+      slug
+      shortDesc
+      tags
+      status
+      visibility
+      releaseDate
+      platforms
+      languages
+      viewCount
+      likeCount
+      createdAt
+      logoUrl
+      createdByUser {
+        id
+        name
+      }
+    }
+  }
+`;
+
 export const GET_APPS = gql`
   query GetApps(
     $status: String

@@ -223,7 +223,7 @@ export class UpdateAppInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsDateString()
-  releaseDate?: Date;
+  releaseDate?: string;
 
   @Field(() => [Platform!], { nullable: true })
   @IsOptional()

@@ -1,7 +1,6 @@
 'use client';
 
 import { UPDATE_USER } from '@/lib/graphql/queries';
-import { normalizeUser } from '@/lib/utils/user';
 import { convertEditUserDataForAPI, getDefaultEditUserFormData, validateEditUserForm } from '@/lib/utils/user-form';
 import { FieldError, User } from '@/types';
 import { useMutation } from '@apollo/client';
@@ -19,7 +18,7 @@ interface AdminUserEditModalProps {
 }
 
 export function AdminUserEditModal({ user, isOpen, onClose, onSuccess }: AdminUserEditModalProps) {
-  const normalizedUser = normalizeUser(user);
+  const normalizedUser = user;
   const [formData, setFormData] = useState<UserFormData>(getDefaultEditUserFormData());
   const [originalFormData, setOriginalFormData] = useState<UserFormData>(getDefaultEditUserFormData());
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});

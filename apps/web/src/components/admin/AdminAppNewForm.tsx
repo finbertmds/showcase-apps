@@ -2,11 +2,11 @@
 
 import { AppFormActions } from '@/components/admin/shared/AppFormActions';
 import { AppFormFields } from '@/components/admin/shared/AppFormFields';
-import { CREATE_APP, GET_APPS } from '@/lib/graphql/queries';
+import { CREATE_APP, GET_ALL_TAGS, GET_APPS } from '@/lib/graphql/queries';
 import { prepareAppDataForAPI } from '@/lib/utils/app';
 import { AppFormData, appFormSchema, getDefaultAppFormData } from '@/lib/utils/app-form';
 import { FieldError } from '@/types';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -17,6 +17,10 @@ export function AdminAppNewForm() {
   const router = useRouter();
   const [tagInput, setTagInput] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const { data: tagsData } = useQuery(GET_ALL_TAGS, {
+    fetchPolicy: 'cache-first',
+  });
 
   const [createApp, { loading: isSubmitting }] = useMutation(CREATE_APP, {
     onCompleted: (data) => {
@@ -103,6 +107,7 @@ export function AdminAppNewForm() {
           tagInput={tagInput}
           setTagInput={setTagInput}
           fieldErrors={fieldErrors}
+          availableTags={tagsData?.getAllTags || []}
         />
 
         <AppFormActions

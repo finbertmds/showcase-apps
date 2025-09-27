@@ -13,6 +13,7 @@ import { AppsService } from '../modules/apps/apps.service';
 import { Roles } from '../modules/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../modules/auth/guards/roles.guard';
+import { AppStatus, AppVisibility } from '../schemas/app.schema';
 import { UserRole } from '../schemas/user.schema';
 
 /**
@@ -50,11 +51,13 @@ export class ExampleAppsResolver {
    */
   @Query(() => [AppDto], { name: QUERIES.TIMELINE_APPS })
   async getTimelineApps(
+    @Args('status', { nullable: true }) status?: AppStatus,
+    @Args('visibility', { nullable: true }) visibility?: AppVisibility,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
   ): Promise<AppDto[]> {
     // Method name: getTimelineApps matches RESOLVER_METHODS[QUERIES.TIMELINE_APPS]
-    const { apps } = await this.appsService.getTimelineApps(limit, offset);
+    const { apps } = await this.appsService.getTimelineApps(status, visibility, limit, offset);
     return apps as any;
   }
 

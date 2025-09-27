@@ -17,16 +17,16 @@ export default function AdminLayout({
   };
 
   return (
-    <ProtectedRoute requiredRole="admin">
+    <ProtectedRoute requiredRole="ADMIN">
       <div className="min-h-screen bg-gray-50">
         <AdminSidebar collapsed={sidebarCollapsed} />
-        
+
         <div className={`transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <AdminHeader 
-            sidebarCollapsed={sidebarCollapsed} 
-            onToggleSidebar={toggleSidebar} 
+          <AdminHeader
+            sidebarCollapsed={sidebarCollapsed}
+            onToggleSidebar={toggleSidebar}
           />
-          
+
           <main className="flex-1">
             <div className="p-8">
               {children}

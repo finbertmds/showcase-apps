@@ -5,7 +5,7 @@ import { Model, Types } from 'mongoose';
 import { AppDto, CreateAppInput, UpdateAppInput } from '../../dto/app.dto';
 import { AppLike, AppLikeDocument } from '../../schemas/app-like.schema';
 import { AppView, AppViewDocument } from '../../schemas/app-view.schema';
-import { App, AppDocument } from '../../schemas/app.schema';
+import { App, AppDocument, AppStatus, AppVisibility } from '../../schemas/app.schema';
 import { Media, MediaDocument } from '../../schemas/media.schema';
 import { User, UserDocument, UserRole } from '../../schemas/user.schema';
 
@@ -37,6 +37,7 @@ export class AppsService {
       tags?: string[];
       search?: string;
       organizationId?: string;
+      category?: string;
     } = {},
     limit = 20,
     offset = 0,
@@ -63,7 +64,10 @@ export class AppsService {
     if (filters.search) {
       query.$text = { $search: filters.search };
     }
-
+    if (filters.category) {
+      query.tags = { $in: [filters.category] };
+    }
+    console.log('query', query);
     const [apps, total] = await Promise.all([
       this.appModel
         .find(query)
@@ -75,28 +79,7 @@ export class AppsService {
     ]);
 
     // Populate createdByUser and organization for each app
-    const appsWithDetails = await Promise.all(
-      apps.map(async (app) => {
-        let user = null;
-        if (app.createdBy) {
-          user = await this.userModel.findById(app.createdBy).exec();
-        }
-
-        let organization = null;
-        if (app.organizationId) {
-          organization = await this.organizationModel.findById(app.organizationId).exec();
-        }
-
-        return {
-          ...app.toObject(),
-          id: app._id.toString(),
-          createdBy: app.createdBy.toString(),
-          createdByUser: user,
-          organizationId: app.organizationId?.toString(),
-          organization: organization,
-        };
-      })
-    );
+    const appsWithDetails = await this.populateAppDetails(apps);
 
     // Populate user interactions
     const appsWithUserInteractions = await this.populateUserInteractions(appsWithDetails, userId);
@@ -121,55 +104,7 @@ export class AppsService {
     ]);
 
     // Populate createdByUser and organization for each app
-    const appsWithDetails = await Promise.all(
-      apps.map(async (app) => {
-        let user = null;
-        if (app.createdBy) {
-          user = await this.userModel.findById(app.createdBy).exec();
-        }
-
-        let organization = null;
-        if (app.organizationId) {
-          organization = await this.organizationModel.findById(app.organizationId).exec();
-        }
-
-        // Get logo URL from media
-        let logoUrl = null;
-        try {
-          const logoMedia = await this.mediaModel.findOne({
-            appId: app._id,
-            type: 'LOGO',
-            isActive: true
-          }).exec();
-          
-          if (logoMedia) {
-            // Try to get thumbnail first, fallback to original URL
-            if (logoMedia.meta?.thumbnails) {
-              const smallThumbnail = logoMedia.meta.thumbnails.find(t => t.size === 'small');
-              if (smallThumbnail) {
-                logoUrl = smallThumbnail.url;
-              } else {
-                logoUrl = logoMedia.url;
-              }
-            } else {
-              logoUrl = logoMedia.url;
-            }
-          }
-        } catch (error) {
-          console.warn(`Failed to get logo for app ${app._id}:`, error.message);
-        }
-
-        return {
-          ...app.toObject(),
-          id: app._id.toString(),
-          createdBy: app.createdBy.toString(),
-          createdByUser: user,
-          organizationId: app.organizationId?.toString(),
-          organization: organization,
-          logoUrl: logoUrl,
-        };
-      })
-    );
+    const appsWithDetails = await this.populateAppDetails(apps);
 
     // Populate user interactions
     const appsWithUserInteractions = await this.populateUserInteractions(appsWithDetails, userId);
@@ -186,24 +121,7 @@ export class AppsService {
       throw new NotFoundException('App not found');
     }
 
-    let user = null;
-    if (app.createdBy) {
-      user = await this.userModel.findById(app.createdBy).exec();
-    }
-
-    let organization = null;
-    if (app.organizationId) {
-      organization = await this.organizationModel.findById(app.organizationId).exec();
-    }
-
-    const appWithDetails = {
-      ...app.toObject(),
-      id: app._id.toString(),
-      createdBy: app.createdBy.toString(),
-      createdByUser: user,
-      organizationId: app.organizationId?.toString(),
-      organization: organization,
-    };
+    const appWithDetails = await this.populateSingleAppDetails(app);
 
     // Populate user interactions
     const [appWithUserInteractions] = await this.populateUserInteractions([appWithDetails], userId);
@@ -220,24 +138,7 @@ export class AppsService {
       throw new NotFoundException('App not found');
     }
 
-    let user = null;
-    if (app.createdBy) {
-      user = await this.userModel.findById(app.createdBy).exec();
-    }
-
-    let organization = null;
-    if (app.organizationId) {
-      organization = await this.organizationModel.findById(app.organizationId).exec();
-    }
-
-    const appWithDetails = {
-      ...app.toObject(),
-      id: app._id.toString(),
-      createdBy: app.createdBy.toString(),
-      createdByUser: user,
-      organizationId: app.organizationId?.toString(),
-      organization: organization,
-    };
+    const appWithDetails = await this.populateSingleAppDetails(app);
 
     // Populate user interactions
     const [appWithUserInteractions] = await this.populateUserInteractions([appWithDetails], userId);
@@ -406,11 +307,15 @@ export class AppsService {
     }));
   }
 
-  async getTimelineApps(limit = 20, offset = 0, userId?: string): Promise<{ apps: AppDto[]; total: number }> {
-    const query = {
-      status: 'PUBLISHED',
-      visibility: 'PUBLIC',
-    };
+  async getTimelineApps(status?: AppStatus, visibility?: AppVisibility, limit = 20, offset = 0, userId?: string): Promise<{ apps: AppDto[]; total: number }> {
+    const query = {} as any;
+
+    if (status) {
+      query.status = status;
+    }
+    if (visibility) {
+      query.visibility = visibility;
+    }
 
     const [apps, total] = await Promise.all([
       this.appModel
@@ -423,59 +328,76 @@ export class AppsService {
     ]);
 
     // Populate createdByUser and organization for each app
-    const appsWithDetails = await Promise.all(
-      apps.map(async (app) => {
-        let user = null;
-        if (app.createdBy) {
-          user = await this.userModel.findById(app.createdBy).exec();
-        }
-
-        let organization = null;
-        if (app.organizationId) {
-          organization = await this.organizationModel.findById(app.organizationId).exec();
-        }
-
-        // Get logo URL from media
-        let logoUrl = null;
-        try {
-          const logoMedia = await this.mediaModel.findOne({
-            appId: app._id,
-            type: 'LOGO',
-            isActive: true
-          }).exec();
-          
-          if (logoMedia) {
-            // Try to get thumbnail first, fallback to original URL
-            if (logoMedia.meta?.thumbnails) {
-              const smallThumbnail = logoMedia.meta.thumbnails.find(t => t.size === 'small');
-              if (smallThumbnail) {
-                logoUrl = smallThumbnail.url;
-              } else {
-                logoUrl = logoMedia.url;
-              }
-            } else {
-              logoUrl = logoMedia.url;
-            }
-          }
-        } catch (error) {
-          console.warn(`Failed to get logo for app ${app._id}:`, error.message);
-        }
-
-        return {
-          ...app.toObject(),
-          id: app._id.toString(),
-          createdBy: app.createdBy.toString(),
-          createdByUser: user,
-          organizationId: app.organizationId?.toString(),
-          organization: organization,
-          logoUrl: logoUrl,
-        } as AppDto;
-      })
-    );
+    const appsWithDetails = await this.populateAppDetails(apps);
 
     // Populate user interactions
     const appsWithUserInteractions = await this.populateUserInteractions(appsWithDetails, userId);
 
     return { apps: appsWithUserInteractions, total };
+  }
+
+  async getAllTags(): Promise<string[]> {
+    const apps = await this.appModel.find({ status: 'PUBLISHED' }).select('tags').exec();
+    const allTags = apps.flatMap(app => app.tags || []);
+    const uniqueTags = Array.from(new Set(allTags));
+    return uniqueTags.sort();
+  }
+
+  /**
+   * Populate app details including user, organization, and logo URL
+   */
+  private async populateAppDetails(apps: any[]): Promise<any[]> {
+    return Promise.all(apps.map(app => this.populateSingleAppDetails(app)));
+  }
+
+  /**
+   * Populate details for a single app including user, organization, and logo URL
+   */
+  private async populateSingleAppDetails(app: any): Promise<any> {
+    let user = null;
+    if (app.createdBy) {
+      user = await this.userModel.findById(app.createdBy).exec();
+    }
+
+    let organization = null;
+    if (app.organizationId) {
+      organization = await this.organizationModel.findById(app.organizationId).exec();
+    }
+
+    // Get logo URL from media
+    let logoUrl = null;
+    try {
+      const logoMedia = await this.mediaModel.findOne({
+        appId: app._id,
+        type: 'LOGO',
+        isActive: true
+      }).exec();
+      
+      if (logoMedia) {
+        // Try to get thumbnail first, fallback to original URL
+        if (logoMedia.meta?.thumbnails) {
+          const smallThumbnail = logoMedia.meta.thumbnails.find(t => t.size === 'small');
+          if (smallThumbnail) {
+            logoUrl = smallThumbnail.url;
+          } else {
+            logoUrl = logoMedia.url;
+          }
+        } else {
+          logoUrl = logoMedia.url;
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to get logo for app ${app._id}:`, error.message);
+    }
+
+    return {
+      ...app.toObject(),
+      id: app._id.toString(),
+      createdBy: app.createdBy.toString(),
+      createdByUser: user,
+      organizationId: app.organizationId?.toString(),
+      organization: organization,
+      logoUrl: logoUrl,
+    };
   }
 }

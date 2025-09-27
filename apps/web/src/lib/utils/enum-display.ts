@@ -172,8 +172,8 @@ export const APP_STATUS_OPTIONS: EnumOption[] = [
 ];
 
 export const APP_VISIBILITY_OPTIONS: EnumOption[] = [
-  { value: 'PUBLIC', label: 'Public' },
   { value: 'PRIVATE', label: 'Private' },
+  { value: 'PUBLIC', label: 'Public' },
   { value: 'UNLISTED', label: 'Unlisted' },
 ];
 

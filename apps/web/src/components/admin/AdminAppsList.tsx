@@ -7,6 +7,7 @@ import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants';
 import { DELETE_APP, GET_APPS_PAGINATED } from '@/lib/graphql/queries';
 // No normalization needed - backend now uses uppercase values
 import { APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, getAppPlatformDisplay, getAppStatusBadgeColor, getAppStatusDisplay, getAppVisibilityBadgeColor, getAppVisibilityDisplay } from '@/lib/utils/enum-display';
+import { App } from '@/types';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   EyeIcon,
@@ -141,7 +142,7 @@ export function AdminAppsList() {
         </Link>
       </div>
 
-      {/* Filters */}
+      {/* Search and Filters */}
       <div className="card p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
@@ -225,7 +226,7 @@ export function AdminAppsList() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredApps.map((app: any) => (
+                {filteredApps.map((app: App) => (
                   <tr key={app.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       {app.logoUrl ? (

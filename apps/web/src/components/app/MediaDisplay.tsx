@@ -73,7 +73,7 @@ export default function MediaDisplay({
   if (error) {
     return (
       <div className={`text-center p-1 text-gray-500 ${className}`}>
-        <PhotoIcon className="w-4 h-4 mx-auto mb-2" />
+        <PhotoIcon className="w-4 h-4" />
       </div>
     );
   }
@@ -82,8 +82,9 @@ export default function MediaDisplay({
 
   if (mediaItems.length === 0) {
     return (
-      <div className={`text-center p-1 text-gray-500 ${className}`}>
-        <PhotoIcon className="w-4 h-4 mx-auto mb-2" />
+      <div className={`text-center p-4 text-gray-500 ${className}`}>
+        <PhotoIcon className="w-8 h-8 mx-auto mb-2" />
+        <p className="text-sm">No media found</p>
       </div>
     );
   }
@@ -149,7 +150,10 @@ export default function MediaDisplay({
               </div>
             )}
             {filteredMedia.length === 0 && (
-              <div className="text-center text-gray-500">No media found</div>
+              <div className="text-center text-gray-500">
+                <PhotoIcon className="w-8 h-8 mx-auto mb-2" />
+                <p className="text-sm">Không có ảnh</p>
+              </div>
             )}
           </div>
         ) : (
@@ -182,7 +186,10 @@ export default function MediaDisplay({
               </div>
             ))}
             {filteredMedia.length === 0 && (
-              <div className="text-center text-gray-500">No media found</div>
+              <div className="text-center text-gray-500">
+                <PhotoIcon className="w-8 h-8 mx-auto mb-2" />
+                <p className="text-sm">Không có ảnh</p>
+              </div>
             )}
           </div>
         )}

@@ -1,7 +1,6 @@
 'use client';
 
 import { CREATE_USER, LIST_USERS } from '@/lib/graphql/queries';
-import { normalizeUsers } from '@/lib/utils/user';
 import { convertNewUserDataForAPI, getDefaultNewUserFormData, validateNewUserForm } from '@/lib/utils/user-form';
 import { FieldError } from '@/types';
 import { useMutation } from '@apollo/client';
@@ -71,7 +70,7 @@ export function AdminUserNewModal({ isOpen, onClose, onSuccess }: AdminUserNewMo
           if (data?.register?.user) {
             const existingUsers = cache.readQuery({ query: LIST_USERS }) as any;
             if (existingUsers?.users) {
-              const normalizedNewUser = normalizeUsers([data.register.user])[0];
+              const normalizedNewUser = data.register.user;
               cache.writeQuery({
                 query: LIST_USERS,
                 data: {

@@ -1,6 +1,7 @@
 'use client';
 
-import { addTag, AppFormData, LANGUAGE_OPTIONS, removeTag, toggleArrayValue } from '@/lib/utils/app-form';
+import { TagsAutocomplete } from '@/components/ui/TagsAutocomplete';
+import { AppFormData, LANGUAGE_OPTIONS, toggleArrayValue } from '@/lib/utils/app-form';
 import { APP_PLATFORM_OPTIONS, APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, EnumOption } from '@/lib/utils/enum-display';
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
@@ -12,6 +13,7 @@ interface AppFormFieldsProps {
   tagInput: string;
   setTagInput: (value: string) => void;
   fieldErrors?: Record<string, string>;
+  availableTags?: string[];
 }
 
 export function AppFormFields({
@@ -22,6 +24,7 @@ export function AppFormFields({
   tagInput,
   setTagInput,
   fieldErrors = {},
+  availableTags = [],
 }: AppFormFieldsProps) {
   const watchedPlatforms = watch('platforms');
   const watchedLanguages = watch('languages');
@@ -37,25 +40,6 @@ export function AppFormFields({
     setValue('languages', newLanguages);
   };
 
-  const handleAddTag = () => {
-    if (tagInput.trim()) {
-      const newTags = addTag(watchedTags || [], tagInput);
-      setValue('tags', newTags);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    const newTags = removeTag(watchedTags || [], tagToRemove);
-    setValue('tags', newTags);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
 
   return (
     <>
@@ -236,41 +220,12 @@ export function AppFormFields({
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-6">Tags</h2>
 
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Add a tag"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-          />
-          <button
-            type="button"
-            onClick={handleAddTag}
-            className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {watchedTags?.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800"
-            >
-              {tag}
-              <button
-                type="button"
-                onClick={() => handleRemoveTag(tag)}
-                className="ml-2 text-primary-600 hover:text-primary-800"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
+        <TagsAutocomplete
+          value={watchedTags || []}
+          onChange={(tags) => setValue('tags', tags)}
+          availableTags={availableTags}
+          placeholder="Add a tag"
+        />
       </div>
 
       {/* URLs */}

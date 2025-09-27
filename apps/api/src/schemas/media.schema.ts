@@ -4,6 +4,7 @@ import { Document, Types } from 'mongoose';
 export type MediaDocument = Media & Document;
 
 export enum MediaType {
+  ALL = 'ALL',
   LOGO = 'LOGO',
   SCREENSHOT = 'SCREENSHOT',
   COVER = 'COVER',

@@ -5,6 +5,7 @@ import {
   INCREMENT_APP_LIKE,
   INCREMENT_APP_VIEW
 } from '@/lib/graphql/queries';
+import { formatDate } from '@/lib/utils/date';
 import { getAppPlatformIcon } from '@/lib/utils/enum-display';
 import { App } from '@/types';
 import { useMutation } from '@apollo/client';
@@ -13,7 +14,6 @@ import {
   HeartIcon,
 } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolidIcon, HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import { format } from 'date-fns';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -80,9 +80,6 @@ export function TimelineItem({ app, index }: TimelineItemProps) {
     return <IconComponent className="h-4 w-4" />;
   };
 
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'MMM d, yyyy');
-  };
 
   return (
     <div className="relative">

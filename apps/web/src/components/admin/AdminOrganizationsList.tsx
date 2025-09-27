@@ -147,55 +147,45 @@ export function AdminOrganizationsList() {
   if (error) return <div className="text-center py-8 text-red-600">Error loading organizations</div>;
 
   return (
-    <>
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
-          <p className="text-gray-600">Manage organizations and their settings</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage organizations and their settings
+          </p>
         </div>
         <button
           onClick={() => setIsNewOrganizationModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          className="btn-primary inline-flex items-center space-x-2 p-2"
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="h-4 w-4" />
           New Organization
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Search */}
-          <div>
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-              Search Organizations
-            </label>
+      {/* Search and Filters */}
+      <div className="card p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
             <input
               type="text"
-              id="search"
-              name="search"
+              placeholder="Search by name, slug, or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              placeholder="Search by name, slug, or description..."
+              className="input w-full"
               autoComplete="off"
             />
           </div>
 
           {/* Status Filter */}
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
+          <div className="sm:w-48">
             <select
-              id="status"
-              name="status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="input w-full"
             >
-              <option value="all">All Organizations</option>
+              <option value="all">All Status</option>
               {ORGANIZATION_STATUS_OPTIONS.map((option: EnumOption) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -207,117 +197,123 @@ export function AdminOrganizationsList() {
       </div>
 
       {/* Organizations Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Organization
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Slug
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Website
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedOrganizations.map((organization: Organization) => (
-                <tr key={organization.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {organization.logo && (
-                        <img
-                          className="h-10 w-10 rounded-full object-cover mr-3"
-                          src={organization.logo}
-                          alt={organization.name}
-                        />
-                      )}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{organization.name}</div>
-                        {organization.description && (
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
-                            {organization.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900 font-mono">/{organization.slug}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleToggleStatus(organization.id, organization.isActive)}
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrganizationStatusBadgeColor(organization.isActive)}`}
-                    >
-                      {getOrganizationStatusDisplay(organization.isActive)}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {organization.website ? (
-                      <a
-                        href={organization.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 truncate max-w-xs block"
-                      >
-                        {organization.website}
-                      </a>
-                    ) : (
-                      <span className="text-sm text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(organization.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditOrganization(organization)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                        aria-label="Edit organization"
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteOrganization(organization.id, organization.name)}
-                        className="text-red-600 hover:text-red-900"
-                        aria-label="Delete organization"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+      <div className="card overflow-hidden">
+        {filteredOrganizations.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No organizations found.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Organization
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Slug
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Website
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created At
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          pageSize={pageSize}
-          totalItems={filteredOrganizations.length}
-          onPageSizeChange={setPageSize}
-          pageSizeOptions={PAGE_SIZE_OPTIONS}
-          showPageSizeSelector={true}
-        />
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {paginatedOrganizations.map((organization: Organization) => (
+                  <tr key={organization.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {organization.logo && (
+                          <img
+                            className="h-10 w-10 rounded-full object-cover mr-3"
+                            src={organization.logo}
+                            alt={organization.name}
+                          />
+                        )}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{organization.name}</div>
+                          {organization.description && (
+                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                              {organization.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900 font-mono">/{organization.slug}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleToggleStatus(organization.id, organization.isActive)}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrganizationStatusBadgeColor(organization.isActive)}`}
+                      >
+                        {getOrganizationStatusDisplay(organization.isActive)}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {organization.website ? (
+                        <a
+                          href={organization.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800 truncate max-w-xs block"
+                        >
+                          {organization.website}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(organization.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditOrganization(organization)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          aria-label="Edit organization"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteOrganization(organization.id, organization.name)}
+                          className="text-red-600 hover:text-red-900"
+                          aria-label="Delete organization"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        pageSize={pageSize}
+        totalItems={filteredOrganizations.length}
+        onPageSizeChange={setPageSize}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showPageSizeSelector={true}
+      />
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
@@ -333,14 +329,16 @@ export function AdminOrganizationsList() {
       />
 
       {/* Edit Organization Modal */}
-      {isModalOpen && selectedOrganization && (
-        <AdminOrganizationEditModal
-          organization={selectedOrganization}
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onSuccess={handleModalSuccess}
-        />
-      )}
+      {
+        isModalOpen && selectedOrganization && (
+          <AdminOrganizationEditModal
+            organization={selectedOrganization}
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            onSuccess={handleModalSuccess}
+          />
+        )
+      }
 
       {/* New Organization Modal */}
       <AdminOrganizationNewModal
@@ -348,6 +346,6 @@ export function AdminOrganizationsList() {
         onClose={() => setIsNewOrganizationModalOpen(false)}
         onSuccess={handleNewOrganizationSuccess}
       />
-    </>
+    </div >
   );
 }

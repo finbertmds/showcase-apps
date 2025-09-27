@@ -5,8 +5,8 @@ import MediaUpload from '@/components/admin/MediaUpload';
 import { AppFormActions } from '@/components/admin/shared/AppFormActions';
 import { AppFormFields } from '@/components/admin/shared/AppFormFields';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { GET_APP_BYID, UPDATE_APP } from '@/lib/graphql/queries';
-import { emptyStringToNull } from '@/lib/utils/app';
+import { GET_ALL_TAGS, GET_APP_BYID, UPDATE_APP } from '@/lib/graphql/queries';
+import { emptyStringToNull, formatDateForAPI, formatDateForInput } from '@/lib/utils/app';
 import { AppFormData, appFormSchema, arraysEqual, getDefaultAppFormData } from '@/lib/utils/app-form';
 import { useMutation, useQuery } from '@apollo/client';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,6 +29,10 @@ export function AdminAppEditForm({ appId }: AdminAppEditFormProps) {
   const { data, loading, error } = useQuery(GET_APP_BYID, {
     variables: { id: appId },
     skip: !appId,
+  });
+
+  const { data: tagsData } = useQuery(GET_ALL_TAGS, {
+    fetchPolicy: 'cache-first',
   });
 
   const [updateApp] = useMutation(UPDATE_APP);
@@ -65,7 +69,7 @@ export function AdminAppEditForm({ appId }: AdminAppEditFormProps) {
         downloadUrl: data.app.downloadUrl || '',
         appStoreUrl: data.app.appStoreUrl || '',
         playStoreUrl: data.app.playStoreUrl || '',
-        releaseDate: data.app.releaseDate || '',
+        releaseDate: formatDateForInput(data.app.releaseDate),
       };
 
       // Store original data for comparison
@@ -138,7 +142,7 @@ export function AdminAppEditForm({ appId }: AdminAppEditFormProps) {
           updateInput.playStoreUrl = emptyStringToNull(formData.playStoreUrl);
         }
         if (formData.releaseDate !== originalAppData.releaseDate) {
-          updateInput.releaseDate = emptyStringToNull(formData.releaseDate);
+          updateInput.releaseDate = formatDateForAPI(formData.releaseDate);
         }
 
         await updateApp({
@@ -225,6 +229,7 @@ export function AdminAppEditForm({ appId }: AdminAppEditFormProps) {
           watch={watch}
           tagInput={tagInput}
           setTagInput={setTagInput}
+          availableTags={tagsData?.getAllTags || []}
         />
 
         {/* Media Upload Section */}

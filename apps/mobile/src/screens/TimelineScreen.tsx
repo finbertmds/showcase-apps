@@ -2,11 +2,11 @@ import { useQuery } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    View
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
 
 import { AppCard } from '../components/AppCard';
@@ -16,12 +16,12 @@ import { GET_TIMELINE_APPS } from '../services/queries';
 import { App } from '../types';
 
 export const TimelineScreen: React.FC = () => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
 
-  const {data, loading, error, fetchMore, refetch} = useQuery(GET_TIMELINE_APPS, {
-    variables: {limit: 20, offset: 0},
+  const { data, loading, error, fetchMore, refetch } = useQuery(GET_TIMELINE_APPS, {
+    variables: { limit: 20, offset: 0 },
     notifyOnNetworkStatusChange: true,
   });
 
@@ -42,7 +42,7 @@ export const TimelineScreen: React.FC = () => {
         variables: {
           offset: apps.length,
         },
-        updateQuery: (prev, {fetchMoreResult}) => {
+        updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult) return prev;
           return {
             timelineApps: [...prev.timelineApps, ...fetchMoreResult.timelineApps],
@@ -53,10 +53,10 @@ export const TimelineScreen: React.FC = () => {
   };
 
   const handleAppPress = (app: App) => {
-    navigation.navigate('AppDetail', {app});
+    navigation.navigate('AppDetail', { app });
   };
 
-  const renderApp = ({item, index}: {item: App; index: number}) => (
+  const renderApp = ({ item, index }: { item: App; index: number }) => (
     <AppCard
       app={item}
       onPress={() => handleAppPress(item)}
@@ -65,11 +65,11 @@ export const TimelineScreen: React.FC = () => {
   );
 
   const renderHeader = () => (
-    <View style={[styles.header, {backgroundColor: theme.colors.background}]}>
-      <Text style={[styles.title, {color: theme.colors.text}]}>
+    <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.title, { color: theme.colors.text }]}>
         Discover Amazing Apps
       </Text>
-      <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+      <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
         Explore the latest applications across all platforms
       </Text>
     </View>
@@ -88,7 +88,7 @@ export const TimelineScreen: React.FC = () => {
 
   const renderEmpty = () => (
     <View style={styles.empty}>
-      <Text style={[styles.emptyText, {color: theme.colors.textSecondary}]}>
+      <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
         No apps found. Check back later!
       </Text>
     </View>
@@ -96,7 +96,7 @@ export const TimelineScreen: React.FC = () => {
 
   if (loading && apps.length === 0) {
     return (
-      <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <LoadingSpinner />
       </View>
     );
@@ -104,8 +104,8 @@ export const TimelineScreen: React.FC = () => {
 
   if (error) {
     return (
-      <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
-        <Text style={[styles.errorText, {color: theme.colors.error}]}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.errorText, { color: theme.colors.error }]}>
           Error loading timeline: {error.message}
         </Text>
       </View>
@@ -113,11 +113,11 @@ export const TimelineScreen: React.FC = () => {
   }
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <FlatList
         data={apps}
         renderItem={renderApp}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: App) => item.id}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}

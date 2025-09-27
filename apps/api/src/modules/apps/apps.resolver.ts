@@ -24,6 +24,11 @@ export class AppsResolver {
     return this.appsService.create(createAppInput, user.id, user.organizationId?.toString() || null) as any;
   }
 
+  @Query(() => [String], { name: 'getAllTags' })
+  async getAllTags(): Promise<string[]> {
+    return this.appsService.getAllTags();
+  }
+
   @Query(() => [AppDto], { name: QUERIES.APPS })
   @UseGuards(JwtAuthGuard)
   async findAll(
@@ -35,17 +40,19 @@ export class AppsResolver {
     @Args('organizationId', { nullable: true }) organizationId?: string,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
+    @Args('category', { nullable: true }) category?: string,
     @Context() context?: any,
   ): Promise<AppDto[]> {
     const userId = context?.req?.user?.id;
     const { apps } = await this.appsService.findAll(
       {
-        status: status?.toLowerCase(), 
-        visibility: visibility?.toLowerCase(),
-        platforms: platforms?.map(platform => platform.toLowerCase()),
+        status: status, 
+        visibility: visibility,
+        platforms: platforms,
         tags,
         search,
-        organizationId
+        organizationId,
+        category
       },
       limit,
       offset,
@@ -87,12 +94,14 @@ export class AppsResolver {
   @Query(() => [AppDto], { name: QUERIES.TIMELINE_APPS })
   @UseGuards(JwtAuthGuard)
   async getTimelineApps(
+    @Args('status', { nullable: true }) status?: AppStatus,
+    @Args('visibility', { nullable: true }) visibility?: AppVisibility,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
     @Args('offset', { type: () => Int, defaultValue: 0 }) offset?: number,
     @Context() context?: any,
   ): Promise<AppDto[]> {
     const userId = context?.req?.user?.id;
-    const { apps } = await this.appsService.getTimelineApps(limit, offset, userId);
+    const { apps } = await this.appsService.getTimelineApps(status, visibility, limit, offset, userId);
     return apps as any;
   }
 

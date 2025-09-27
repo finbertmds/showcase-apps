@@ -3,12 +3,30 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Bars3Icon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userMenuOpen]);
 
   const navigation = [
     { name: 'Timeline', href: '/' },
@@ -54,7 +72,7 @@ export function Header() {
                   )}
 
                   {/* User menu */}
-                  <div className="relative">
+                  <div className="relative" ref={userMenuRef}>
                     <button
                       type="button"
                       className="flex items-center space-x-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
@@ -71,15 +89,6 @@ export function Header() {
                           <div className="text-gray-500">{user?.email}</div>
                           <div className="text-xs text-gray-400 capitalize">{user?.role}</div>
                         </div>
-                        {user?.role === 'ADMIN' && (
-                          <Link
-                            href="/admin"
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b border-gray-200"
-                            onClick={() => setUserMenuOpen(false)}
-                          >
-                            Admin Page
-                          </Link>
-                        )}
                         <button
                           onClick={() => {
                             logout();

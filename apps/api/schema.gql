@@ -173,6 +173,7 @@ type MediaDto {
 
 """Media type enum"""
 enum MediaType {
+  ALL
   COVER
   DOCUMENT
   ICON
@@ -245,8 +246,9 @@ enum Platform {
 type Query {
   app(id: String!): AppDto!
   appBySlug(slug: String!): AppDto!
-  apps(limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
+  apps(category: String, limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
   appsPaginated(category: String, limit: Int!, offset: Int!, search: String): AppsPage!
+  getAllTags: [String!]!
   getAppMedia(input: GetAppMediaInput!): [MediaDto!]!
   getUserLikedApps: [String!]!
   getUserViewedApps: [String!]!
@@ -256,7 +258,7 @@ type Query {
   organization(id: String!): OrganizationDto!
   organizationBySlug(slug: String!): OrganizationDto!
   organizations: [OrganizationDto!]!
-  timelineApps(limit: Int! = 20, offset: Int! = 0): [AppDto!]!
+  timelineApps(limit: Int! = 20, offset: Int! = 0, status: String, visibility: String): [AppDto!]!
   timelineEvents(limit: Int! = 20, offset: Int! = 0): [TimelineEventDto!]!
   timelineEventsByApp(appId: String!, isPublic: Boolean! = true): [TimelineEventDto!]!
   user(id: String!): UserDto!
@@ -296,7 +298,7 @@ input UpdateAppInput {
   longDesc: String
   platforms: [Platform!]
   playStoreUrl: String
-  releaseDate: DateTime
+  releaseDate: String
   repository: String
   shortDesc: String
   slug: String
