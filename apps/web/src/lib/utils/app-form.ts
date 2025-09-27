@@ -25,13 +25,6 @@ export type AppFormData = z.infer<typeof appFormSchema>;
 // Platform options - moved to enum-display.ts for consistency
 // Use APP_PLATFORM_OPTIONS from enum-display.ts instead
 
-// Language options
-export const LANGUAGE_OPTIONS = [
-  'JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'C++', 'Go', 'Rust',
-  'Swift', 'Kotlin', 'Dart', 'PHP', 'Ruby', 'React', 'Vue', 'Angular',
-  'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'Laravel', 'Rails',
-];
-
 // Default form values
 export const getDefaultAppFormData = (): AppFormData => ({
   title: '',

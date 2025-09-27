@@ -2,19 +2,23 @@
 
 import { AdminOrganizationEditModal } from '@/components/admin/AdminOrganizationEditModal';
 import { AdminOrganizationNewModal } from '@/components/admin/AdminOrganizationNewModal';
+import { AdminListHeader } from '@/components/admin/shared/AdminListHeader';
+import { AdminSearchAndFilter } from '@/components/admin/shared/AdminSearchAndFilter';
+import { AdminTable, TableColumn } from '@/components/admin/shared/AdminTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants';
-import { DELETE_ORGANIZATION, LIST_ORGANIZATIONS, UPDATE_ORGANIZATION } from '@/lib/graphql/queries';
-import { EnumOption, getOrganizationStatusBadgeColor, getOrganizationStatusDisplay, ORGANIZATION_STATUS_OPTIONS } from '@/lib/utils/enum-display';
+import { DELETE_ORGANIZATION, GET_ORGANIZATIONS_PAGINATED, UPDATE_ORGANIZATION } from '@/lib/graphql/queries';
+import { getOrganizationStatusBadgeColor, getOrganizationStatusDisplay, ORGANIZATION_STATUS_OPTIONS } from '@/lib/utils/enum-display';
 import { Organization } from '@/types';
 import { useMutation, useQuery } from '@apollo/client';
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { useEffect, useMemo, useState } from 'react';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export function AdminOrganizationsList() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
@@ -31,46 +35,61 @@ export function AdminOrganizationsList() {
     organizationName: '',
   });
 
-  const { data, loading, error, refetch } = useQuery(LIST_ORGANIZATIONS);
-  const [updateOrganization] = useMutation(UPDATE_ORGANIZATION);
-  const [deleteOrganization, { loading: isDeleting }] = useMutation(DELETE_ORGANIZATION);
-
-  // Client-side filtering and pagination
-  const filteredOrganizations = useMemo(() => {
-    if (!data?.organizations) return [];
-
-    let filtered = data.organizations;
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter((org: Organization) =>
-        org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (org.description && org.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((org: Organization) => {
-        if (statusFilter === 'active') return org.isActive;
-        if (statusFilter === 'inactive') return !org.isActive;
-        return true;
-      });
-    }
-
-    return filtered;
-  }, [data?.organizations, searchTerm, statusFilter]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredOrganizations.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedOrganizations = filteredOrganizations.slice(startIndex, startIndex + pageSize);
-
-  // Reset page when filters change
+  // Debounce search term
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when searching
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const { data, loading, error, refetch } = useQuery(GET_ORGANIZATIONS_PAGINATED, {
+    variables: {
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
+      search: debouncedSearchTerm || undefined,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+    },
+    notifyOnNetworkStatusChange: true,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [updateOrganization] = useMutation(UPDATE_ORGANIZATION);
+  const [deleteOrganization, { loading: isDeleting }] = useMutation(DELETE_ORGANIZATION, {
+    onCompleted: () => {
+      toast.success('Organization deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('Error deleting organization:', error);
+      toast.error('Failed to delete organization');
+    },
+    refetchQueries: [
+      {
+        query: GET_ORGANIZATIONS_PAGINATED,
+        variables: {
+          limit: pageSize,
+          offset: (currentPage - 1) * pageSize,
+          search: debouncedSearchTerm || undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+        },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
+
+  // Server-side pagination data
+  const paginatedOrganizations = data?.organizationsPaginated?.items || [];
+  const paginationData = data?.organizationsPaginated || {
+    totalCount: 0,
+    limit: DEFAULT_PAGE_SIZE,
+    offset: 0,
+  };
+
+  // Calculate total pages
+  const totalPages = Math.ceil(paginationData.totalCount / paginationData.limit);
+  const currentPageFromData = Math.floor(paginationData.offset / paginationData.limit) + 1;
 
   const handleEditOrganization = (organization: Organization) => {
     setSelectedOrganization(organization);
@@ -87,25 +106,10 @@ export function AdminOrganizationsList() {
 
   const handleConfirmDelete = async () => {
     try {
-      await deleteOrganization({
-        variables: { id: deleteModal.organizationId },
-        update: (cache) => {
-          const existingOrganizations = cache.readQuery({ query: LIST_ORGANIZATIONS }) as any;
-          if (existingOrganizations?.organizations) {
-            cache.writeQuery({
-              query: LIST_ORGANIZATIONS,
-              data: {
-                organizations: existingOrganizations.organizations.filter((org: Organization) => org.id !== deleteModal.organizationId),
-              },
-            });
-          }
-        },
-      });
-      toast.success('Organization deleted successfully');
+      await deleteOrganization({ variables: { id: deleteModal.organizationId } });
       setDeleteModal({ isOpen: false, organizationId: '', organizationName: '' });
     } catch (error) {
-      console.error('Delete organization error:', error);
-      toast.error('Failed to delete organization');
+      console.error('Error deleting organization:', error);
     }
   };
 
@@ -143,174 +147,151 @@ export function AdminOrganizationsList() {
     handleModalClose();
   };
 
+  // Define table columns
+  const columns: TableColumn<Organization>[] = [
+    {
+      key: 'organization',
+      header: 'Organization',
+      render: (organization) => (
+        <div className="flex items-center">
+          {organization.logo && (
+            <img
+              className="h-10 w-10 rounded-full object-cover mr-3"
+              src={organization.logo}
+              alt={organization.name}
+            />
+          )}
+          <div>
+            <div className="text-sm font-medium text-gray-900">{organization.name}</div>
+            {organization.description && (
+              <div className="text-sm text-gray-500 truncate max-w-xs">
+                {organization.description}
+              </div>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'slug',
+      header: 'Slug',
+      render: (organization) => (
+        <span className="text-sm text-gray-900 font-mono">/{organization.slug}</span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (organization) => (
+        <button
+          onClick={() => handleToggleStatus(organization.id, organization.isActive)}
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrganizationStatusBadgeColor(organization.isActive)}`}
+        >
+          {getOrganizationStatusDisplay(organization.isActive)}
+        </button>
+      ),
+    },
+    {
+      key: 'website',
+      header: 'Website',
+      render: (organization) => (
+        organization.website ? (
+          <a
+            href={organization.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 hover:text-blue-800 truncate max-w-xs block"
+          >
+            {organization.website}
+          </a>
+        ) : (
+          <span className="text-sm text-gray-400">-</span>
+        )
+      ),
+    },
+    {
+      key: 'created',
+      header: 'Created At',
+      render: (organization) => (
+        <span className="text-sm text-gray-500">
+          {new Date(organization.createdAt).toLocaleDateString()}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (organization) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEditOrganization(organization)}
+            className="text-indigo-600 hover:text-indigo-900"
+            aria-label="Edit organization"
+          >
+            <PencilIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => handleDeleteOrganization(organization.id, organization.name)}
+            className="text-red-600 hover:text-red-900"
+            aria-label="Delete organization"
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   if (loading) return <div className="text-center py-8">Loading organizations...</div>;
   if (error) return <div className="text-center py-8 text-red-600">Error loading organizations</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage organizations and their settings
-          </p>
-        </div>
-        <button
-          onClick={() => setIsNewOrganizationModalOpen(true)}
-          className="btn-primary inline-flex items-center space-x-2 p-2"
-        >
-          <PlusIcon className="h-4 w-4" />
-          New Organization
-        </button>
-      </div>
+      {/* Header */}
+      <AdminListHeader
+        title="Organizations"
+        description="Manage organizations and their settings"
+        actionButton={{
+          onClick: () => setIsNewOrganizationModalOpen(true),
+          text: "New Organization"
+        }}
+      />
 
       {/* Search and Filters */}
-      <div className="card p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search by name, slug, or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input w-full"
-              autoComplete="off"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <div className="sm:w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input w-full"
-            >
-              <option value="all">All Status</option>
-              {ORGANIZATION_STATUS_OPTIONS.map((option: EnumOption) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+      <AdminSearchAndFilter
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Search by name, slug, or description..."
+        loading={loading}
+        filters={[
+          {
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: ORGANIZATION_STATUS_OPTIONS,
+            placeholder: "All Status"
+          }
+        ]}
+      />
 
       {/* Organizations Table */}
-      <div className="card overflow-hidden">
-        {filteredOrganizations.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No organizations found.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Slug
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Website
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedOrganizations.map((organization: Organization) => (
-                  <tr key={organization.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {organization.logo && (
-                          <img
-                            className="h-10 w-10 rounded-full object-cover mr-3"
-                            src={organization.logo}
-                            alt={organization.name}
-                          />
-                        )}
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{organization.name}</div>
-                          {organization.description && (
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {organization.description}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 font-mono">/{organization.slug}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleToggleStatus(organization.id, organization.isActive)}
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrganizationStatusBadgeColor(organization.isActive)}`}
-                      >
-                        {getOrganizationStatusDisplay(organization.isActive)}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {organization.website ? (
-                        <a
-                          href={organization.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 truncate max-w-xs block"
-                        >
-                          {organization.website}
-                        </a>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(organization.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditOrganization(organization)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                          aria-label="Edit organization"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteOrganization(organization.id, organization.name)}
-                          className="text-red-600 hover:text-red-900"
-                          aria-label="Delete organization"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <AdminTable
+        data={paginatedOrganizations}
+        columns={columns}
+        emptyMessage="No organizations found."
+      />
 
       {/* Pagination */}
       <Pagination
-        currentPage={currentPage}
+        currentPage={currentPageFromData}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        pageSize={pageSize}
-        totalItems={filteredOrganizations.length}
-        onPageSizeChange={setPageSize}
+        onPageChange={(page) => setCurrentPage(page)}
+        pageSize={paginationData.limit}
+        totalItems={paginationData.totalCount}
+        onPageSizeChange={(newPageSize) => {
+          setPageSize(newPageSize);
+          setCurrentPage(1);
+        }}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         showPageSizeSelector={true}
       />

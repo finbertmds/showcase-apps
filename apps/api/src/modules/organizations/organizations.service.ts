@@ -169,4 +169,49 @@ export class OrganizationsService {
     
     return true;
   }
+
+  async findPaginated(filters: any, limit: number, offset: number): Promise<{ organizations: OrganizationDto[]; total: number }> {
+    // Build the query
+    const query = this.organizationModel.find(filters);
+    
+    // Get total count
+    const total = await this.organizationModel.countDocuments(filters);
+    
+    // Apply pagination and populate owner
+    const organizations = await query
+      .populate('ownerId', 'name email username role isActive avatar')
+      .skip(offset)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    // Transform to DTO format
+    const organizationsWithOwners = organizations.map((org) => {
+      const orgObj = org.toObject();
+      const populatedOwner = orgObj.ownerId as any;
+      
+      return {
+        ...orgObj,
+        id: org._id.toString(),
+        ownerId: populatedOwner?._id?.toString(),
+        owner: populatedOwner ? {
+          id: populatedOwner._id.toString(),
+          name: populatedOwner.name,
+          email: populatedOwner.email,
+          username: populatedOwner.username,
+          role: populatedOwner.role,
+          isActive: populatedOwner.isActive,
+          avatar: populatedOwner.avatar,
+          lastLoginAt: populatedOwner.lastLoginAt,
+          createdAt: populatedOwner.createdAt,
+          updatedAt: populatedOwner.updatedAt,
+        } : null,
+      };
+    });
+
+    return {
+      organizations: organizationsWithOwners as OrganizationDto[],
+      total,
+    };
+  }
 }

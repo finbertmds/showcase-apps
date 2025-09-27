@@ -194,4 +194,50 @@ export class UsersService {
   async updateLastLogin(id: string): Promise<void> {
     await this.userModel.findByIdAndUpdate(id, { lastLoginAt: new Date() }).exec();
   }
+
+  async findPaginated(filters: any, limit: number, offset: number): Promise<{ users: UserDto[]; total: number }> {
+    // Build the query
+    const query = this.userModel.find(filters);
+    
+    // Get total count
+    const total = await this.userModel.countDocuments(filters);
+    
+    // Apply pagination and populate organization
+    const users = await query
+      .populate('organizationId', 'name slug logo website isActive')
+      .skip(offset)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    // Transform to DTO format
+    const usersWithOrganizations = users.map((user) => {
+      const userObj = user.toObject();
+      const populatedOrg = userObj.organizationId as any;
+      
+      return {
+        ...userObj,
+        id: user._id.toString(),
+        organizationId: populatedOrg?._id?.toString(),
+        organization: populatedOrg ? {
+          id: populatedOrg._id.toString(),
+          name: populatedOrg.name,
+          slug: populatedOrg.slug,
+          description: populatedOrg.description,
+          logo: populatedOrg.logo,
+          website: populatedOrg.website,
+          isActive: populatedOrg.isActive,
+          ownerId: populatedOrg.ownerId?.toString(),
+          owner: null, // We don't need owner info for user list
+          createdAt: populatedOrg.createdAt,
+          updatedAt: populatedOrg.updatedAt,
+        } : null,
+      };
+    });
+
+    return {
+      users: usersWithOrganizations as UserDto[],
+      total,
+    };
+  }
 }

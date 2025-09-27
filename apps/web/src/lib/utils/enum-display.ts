@@ -210,3 +210,10 @@ export const ORGANIZATION_STATUS_OPTIONS: EnumOption[] = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
 ];
+
+// Language options
+export const LANGUAGE_OPTIONS = [
+  'JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'C++', 'Go', 'Rust',
+  'Swift', 'Kotlin', 'Dart', 'PHP', 'Ruby', 'React', 'Vue', 'Angular',
+  'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'Laravel', 'Rails',
+];

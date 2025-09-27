@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsOptional, IsString, IsUrl } from 'class-validator';
 
 @ObjectType()
@@ -135,4 +135,19 @@ export class UpdateOrganizationInput {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+}
+
+@ObjectType()
+export class OrganizationsPage {
+  @Field(() => [OrganizationDto])
+  items: OrganizationDto[];
+
+  @Field(() => Int)
+  totalCount: number;
+
+  @Field(() => Int)
+  limit: number;
+
+  @Field(() => Int)
+  offset: number;
 }

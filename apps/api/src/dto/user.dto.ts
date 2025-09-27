@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '../schemas/user.schema';
 import { OrganizationDto } from './organization.dto';
@@ -83,4 +83,19 @@ export class UpdateUserInput {
   @IsOptional()
   @IsString()
   avatar?: string;
+}
+
+@ObjectType()
+export class UsersPage {
+  @Field(() => [UserDto])
+  items: UserDto[];
+
+  @Field(() => Int)
+  totalCount: number;
+
+  @Field(() => Int)
+  limit: number;
+
+  @Field(() => Int)
+  offset: number;
 }

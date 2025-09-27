@@ -1,7 +1,7 @@
 import { UseFilters, UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MUTATIONS, QUERIES } from '../../constants/graphql-operations';
-import { UpdateUserInput, UserDto } from '../../dto/user.dto';
+import { UpdateUserInput, UserDto, UsersPage } from '../../dto/user.dto';
 import { ValidationExceptionFilter } from '../../filters/validation-exception.filter';
 import { UserRole } from '../../schemas/user.schema';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -31,6 +31,48 @@ export class UsersResolver {
   async getCurrentUser(@Context() context: any): Promise<UserDto> {
     const user = context.req.user;
     return this.usersService.findOne(user._id.toString()) as any;
+  }
+
+  @Query(() => UsersPage, { name: 'usersPaginated' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async findPaginated(
+    @Args('limit', { type: () => Int }) limit: number,
+    @Args('offset', { type: () => Int }) offset: number,
+    @Args('search', { nullable: true }) search?: string,
+    @Args('role', { nullable: true }) role?: string,
+    @Args('status', { nullable: true }) status?: string,
+  ): Promise<UsersPage> {
+    const filters: any = {};
+    
+    if (search) {
+      filters.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { username: { $regex: search, $options: 'i' } },
+      ];
+    }
+    
+    if (role && role !== 'all') {
+      filters.role = role;
+    }
+    
+    if (status && status !== 'all') {
+      if (status === 'active') {
+        filters.isActive = true;
+      } else if (status === 'inactive') {
+        filters.isActive = false;
+      }
+    }
+
+    const { users, total } = await this.usersService.findPaginated(filters, limit, offset);
+    
+    return {
+      items: users as any,
+      totalCount: total,
+      limit,
+      offset,
+    };
   }
 
   @Mutation(() => UserDto, { name: MUTATIONS.UPDATE_USER })

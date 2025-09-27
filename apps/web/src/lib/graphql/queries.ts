@@ -654,6 +654,37 @@ export const LIST_USERS = gql`
   }
 `;
 
+export const GET_USERS_PAGINATED = gql`
+  query GetUsersPaginated($limit: Int!, $offset: Int!, $search: String, $role: String, $status: String) {
+    usersPaginated(limit: $limit, offset: $offset, search: $search, role: $role, status: $status) {
+      items {
+        id
+        email
+        username
+        name
+        role
+        organizationId
+        organization {
+          id
+          name
+          slug
+          isActive
+          logo
+          website
+        }
+        isActive
+        avatar
+        lastLoginAt
+        createdAt
+        updatedAt
+      }
+      totalCount
+      limit
+      offset
+    }
+  }
+`;
+
 export const UPDATE_USER = gql`
   mutation UpdateUser($id: String!, $input: UpdateUserInput!) {
     updateUser(id: $id, input: $input) {
@@ -697,6 +728,36 @@ export const CREATE_USER = gql`
         updatedAt
         avatar
       }
+    }
+  }
+`;
+
+export const GET_ORGANIZATIONS_PAGINATED = gql`
+  query GetOrganizationsPaginated($limit: Int!, $offset: Int!, $search: String, $status: String) {
+    organizationsPaginated(limit: $limit, offset: $offset, search: $search, status: $status) {
+      items {
+        id
+        name
+        slug
+        description
+        logo
+        website
+        isActive
+        ownerId
+        owner {
+          name
+          email
+          username
+          role
+          isActive
+          avatar
+        }
+        createdAt
+        updatedAt
+      }
+      totalCount
+      limit
+      offset
     }
   }
 `;

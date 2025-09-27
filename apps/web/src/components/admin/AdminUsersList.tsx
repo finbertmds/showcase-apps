@@ -2,27 +2,30 @@
 
 import { AdminUserEditModal } from '@/components/admin/AdminUserEditModal';
 import { AdminUserNewModal } from '@/components/admin/AdminUserNewModal';
+import { AdminListHeader } from '@/components/admin/shared/AdminListHeader';
+import { AdminSearchAndFilter } from '@/components/admin/shared/AdminSearchAndFilter';
+import { AdminTable, TableColumn } from '@/components/admin/shared/AdminTable';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants';
-import { DELETE_USER, LIST_USERS, UPDATE_USER } from '@/lib/graphql/queries';
-import { EnumOption, getUserRoleBadgeColor, getUserRoleDisplay, getUserStatusBadgeColor, getUserStatusDisplay, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from '@/lib/utils/enum-display';
+import { DELETE_USER, GET_USERS_PAGINATED, UPDATE_USER } from '@/lib/graphql/queries';
+import { getUserRoleBadgeColor, getUserRoleDisplay, getUserStatusBadgeColor, getUserStatusDisplay, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from '@/lib/utils/enum-display';
 import { User } from '@/types';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   PencilIcon,
-  PlusIcon,
   TrashIcon,
   UserCircleIcon
 } from '@heroicons/react/24/outline';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export function AdminUsersList() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -38,43 +41,64 @@ export function AdminUsersList() {
     userName: '',
   });
 
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when searching
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // GraphQL queries and mutations
-  const { data, loading, error, refetch } = useQuery(LIST_USERS, {
+  const { data, loading, error, refetch } = useQuery(GET_USERS_PAGINATED, {
+    variables: {
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
+      search: debouncedSearchTerm || undefined,
+      role: roleFilter !== 'all' ? roleFilter : undefined,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+    },
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: 'cache-and-network',
   });
 
   const [updateUser] = useMutation(UPDATE_USER);
-  const [deleteUser, { loading: isDeleting }] = useMutation(DELETE_USER);
+  const [deleteUser, { loading: isDeleting }] = useMutation(DELETE_USER, {
+    onCompleted: () => {
+      toast.success('User deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('Error deleting user:', error);
+      toast.error('Failed to delete user');
+    },
+    refetchQueries: [
+      {
+        query: GET_USERS_PAGINATED,
+        variables: {
+          limit: pageSize,
+          offset: (currentPage - 1) * pageSize,
+          search: debouncedSearchTerm || undefined,
+          role: roleFilter !== 'all' ? roleFilter : undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+        },
+      },
+    ],
+    awaitRefetchQueries: true,
+  });
 
-  // Client-side filtering and pagination
-  const allUsers = data?.users || [];
+  // Server-side pagination data
+  const users = data?.usersPaginated?.items || [];
+  const paginationData = data?.usersPaginated || {
+    totalCount: 0,
+    limit: DEFAULT_PAGE_SIZE,
+    offset: 0,
+  };
 
-  const filteredUsers = useMemo(() => {
-    return allUsers.filter((user: User) => {
-      const matchesSearch = !searchTerm ||
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesRole = !roleFilter || user.role === roleFilter.toLowerCase();
-
-      const matchesStatus = !statusFilter ||
-        (statusFilter === 'active' && user.isActive) ||
-        (statusFilter === 'inactive' && !user.isActive);
-
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-  }, [allUsers, searchTerm, roleFilter, statusFilter]);
-
-  // Reset pagination when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, roleFilter, statusFilter]);
-
-  const total = filteredUsers.length;
-  const totalPages = Math.ceil(total / pageSize);
-  const offset = (currentPage - 1) * pageSize;
-  const users = filteredUsers.slice(offset, offset + pageSize);
+  // Calculate total pages
+  const totalPages = Math.ceil(paginationData.totalCount / paginationData.limit);
+  const currentPageFromData = Math.floor(paginationData.offset / paginationData.limit) + 1;
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
@@ -91,24 +115,10 @@ export function AdminUsersList() {
 
   const handleConfirmDelete = async () => {
     try {
-      await deleteUser({
-        variables: { id: deleteModal.userId },
-        update: (cache) => {
-          // Remove the user from the cache
-          cache.modify({
-            fields: {
-              users(existingUsers = []) {
-                return existingUsers.filter((user: any) => user.__ref !== `UserDto:${deleteModal.userId}`);
-              },
-            },
-          });
-        },
-      });
-      toast.success('User deleted successfully');
+      await deleteUser({ variables: { id: deleteModal.userId } });
       setDeleteModal({ isOpen: false, userId: '', userName: '' });
     } catch (error) {
-      console.error('Delete user error:', error);
-      toast.error('Failed to delete user');
+      console.error('Error deleting user:', error);
     }
   };
 
@@ -132,6 +142,137 @@ export function AdminUsersList() {
     setIsNewUserModalOpen(false);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
+  // Define table columns
+  const columns: TableColumn<User>[] = [
+    {
+      key: 'user',
+      header: 'User',
+      render: (user) => (
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-10 w-10">
+            {user.avatar ? (
+              <img
+                className="h-10 w-10 rounded-full"
+                src={user.avatar}
+                alt={user.name}
+              />
+            ) : (
+              <UserCircleIcon className="h-10 w-10 text-gray-400" />
+            )}
+          </div>
+          <div className="ml-4">
+            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+            <div className="text-sm text-gray-500">{user.email}</div>
+            <div className="text-xs text-gray-400">@{user.username}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (user) => (
+        <span
+          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUserRoleBadgeColor(user.role)}`}
+        >
+          {getUserRoleDisplay(user.role)}
+        </span>
+      ),
+    },
+    {
+      key: 'organization',
+      header: 'Organization',
+      render: (user) => (
+        user.organization ? (
+          <div className="flex items-center">
+            {user.organization.logo && (
+              <img
+                className="h-6 w-6 rounded-full object-cover mr-2"
+                src={user.organization.logo}
+                alt={user.organization.name}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            )}
+            <div>
+              <div className="text-sm font-medium text-gray-900">{user.organization.name}</div>
+              <div className="text-xs text-gray-500">/{user.organization.slug}</div>
+            </div>
+          </div>
+        ) : (
+          <span className="text-sm text-gray-400">No organization</span>
+        )
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (user) => (
+        <span
+          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUserStatusBadgeColor(user.isActive)}`}
+        >
+          {getUserStatusDisplay(user.isActive)}
+        </span>
+      ),
+    },
+    {
+      key: 'lastLogin',
+      header: 'Last Login',
+      render: (user) => (
+        <span className="text-sm text-gray-500">
+          {user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Never'}
+        </span>
+      ),
+    },
+    {
+      key: 'created',
+      header: 'Created',
+      render: (user) => (
+        <span className="text-sm text-gray-500">
+          {formatDate(user.createdAt)}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'text-right',
+      render: (user) => (
+        <div className="flex items-center justify-end space-x-2">
+          <button
+            id={`edit-${user.id}`}
+            name={`edit-${user.id}`}
+            onClick={() => handleEditUser(user)}
+            className="text-primary-600 hover:text-primary-900 p-1 rounded-md hover:bg-primary-50"
+            title="Edit user"
+            aria-label={`Edit user ${user.name}`}
+          >
+            <PencilIcon className="h-4 w-4" />
+          </button>
+          <button
+            id={`delete-${user.id}`}
+            name={`delete-${user.id}`}
+            onClick={() => handleDeleteUser(user.id, user.name)}
+            className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
+            title="Delete user"
+            aria-label={`Delete user ${user.name}`}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   if (loading) {
     return (
@@ -158,211 +299,52 @@ export function AdminUsersList() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage users, roles, and permissions for the Showcase Apps platform.
-          </p>
-        </div>
-
-        <button
-          onClick={() => setIsNewUserModalOpen(true)}
-          className="btn-primary inline-flex items-center space-x-2 p-2"
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span>New User</span>
-        </button>
-      </div>
+      <AdminListHeader
+        title="Users"
+        description="Manage users, roles, and permissions for the Showcase Apps platform."
+        actionButton={{
+          onClick: () => setIsNewUserModalOpen(true),
+          text: "New User"
+        }}
+      />
 
       {/* Search and Filters */}
-      <div className="card p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search users by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input w-full"
-              autoComplete="off"
-            />
-          </div>
-
-          {/* Role Filter */}
-          <div className="sm:w-48">
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="input w-full"
-            >
-              <option value="all">All Roles</option>
-              {USER_ROLE_OPTIONS.map((option: EnumOption) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status Filter */}
-          <div className="sm:w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="input w-full"
-            >
-              <option value="all">All Status</option>
-              {USER_STATUS_OPTIONS.map((option: EnumOption) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+      <AdminSearchAndFilter
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Search users by name or email..."
+        loading={loading}
+        filters={[
+          {
+            value: roleFilter,
+            onChange: setRoleFilter,
+            options: USER_ROLE_OPTIONS,
+            placeholder: "All Roles"
+          },
+          {
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: USER_STATUS_OPTIONS,
+            placeholder: "All Status"
+          }
+        ]}
+      />
 
       {/* Users Table */}
-      <div className="card overflow-hidden">
-        {users.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No users found.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Organization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Last Login
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user: User) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          {user.avatar ? (
-                            <img
-                              className="h-10 w-10 rounded-full"
-                              src={user.avatar}
-                              alt={user.name}
-                            />
-                          ) : (
-                            <UserCircleIcon className="h-10 w-10 text-gray-400" />
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                          <div className="text-xs text-gray-400">@{user.username}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUserRoleBadgeColor(user.role)}`}
-                      >
-                        {getUserRoleDisplay(user.role)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.organization ? (
-                        <div className="flex items-center">
-                          {user.organization.logo && (
-                            <img
-                              className="h-6 w-6 rounded-full object-cover mr-2"
-                              src={user.organization.logo}
-                              alt={user.organization.name}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          )}
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{user.organization.name}</div>
-                            <div className="text-xs text-gray-500">/{user.organization.slug}</div>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">No organization</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUserStatusBadgeColor(user.isActive)}`}
-                      >
-                        {getUserStatusDisplay(user.isActive)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Never'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(user.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          id={`edit-${user.id}`}
-                          name={`edit-${user.id}`}
-                          onClick={() => handleEditUser(user)}
-                          className="text-primary-600 hover:text-primary-900 p-1 rounded-md hover:bg-primary-50"
-                          title="Edit user"
-                          aria-label={`Edit user ${user.name}`}
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          id={`delete-${user.id}`}
-                          name={`delete-${user.id}`}
-                          onClick={() => handleDeleteUser(user.id, user.name)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
-                          title="Delete user"
-                          aria-label={`Delete user ${user.name}`}
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <AdminTable
+        data={users}
+        columns={columns}
+        emptyMessage="No users found."
+      />
 
       {/* Pagination */}
       <Pagination
-        currentPage={currentPage}
+        currentPage={currentPageFromData}
         totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        pageSize={pageSize}
-        totalItems={total}
-        onPageSizeChange={setPageSize}
+        onPageChange={handlePageChange}
+        pageSize={paginationData.limit}
+        totalItems={paginationData.totalCount}
+        onPageSizeChange={handlePageSizeChange}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         showPageSizeSelector={true}
       />

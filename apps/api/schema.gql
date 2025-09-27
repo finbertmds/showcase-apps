@@ -219,6 +219,13 @@ type OrganizationDto {
   website: String
 }
 
+type OrganizationsPage {
+  items: [OrganizationDto!]!
+  limit: Int!
+  offset: Int!
+  totalCount: Int!
+}
+
 type OwnerDto {
   avatar: String
   createdAt: DateTime!
@@ -258,11 +265,13 @@ type Query {
   organization(id: String!): OrganizationDto!
   organizationBySlug(slug: String!): OrganizationDto!
   organizations: [OrganizationDto!]!
+  organizationsPaginated(limit: Int!, offset: Int!, search: String, status: String): OrganizationsPage!
   timelineApps(limit: Int! = 20, offset: Int! = 0, status: String, visibility: String): [AppDto!]!
   timelineEvents(limit: Int! = 20, offset: Int! = 0): [TimelineEventDto!]!
   timelineEventsByApp(appId: String!, isPublic: Boolean! = true): [TimelineEventDto!]!
   user(id: String!): UserDto!
   users: [UserDto!]!
+  usersPaginated(limit: Int!, offset: Int!, role: String, search: String, status: String): UsersPage!
 }
 
 input RegisterInput {
@@ -371,4 +380,11 @@ enum UserRole {
   ADMIN
   DEVELOPER
   VIEWER
+}
+
+type UsersPage {
+  items: [UserDto!]!
+  limit: Int!
+  offset: Int!
+  totalCount: Int!
 }

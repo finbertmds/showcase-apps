@@ -1,5 +1,8 @@
 'use client';
 
+import { AdminListHeader } from '@/components/admin/shared/AdminListHeader';
+import { AdminStatsGrid, StatItem } from '@/components/admin/shared/AdminStatsGrid';
+import { AdminTable, TableColumn } from '@/components/admin/shared/AdminTable';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { DASHBOARD_DISPLAY } from '@/constants';
 import { GET_APPS } from '@/lib/graphql/queries';
@@ -39,7 +42,59 @@ export function AdminDashboard() {
   const publishedApps = apps.filter((app: any) => app.status === 'PUBLISHED').length;
   const draftApps = apps.filter((app: any) => app.status === 'DRAFT').length;
 
-  const stats = [
+  // Define table columns for recent apps
+  const columns: TableColumn<any>[] = [
+    {
+      key: 'app',
+      header: 'App',
+      render: (app) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">{app.title}</div>
+          <div className="text-sm text-gray-500">{app.shortDesc}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (app) => (
+        <span
+          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppStatusBadgeColor(app.status)}`}
+        >
+          {getAppStatusDisplay(app.status)}
+        </span>
+      ),
+    },
+    {
+      key: 'visibility',
+      header: 'Visibility',
+      render: (app) => (
+        <span
+          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppVisibilityBadgeColor(app.visibility)}`}
+        >
+          {getAppVisibilityDisplay(app.visibility)}
+        </span>
+      ),
+    },
+    {
+      key: 'views',
+      header: 'Views',
+      render: (app) => (
+        <span className="text-sm text-gray-900">{app.viewCount}</span>
+      ),
+    },
+    {
+      key: 'created',
+      header: 'Created',
+      render: (app) => (
+        <span className="text-sm text-gray-500">
+          {new Date(app.createdAt).toLocaleDateString()}
+        </span>
+      ),
+    },
+  ];
+
+  const stats: StatItem[] = [
     {
       name: 'Total Apps',
       value: apps.length,
@@ -74,95 +129,24 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Overview of your Showcase Apps platform
-        </p>
-      </div>
+      {/* Header */}
+      <AdminListHeader
+        title="Dashboard"
+        description="Overview of your Showcase Apps platform"
+      />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.name} className="card p-6">
-              <div className="flex items-center">
-                <div className={`p-3 rounded-lg ${stat.color}`}>
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <AdminStatsGrid stats={stats} />
 
       {/* Recent Apps */}
       <div className="card p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Apps</h2>
-        {apps.length === 0 ? (
-          <p className="text-gray-500">No apps created yet.</p>
-        ) : (
-          <div className="overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    App
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Visibility
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Views
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {apps.slice(0, DASHBOARD_DISPLAY.RECENT_APPS_LIMIT).map((app: any) => (
-                  <tr key={app.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{app.title}</div>
-                        <div className="text-sm text-gray-500">{app.shortDesc}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppStatusBadgeColor(app.status)}`}
-                      >
-                        {getAppStatusDisplay(app.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getAppVisibilityBadgeColor(app.visibility)}`}
-                      >
-                        {getAppVisibilityDisplay(app.visibility)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {app.viewCount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(app.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <AdminTable
+          data={apps.slice(0, DASHBOARD_DISPLAY.RECENT_APPS_LIMIT)}
+          columns={columns}
+          emptyMessage="No apps created yet."
+          loading={loading}
+        />
       </div>
     </div>
   );

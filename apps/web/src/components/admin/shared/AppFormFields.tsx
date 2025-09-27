@@ -1,8 +1,8 @@
 'use client';
 
 import { TagsAutocomplete } from '@/components/ui/TagsAutocomplete';
-import { AppFormData, LANGUAGE_OPTIONS, toggleArrayValue } from '@/lib/utils/app-form';
-import { APP_PLATFORM_OPTIONS, APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, EnumOption } from '@/lib/utils/enum-display';
+import { AppFormData, toggleArrayValue } from '@/lib/utils/app-form';
+import { APP_PLATFORM_OPTIONS, APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, EnumOption, LANGUAGE_OPTIONS } from '@/lib/utils/enum-display';
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 interface AppFormFieldsProps {
