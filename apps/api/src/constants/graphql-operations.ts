@@ -40,6 +40,11 @@ export const QUERIES = {
   // Timeline Queries
   TIMELINE_EVENTS: 'timelineEvents',
   TIMELINE_EVENTS_BY_APP: 'timelineEventsByApp',
+
+  // Enum Queries
+  ENUMS: 'enums',
+  ENUM: 'enum',
+  DEBUG_ENUM_USAGE: 'debugEnumUsage',
 } as const;
 
 // ============================================================================
@@ -62,6 +67,16 @@ export const MUTATIONS = {
   CREATE_ORGANIZATION: 'createOrganization',
   UPDATE_ORGANIZATION: 'updateOrganization',
   REMOVE_ORGANIZATION: 'removeOrganization',
+
+  // Enum Mutations
+  CREATE_ENUM: 'createEnum',
+  UPDATE_ENUM: 'updateEnum',
+  ADD_ENUM_OPTION: 'addEnumOption',
+  UPDATE_ENUM_OPTION: 'updateEnumOption',
+  REMOVE_ENUM_OPTION: 'removeEnumOption',
+  DELETE_ENUM: 'deleteEnum',
+  RESET_ENUM_TO_DEFAULT: 'resetEnumToDefault',
+  RESET_ALL_ENUMS_TO_DEFAULT: 'resetAllEnumsToDefault',
 
   // Auth Mutations
   LOGIN: 'login',
@@ -135,6 +150,19 @@ export const RESOLVER_METHODS = {
   [MUTATIONS.CREATE_TIMELINE_EVENT]: 'TimelineResolver.createTimelineEvent',
   [MUTATIONS.UPDATE_TIMELINE_EVENT]: 'TimelineResolver.updateTimelineEvent',
   [MUTATIONS.REMOVE_TIMELINE_EVENT]: 'TimelineResolver.removeTimelineEvent',
+
+  // EnumResolver
+  [QUERIES.ENUMS]: 'EnumResolver.findAll',
+  [QUERIES.ENUM]: 'EnumResolver.findByKey',
+  [MUTATIONS.CREATE_ENUM]: 'EnumResolver.create',
+  [MUTATIONS.UPDATE_ENUM]: 'EnumResolver.update',
+  [MUTATIONS.ADD_ENUM_OPTION]: 'EnumResolver.addOption',
+  [MUTATIONS.UPDATE_ENUM_OPTION]: 'EnumResolver.updateOption',
+  [MUTATIONS.REMOVE_ENUM_OPTION]: 'EnumResolver.removeOption',
+  [MUTATIONS.DELETE_ENUM]: 'EnumResolver.delete',
+  [MUTATIONS.RESET_ENUM_TO_DEFAULT]: 'EnumResolver.resetToDefault',
+  [MUTATIONS.RESET_ALL_ENUMS_TO_DEFAULT]: 'EnumResolver.resetAllToDefault',
+  [QUERIES.DEBUG_ENUM_USAGE]: 'EnumResolver.debugEnumUsage',
 } as const;
 
 // ============================================================================
@@ -249,5 +277,17 @@ export const OPERATION_GROUPS = {
     MUTATIONS.CREATE_TIMELINE_EVENT,
     MUTATIONS.UPDATE_TIMELINE_EVENT,
     MUTATIONS.REMOVE_TIMELINE_EVENT,
+  ],
+  ENUMS: [
+    QUERIES.ENUMS,
+    QUERIES.ENUM,
+    MUTATIONS.CREATE_ENUM,
+    MUTATIONS.UPDATE_ENUM,
+    MUTATIONS.ADD_ENUM_OPTION,
+    MUTATIONS.UPDATE_ENUM_OPTION,
+    MUTATIONS.REMOVE_ENUM_OPTION,
+    MUTATIONS.DELETE_ENUM,
+    MUTATIONS.RESET_ENUM_TO_DEFAULT,
+    MUTATIONS.RESET_ALL_ENUMS_TO_DEFAULT,
   ],
 } as const;

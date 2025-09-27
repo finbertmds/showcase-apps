@@ -16,15 +16,6 @@ export enum AppVisibility {
   UNLISTED = 'UNLISTED',
 }
 
-export enum Platform {
-  WEB = 'WEB',
-  MOBILE = 'MOBILE',
-  IOS = 'IOS',
-  ANDROID = 'ANDROID',
-  DESKTOP = 'DESKTOP',
-  API = 'API',
-}
-
 @Schema({ timestamps: true })
 export class App {
   @Field(() => String)
@@ -59,11 +50,11 @@ export class App {
   @Prop({ type: Date })
   releaseDate?: Date;
 
-  @Prop({ type: [String], enum: Platform, default: [] })
-  platforms: Platform[];
+  @Prop({ type: [String], default: [] })
+  platforms: string[]; // Array of enum option IDs for APP_PLATFORM
 
   @Prop({ type: [String], default: [] })
-  languages: string[];
+  languages: string[]; // Array of enum option IDs for APP_LANGUAGE
 
   @Prop({ type: [String], default: [] })
   tags: string[];

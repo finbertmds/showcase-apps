@@ -12,6 +12,7 @@ import { AppService } from './app.service';
 // Feature modules
 import { AppsModule } from './modules/apps/apps.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EnumModule } from './modules/enum/enum.module';
 import { MediaModule } from './modules/media/media.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { QueueModule } from './modules/queue/queue.module';
@@ -86,6 +87,7 @@ import { redisConfig } from './config/redis.config';
     MediaModule,
     TimelineModule,
     QueueModule,
+    EnumModule,
   ],
   controllers: [AppController],
   providers: [AppService],

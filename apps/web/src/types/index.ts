@@ -6,6 +6,20 @@ export type UserRole = 'ADMIN' | 'DEVELOPER' | 'VIEWER';
 export type EventType = 'RELEASE' | 'UPDATE' | 'MILESTONE' | 'ANNOUNCEMENT' | 'FEATURE' | 'BUGFIX';
 export type MediaType = 'SCREENSHOT' | 'LOGO' | 'COVER' | 'ICON' | 'VIDEO' | 'DOCUMENT';
 
+// Enum Manager Types
+export interface EnumOption {
+  id: string;
+  value: string;
+  label: string;
+}
+
+export interface EnumData {
+  id: string;
+  key: string;
+  options: EnumOption[];
+  updatedAt: string;
+}
+
 // Main Interfaces
 export interface App {
   id: string;

@@ -6,6 +6,146 @@ export const GET_ALL_TAGS = gql`
   }
 `;
 
+// Enum Manager Queries
+export const GET_ALL_ENUMS = gql`
+  query GetAllEnums {
+    enums {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const GET_ENUM_BY_KEY = gql`
+  query GetEnumByKey($key: String!) {
+    enum(key: $key) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+// Enum Manager Mutations
+export const CREATE_ENUM = gql`
+  mutation CreateEnum($input: CreateEnumInput!) {
+    createEnum(input: $input) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_ENUM = gql`
+  mutation UpdateEnum($key: String!, $input: UpdateEnumInput!) {
+    updateEnum(key: $key, input: $input) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const ADD_ENUM_OPTION = gql`
+  mutation AddEnumOption($key: String!, $input: AddEnumOptionInput!) {
+    addEnumOption(key: $key, input: $input) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_ENUM_OPTION = gql`
+  mutation UpdateEnumOption($key: String!, $input: UpdateEnumOptionInput!) {
+    updateEnumOption(key: $key, input: $input) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const REMOVE_ENUM_OPTION = gql`
+  mutation RemoveEnumOption($key: String!, $id: String!) {
+    removeEnumOption(key: $key, id: $id) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_ENUM = gql`
+  mutation DeleteEnum($key: String!) {
+    deleteEnum(key: $key)
+  }
+`;
+
+export const RESET_ENUM_TO_DEFAULT = gql`
+  mutation ResetEnumToDefault($key: String!) {
+    resetEnumToDefault(key: $key) {
+      id
+      key
+      options {
+        id
+        value
+        label
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const RESET_ALL_ENUMS_TO_DEFAULT = gql`
+  mutation ResetAllEnumsToDefault {
+    resetAllEnumsToDefault
+  }
+`;
+
+export const DEBUG_ENUM_USAGE = gql`
+  query DebugEnumUsage($key: String!) {
+    debugEnumUsage(key: $key)
+  }
+`;
+
 export const LIST_APPS = gql`
   query ListApps(
     $search: String

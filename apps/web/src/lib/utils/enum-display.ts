@@ -1,6 +1,9 @@
 /**
  * Enum Display Utilities
  * Centralized mapping of enum values to display text for consistent UI
+ * 
+ * Note: Enum values are now managed in MongoDB via Enum Manager
+ * These display mappings serve as fallbacks and for TypeScript compatibility
  */
 
 import {
@@ -12,6 +15,7 @@ import {
 
 // Type definitions for enum options
 export interface EnumOption {
+  id: string;
   value: string;
   label: string;
 }
@@ -166,54 +170,103 @@ export function getOrganizationStatusBadgeColor(isActive: boolean): string {
 
 // Options for select dropdowns
 export const APP_STATUS_OPTIONS: EnumOption[] = [
-  { value: 'DRAFT', label: 'Draft' },
-  { value: 'PUBLISHED', label: 'Published' },
-  { value: 'ARCHIVED', label: 'Archived' },
+  { id: 'DRAFT', value: 'DRAFT', label: 'Draft' },
+  { id: 'PUBLISHED', value: 'PUBLISHED', label: 'Published' },
+  { id: 'ARCHIVED', value: 'ARCHIVED', label: 'Archived' },
 ];
 
 export const APP_VISIBILITY_OPTIONS: EnumOption[] = [
-  { value: 'PRIVATE', label: 'Private' },
-  { value: 'PUBLIC', label: 'Public' },
-  { value: 'UNLISTED', label: 'Unlisted' },
+  { id: 'PRIVATE', value: 'PRIVATE', label: 'Private' },
+  { id: 'PUBLIC', value: 'PUBLIC', label: 'Public' },
+  { id: 'UNLISTED', value: 'UNLISTED', label: 'Unlisted' },
 ];
 
 export const APP_PLATFORM_OPTIONS: EnumOption[] = [
-  { value: 'WEB', label: 'Web' },
-  { value: 'MOBILE', label: 'Mobile' },
-  { value: 'DESKTOP', label: 'Desktop' },
-  { value: 'API', label: 'API' },
-  { value: 'IOS', label: 'iOS' },
-  { value: 'ANDROID', label: 'Android' },
+  { id: 'WEB', value: 'WEB', label: 'Web' },
+  { id: 'MOBILE', value: 'MOBILE', label: 'Mobile' },
+  { id: 'DESKTOP', value: 'DESKTOP', label: 'Desktop' },
+  { id: 'API', value: 'API', label: 'API' },
+  { id: 'IOS', value: 'IOS', label: 'iOS' },
+  { id: 'ANDROID', value: 'ANDROID', label: 'Android' },
 ];
 
 export const MEDIA_TYPE_OPTIONS: EnumOption[] = [
-  { value: 'SCREENSHOT', label: 'Screenshot' },
-  { value: 'LOGO', label: 'Logo' },
-  { value: 'COVER', label: 'Cover' },
-  { value: 'ICON', label: 'Icon' },
-  { value: 'VIDEO', label: 'Video' },
-  { value: 'DOCUMENT', label: 'Document' },
+  { id: 'SCREENSHOT', value: 'SCREENSHOT', label: 'Screenshot' },
+  { id: 'LOGO', value: 'LOGO', label: 'Logo' },
+  { id: 'COVER', value: 'COVER', label: 'Cover' },
+  { id: 'ICON', value: 'ICON', label: 'Icon' },
+  { id: 'VIDEO', value: 'VIDEO', label: 'Video' },
+  { id: 'DOCUMENT', value: 'DOCUMENT', label: 'Document' },
 ];
 
 export const USER_ROLE_OPTIONS: EnumOption[] = [
-  { value: 'VIEWER', label: 'Viewer' },
-  { value: 'DEVELOPER', label: 'Developer' },
-  { value: 'ADMIN', label: 'Admin' },
+  { id: 'VIEWER', value: 'VIEWER', label: 'Viewer' },
+  { id: 'DEVELOPER', value: 'DEVELOPER', label: 'Developer' },
+  { id: 'ADMIN', value: 'ADMIN', label: 'Admin' },
 ];
 
 export const USER_STATUS_OPTIONS: EnumOption[] = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
+  { id: 'active', value: 'active', label: 'Active' },
+  { id: 'inactive', value: 'inactive', label: 'Inactive' },
 ];
 
 export const ORGANIZATION_STATUS_OPTIONS: EnumOption[] = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
+  { id: 'active', value: 'active', label: 'Active' },
+  { id: 'inactive', value: 'inactive', label: 'Inactive' },
 ];
 
 // Language options
-export const LANGUAGE_OPTIONS = [
-  'JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'C++', 'Go', 'Rust',
-  'Swift', 'Kotlin', 'Dart', 'PHP', 'Ruby', 'React', 'Vue', 'Angular',
-  'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'Laravel', 'Rails',
+export const APP_LANGUAGE_OPTIONS: EnumOption[] = [
+  { id: 'JavaScript', value: 'JavaScript', label: 'JavaScript' },
+  { id: 'TypeScript', value: 'TypeScript', label: 'TypeScript' },
+  { id: 'Python', value: 'Python', label: 'Python' },
+  { id: 'Java', value: 'Java', label: 'Java' },
+  { id: 'C#', value: 'C#', label: 'C#' },
+  { id: 'C++', value: 'C++', label: 'C++' },
+  { id: 'Go', value: 'Go', label: 'Go' },
+  { id: 'Rust', value: 'Rust', label: 'Rust' },
+  { id: 'Swift', value: 'Swift', label: 'Swift' },
+  { id: 'Kotlin', value: 'Kotlin', label: 'Kotlin' },
+  { id: 'Dart', value: 'Dart', label: 'Dart' },
+  { id: 'PHP', value: 'PHP', label: 'PHP' },
+  { id: 'Ruby', value: 'Ruby', label: 'Ruby' },
+  { id: 'React', value: 'React', label: 'React' },
+  { id: 'Vue', value: 'Vue', label: 'Vue' },
+  { id: 'Angular', value: 'Angular', label: 'Angular' },
+  { id: 'Node.js', value: 'Node.js', label: 'Node.js' },
+  { id: 'Express', value: 'Express', label: 'Express' },
+  { id: 'Django', value: 'Django', label: 'Django' },
+  { id: 'Flask', value: 'Flask', label: 'Flask' },
+  { id: 'Spring', value: 'Spring', label: 'Spring' },
+  { id: 'Laravel', value: 'Laravel', label: 'Laravel' },
+  { id: 'Rails', value: 'Rails', label: 'Rails' },
 ];
+
+/**
+ * Helper functions to get enum options from MongoDB
+ * These functions can be used to get dynamic enum values from the Enum Manager
+ */
+
+// Helper function to get enum options by key from MongoDB enum data
+export const getEnumOptionsFromData = (enumData: any, key: string): EnumOption[] => {
+  const enumItem = enumData.find((item: any) => item.key === key);
+  return enumItem ? enumItem.options : [];
+};
+
+// Helper function to get display mapping from enum options
+export const createDisplayMapping = (options: EnumOption[]): Record<string, string> => {
+  const mapping: Record<string, string> = {};
+  options.forEach(option => {
+    mapping[option.id] = option.label;
+  });
+  return mapping;
+};
+
+// Helper function to get enum options as value-label pairs
+export const getEnumOptionsAsArray = (options: EnumOption[]): EnumOption[] => {
+  return options.map(option => ({
+    id: option.id,
+    value: option.value,
+    label: option.label
+  }));
+};

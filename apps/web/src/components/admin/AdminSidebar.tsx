@@ -21,6 +21,10 @@ const navigation = [
   { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
 ];
 
+const settingsNavigation = [
+  { name: 'Enums', href: '/admin/settings/enums', icon: Cog6ToothIcon },
+];
+
 interface AdminSidebarProps {
   collapsed: boolean;
 }
@@ -35,31 +39,63 @@ export function AdminSidebar({ collapsed }: AdminSidebarProps) {
         <nav className={`flex-1 py-6 space-y-2 ${collapsed ? 'px-2' : 'px-4'}`}>
           {navigation.map((item) => {
             const isActive = item.href === '/admin' ? pathname === item.href : pathname.includes(item.href);
+            const isSettingsActive = item.href === '/admin/settings' && pathname.startsWith('/admin/settings');
+
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={clsx(
-                  'group flex items-center rounded-md transition-colors',
-                  collapsed ? 'px-2 py-2 justify-center' : 'px-3 py-2',
-                  'text-sm font-medium',
-                  isActive
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                )}
-                title={collapsed ? item.name : undefined}
-              >
-                <item.icon
+              <div key={item.name}>
+                <Link
+                  href={item.href}
                   className={clsx(
-                    'h-5 w-5 flex-shrink-0',
-                    collapsed ? '' : 'mr-3',
-                    isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
+                    'group flex items-center rounded-md transition-colors',
+                    collapsed ? 'px-2 py-2 justify-center' : 'px-3 py-2',
+                    'text-sm font-medium',
+                    isActive || isSettingsActive
+                      ? 'bg-primary-100 text-primary-700'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   )}
-                />
-                {!collapsed && (
-                  <span className="truncate">{item.name}</span>
+                  title={collapsed ? item.name : undefined}
+                >
+                  <item.icon
+                    className={clsx(
+                      'h-5 w-5 flex-shrink-0',
+                      collapsed ? '' : 'mr-3',
+                      isActive || isSettingsActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
+                    )}
+                  />
+                  {!collapsed && (
+                    <span className="truncate">{item.name}</span>
+                  )}
+                </Link>
+
+                {/* Settings submenu */}
+                {item.href === '/admin/settings' && !collapsed && isSettingsActive && (
+                  <div className="ml-6 mt-2 space-y-1">
+                    {settingsNavigation.map((subItem) => {
+                      const isSubActive = pathname === subItem.href;
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={clsx(
+                            'group flex items-center rounded-md transition-colors px-3 py-2 text-sm font-medium',
+                            isSubActive
+                              ? 'bg-primary-50 text-primary-700'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          )}
+                        >
+                          <subItem.icon
+                            className={clsx(
+                              'h-4 w-4 flex-shrink-0 mr-2',
+                              isSubActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
+                            )}
+                          />
+                          <span className="truncate">{subItem.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
-              </Link>
+              </div>
             );
           })}
         </nav>

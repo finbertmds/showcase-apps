@@ -2,7 +2,7 @@
 
 import { TagsAutocomplete } from '@/components/ui/TagsAutocomplete';
 import { AppFormData, toggleArrayValue } from '@/lib/utils/app-form';
-import { APP_PLATFORM_OPTIONS, APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, EnumOption, LANGUAGE_OPTIONS } from '@/lib/utils/enum-display';
+import { APP_LANGUAGE_OPTIONS, APP_PLATFORM_OPTIONS, APP_STATUS_OPTIONS, APP_VISIBILITY_OPTIONS, EnumOption } from '@/lib/utils/enum-display';
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 interface AppFormFieldsProps {
@@ -35,8 +35,8 @@ export function AppFormFields({
     setValue('platforms', newPlatforms);
   };
 
-  const handleLanguageToggle = (language: string) => {
-    const newLanguages = toggleArrayValue(watchedLanguages || [], language);
+  const handleLanguageToggle = (language: EnumOption) => {
+    const newLanguages = toggleArrayValue(watchedLanguages || [], language.id);
     setValue('languages', newLanguages);
   };
 
@@ -202,15 +202,15 @@ export function AppFormFields({
         <h2 className="text-lg font-medium text-gray-900 mb-6">Languages & Technologies</h2>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {LANGUAGE_OPTIONS.map((language: string) => (
-            <label key={language} className="flex items-center">
+          {APP_LANGUAGE_OPTIONS.map((language: EnumOption) => (
+            <label key={language.id} className="flex items-center">
               <input
                 type="checkbox"
-                checked={watchedLanguages?.includes(language) || false}
+                checked={watchedLanguages?.includes(language.id) || false}
                 onChange={() => handleLanguageToggle(language)}
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">{language}</span>
+              <span className="ml-2 text-sm text-gray-700">{language.label}</span>
             </label>
           ))}
         </div>

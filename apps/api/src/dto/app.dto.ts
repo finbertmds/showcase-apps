@@ -1,6 +1,6 @@
 import { Field, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
-import { AppStatus, AppVisibility, Platform } from '../schemas/app.schema';
+import { AppStatus, AppVisibility } from '../schemas/app.schema';
 import { OrganizationDto } from './organization.dto';
 import { UserDto } from './user.dto';
 
@@ -12,11 +12,6 @@ registerEnumType(AppStatus, {
 registerEnumType(AppVisibility, {
   name: 'AppVisibility',
   description: 'App visibility enum',
-});
-
-registerEnumType(Platform, {
-  name: 'Platform',
-  description: 'Platform enum',
 });
 
 @ObjectType()
@@ -45,11 +40,11 @@ export class AppDto {
   @Field({ nullable: true })
   releaseDate?: Date;
 
-  @Field(() => [Platform!])
-  platforms: Platform[];
+  @Field(() => [String!])
+  platforms: string[]; // Array of enum option IDs for APP_PLATFORM
 
   @Field(() => [String!])
-  languages: string[];
+  languages: string[]; // Array of enum option IDs for APP_LANGUAGE
 
   @Field(() => [String!])
   tags: string[];
@@ -142,15 +137,15 @@ export class CreateAppInput {
   @IsDateString()
   releaseDate?: Date;
 
-  @Field(() => [Platform!], { defaultValue: [] })
+  @Field(() => [String!], { defaultValue: [] })
   @IsArray()
-  @IsEnum(Platform, { each: true })
-  platforms: Platform[];
+  @IsString({ each: true })
+  platforms: string[]; // Array of enum option IDs for APP_PLATFORM
 
   @Field(() => [String!], { defaultValue: [] })
   @IsArray()
   @IsString({ each: true })
-  languages: string[];
+  languages: string[]; // Array of enum option IDs for APP_LANGUAGE
 
   @Field(() => [String!], { defaultValue: [] })
   @IsArray()
@@ -225,17 +220,17 @@ export class UpdateAppInput {
   @IsDateString()
   releaseDate?: string;
 
-  @Field(() => [Platform!], { nullable: true })
+  @Field(() => [String!], { nullable: true })
   @IsOptional()
   @IsArray()
-  @IsEnum(Platform, { each: true })
-  platforms?: Platform[];
+  @IsString({ each: true })
+  platforms?: string[]; // Array of enum option IDs for APP_PLATFORM
 
   @Field(() => [String!], { nullable: true })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  languages?: string[];
+  languages?: string[]; // Array of enum option IDs for APP_LANGUAGE
 
   @Field(() => [String!], { nullable: true })
   @IsOptional()

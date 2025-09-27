@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddEnumOptionInput {
+  label: String!
+  value: String!
+}
+
 type AppDto {
   appStoreUrl: String
   createdAt: DateTime
@@ -16,7 +21,7 @@ type AppDto {
   longDesc: String!
   organization: OrganizationDto
   organizationId: String
-  platforms: [Platform!]!
+  platforms: [String!]!
   playStoreUrl: String
   releaseDate: DateTime
   repository: String
@@ -70,7 +75,7 @@ input CreateAppInput {
   downloadUrl: String
   languages: [String!]! = []
   longDesc: String!
-  platforms: [Platform!]! = []
+  platforms: [String!]! = []
   playStoreUrl: String
   releaseDate: DateTime
   repository: String
@@ -81,6 +86,11 @@ input CreateAppInput {
   title: String!
   visibility: AppVisibility! = PUBLIC
   website: String
+}
+
+input CreateEnumInput {
+  key: String!
+  options: [EnumOptionInput!]!
 }
 
 input CreateMediaInput {
@@ -123,6 +133,25 @@ input CreateTimelineEventInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type EnumDto {
+  id: String!
+  key: String!
+  options: [EnumOptionDto!]!
+  updatedAt: DateTime!
+}
+
+type EnumOptionDto {
+  id: String!
+  label: String!
+  value: String!
+}
+
+input EnumOptionInput {
+  id: String
+  label: String!
+  value: String!
+}
 
 """Timeline event type enum"""
 enum EventType {
@@ -183,21 +212,29 @@ enum MediaType {
 }
 
 type Mutation {
+  addEnumOption(input: AddEnumOptionInput!, key: String!): EnumDto!
   changePassword(input: ChangePasswordInput!): Boolean!
   createApp(input: CreateAppInput!): AppDto!
+  createEnum(input: CreateEnumInput!): EnumDto!
   createMedia(input: CreateMediaInput!): MediaDto!
   createOrganization(input: CreateOrganizationInput!): OrganizationDto!
   createTimelineEvent(input: CreateTimelineEventInput!): TimelineEventDto!
+  deleteEnum(key: String!): Boolean!
   deleteMedia(id: String!): Boolean!
   incrementAppLike(id: String!): Boolean!
   incrementAppView(id: String!): Boolean!
   login(input: LoginInput!): AuthResponse!
   register(input: RegisterInput!): AuthResponse!
   removeApp(id: String!): Boolean!
+  removeEnumOption(id: String!, key: String!): EnumDto!
   removeOrganization(id: String!): Boolean!
   removeTimelineEvent(id: String!): Boolean!
   removeUser(id: String!): Boolean!
+  resetAllEnumsToDefault: Boolean!
+  resetEnumToDefault(key: String!): EnumDto!
   updateApp(id: String!, input: UpdateAppInput!): AppDto!
+  updateEnum(input: UpdateEnumInput!, key: String!): EnumDto!
+  updateEnumOption(input: UpdateEnumOptionInput!, key: String!): EnumDto!
   updateOrganization(id: String!, input: UpdateOrganizationInput!): OrganizationDto!
   updateTimelineEvent(id: String!, input: UpdateTimelineEventInput!): TimelineEventDto!
   updateUser(id: String!, input: UpdateUserInput!): UserDto!
@@ -240,21 +277,14 @@ type OwnerDto {
   username: String!
 }
 
-"""Platform enum"""
-enum Platform {
-  ANDROID
-  API
-  DESKTOP
-  IOS
-  MOBILE
-  WEB
-}
-
 type Query {
   app(id: String!): AppDto!
   appBySlug(slug: String!): AppDto!
   apps(category: String, limit: Int! = 20, offset: Int! = 0, organizationId: String, platforms: [String!], search: String, status: String, tags: [String!], visibility: String): [AppDto!]!
   appsPaginated(category: String, limit: Int!, offset: Int!, search: String): AppsPage!
+  debugEnumUsage(key: String!): String!
+  enum(key: String!): EnumDto!
+  enums: [EnumDto!]!
   getAllTags: [String!]!
   getAppMedia(input: GetAppMediaInput!): [MediaDto!]!
   getUserLikedApps: [String!]!
@@ -305,7 +335,7 @@ input UpdateAppInput {
   downloadUrl: String
   languages: [String!]
   longDesc: String
-  platforms: [Platform!]
+  platforms: [String!]
   playStoreUrl: String
   releaseDate: String
   repository: String
@@ -316,6 +346,16 @@ input UpdateAppInput {
   title: String
   visibility: AppVisibility
   website: String
+}
+
+input UpdateEnumInput {
+  options: [EnumOptionInput!]!
+}
+
+input UpdateEnumOptionInput {
+  id: String!
+  label: String!
+  value: String!
 }
 
 input UpdateOrganizationInput {
